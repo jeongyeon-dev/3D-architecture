@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./public/main.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js"
+        }
+    }
+    </script>   
+    <title>Document</title>
+</head>
+<body>
+    <div id="root-window">
+        <div id="render-target">
+            <div id="ui-toolbar">
+                <button id="button-bulldoze" class="ui-button selected" onclick="setActiveTool(event, 'bulldoze')">철거</button>
+                <button id="button-brick" class="ui-button" onclick="setActiveTool(event, 'brick')">벽돌</button>
+                <button id="button-floor" class="ui-button" onclick="setActiveTool(event, 'floor')">바닥</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createSimulator } from './src/simulator.js';
+
+        let selectedControl = document.getElementById('button-bulldoze');
+
+        window.onload = () => {
+            window.simulator = createSimulator();
+        }
+
+        window.setActiveTool = (event, toolId) => {
+            if(selectedControl){
+                selectedControl.classList.remove('selected');
+            }
+
+            selectedControl = event.target;
+            selectedControl.classList.add('selected');
+
+            window.simulator.setActiveToolId(toolId);
+        }
+    </script>
+</body>
+</html>
