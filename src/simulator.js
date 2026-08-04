@@ -5,23 +5,15 @@ export function createSimulator(){
     let activeToolId = '';
 
     const scene = createScene();
-    const land = createLand(16);
+    const land = createLand(1);
 
     scene.initialize(land);
 
-    /* 선택 명령 실행기 */
-    scene.onObjectSelected = (selectedObject) => {
-        let { x, y } = selectedObject.userData;
-        const tile = Compatibility.data[x][y];
+    /* 선택된 오브젝트 건설하기 */
+    scene.setOnObjectSelected(({ gridX, gridZ }) => {
+        scene.placeObject(activeToolId, gridX, gridZ);
+    });
 
-        if(activeToolId === 'bulldoze'){
-
-        }else if(!tile.buildingId){
-            
-        }
-    }
-
-    
     document.addEventListener('mousedown', scene.onMouseDown.bind(scene), false);
     document.addEventListener('mouseup', scene.onMouseUp.bind(scene), false);
     document.addEventListener('mousemove', scene.onMouseMove.bind(scene), false);

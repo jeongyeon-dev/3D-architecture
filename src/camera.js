@@ -7,11 +7,11 @@ export function createCamera(gameWindow){
     const MIDDLE_MOUSE_BUTTON = 1;
     const RIGHT_MOUSE_BUTTON = 2;
 
-    const MIN_CAMERA_RADIUS = 10;
-    const MAX_CAMERA_RADIUS = 20;
+    const MIN_CAMERA_RADIUS = 5;
+    const MAX_CAMERA_RADIUS = 30;
     
-    const MIN_CAMERA_ELEVATION = 20;
-    const MAX_CAMERA_ELEVATION = 90;
+    const MIN_CAMERA_ELEVATION = 0;
+    const MAX_CAMERA_ELEVATION = 89;
 
     const ROTATION_SENSITIVITY = 0.5;
     const ZOOM_SENSITIVITY = 0.02;
@@ -39,9 +39,7 @@ export function createCamera(gameWindow){
     updateCameraPosition();
 
     /* 마우스 event로 카메라를 이동하는 함수들 */
-    function onMouseDown(event){
-        console.log('mousedown');
-        
+    function onMouseDown(event){    
         if(event.button === LEFT_MOUSE_BUTTON){
             isLeftMouseDown = true;
         }
@@ -54,8 +52,6 @@ export function createCamera(gameWindow){
     }
 
     function onMouseUp(event){
-        console.log('mouseup');
-
         if(event.button === LEFT_MOUSE_BUTTON){
             isLeftMouseDown = false;
         }
@@ -68,8 +64,6 @@ export function createCamera(gameWindow){
     }
 
     function onMouseMove(event){
-        console.log('mousemove');
-
         /* 공통 변수 */
         const deltaX = event.clientX - prevMouseX;
         const deltaY = event.clientY - prevMouseY;
