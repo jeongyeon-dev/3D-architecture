@@ -11,12 +11,25 @@ export function createSimulator(){
 
     /* 선택된 오브젝트 건설하기 */
     scene.setOnObjectSelected(({ gridX, gridZ }) => {
-        scene.placeObject(activeToolId, gridX, gridZ);
+        // scene.placeObject(activeToolId, gridX, gridZ);
     });
+
+    /* 좌표 추적하기 */
+    scene.setOnGridHovered(({ gridX, gridZ }) => {
+        if (activeToolId !== 'wall'){
+            scene.hideWallCursor();
+            return;
+        } 
+
+        scene.updateWallCursor(gridX, gridZ);
+        console.log('벽 Grid:', gridX, gridZ);
+    });
+    
 
     document.addEventListener('mousedown', scene.onMouseDown.bind(scene), false);
     document.addEventListener('mouseup', scene.onMouseUp.bind(scene), false);
-    document.addEventListener('mousemove', scene.onMouseMove.bind(scene), false);
+    document.addEventListener('mousemove', scene.onMouseMove, false);
+    document.addEventListener('wheel', scene.onWheel, { passive: false });
     document.addEventListener('contextmenu', (event) => event.preventDefault(), false);
 
     const simulator = {

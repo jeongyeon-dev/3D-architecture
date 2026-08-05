@@ -15,6 +15,7 @@ export function createCamera(gameWindow){
 
     const ROTATION_SENSITIVITY = 0.5;
     const ZOOM_SENSITIVITY = 0.02;
+    const WHEEL_ZOOM_SENSITIVITY = 0.01;
     const PAN_SENSITIVITY = -0.01;
 
     const Y_AXIS = new THREE.Vector3(0, 1, 0);
@@ -76,8 +77,13 @@ export function createCamera(gameWindow){
             updateCameraPosition();
         }
 
-        /* 카메라 이동 */
+        /* 안 쓰는 녀석 */
         if(isMiddleMouseDown){
+
+        }
+
+        /* 카메라 줌아웃 */
+        if(isRightMouseDown){
             const forward = new THREE.Vector3(0, 0, 1).applyAxisAngle(Y_AXIS, cameraAzimuth * DEG2RAD);
             const left = new THREE.Vector3(1, 0, 0).applyAxisAngle(Y_AXIS, cameraAzimuth * DEG2RAD);
             
@@ -86,16 +92,16 @@ export function createCamera(gameWindow){
             updateCameraPosition();
         }
 
-        /* 카메라 줌아웃 */
-        if(isRightMouseDown){
-            cameraRadius += deltaY * ZOOM_SENSITIVITY;
-            cameraRadius = Math.min(MAX_CAMERA_RADIUS, Math.max(MIN_CAMERA_RADIUS, cameraRadius));
-            updateCameraPosition();
-        }
-
         /* 원점 기준 변경 */
         prevMouseX = event.clientX;
         prevMouseY = event.clientY;
+    }
+
+    /* 카메라 줌 인아웃 */
+    function onWheel(event){
+        cameraRadius += event.deltaY * WHEEL_ZOOM_SENSITIVITY;
+        cameraRadius = Math.min(MAX_CAMERA_RADIUS, Math.max(MIN_CAMERA_RADIUS, cameraRadius));
+        updateCameraPosition();
     }
     
     /* 카메라 위치 변경 함수 */
@@ -120,6 +126,7 @@ export function createCamera(gameWindow){
         setOrigin,
         onMouseDown,
         onMouseUp,
-        onMouseMove
+        onMouseMove,
+        onWheel
     }
 }

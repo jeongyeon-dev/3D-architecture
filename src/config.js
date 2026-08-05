@@ -2,4 +2,4 @@
 
 /* 토지 좌우 사이즈, 좌표 한 칸 사이즈 */
 export const LAND_SIZE_M = 16;
-export const GRID_SIZE_M = 0.1;
+export const GRID_SIZE_M = 0.25;

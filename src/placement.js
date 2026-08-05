@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createAssetInstance } from './assets.js';
+import { createAssetInstance } from './assets/basic-assets.js';
 
 export function createPlacementController({
     scene,
@@ -7,7 +7,8 @@ export function createPlacementController({
     camera,
     plate,
     gridSize,
-    onGridSelected
+    onGridSelected,
+    onGridHovered
 }) {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -31,13 +32,31 @@ export function createPlacementController({
 
         const snappedX = gridX * gridSize;
         const snappedZ = gridZ * gridSize;
+    }
 
-        console.log({
-            gridX,
-            gridZ,
-            snappedX,
-            snappedZ
-        });
+    function onMouseMove(event){
+        const currGridPoint = getGridPoint(event);
+        if (!currGridPoint) return;
+
+        onGridHovered?.(currGridPoint);
+    }
+
+    /* 마우스 커서(event)를 grid 좌표로 반환하는 함수 */
+    function getGridPoint(event){
+        const rect = renderer.domElement.getBoundingClientRect();
+
+        /* 마우스 좌표를 기준으로 raycast 실행 */
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        const hit= raycaster.intersectObject(plate, false)[0];
+        if (!hit) return undefined;
+
+        return {
+            gridX: Math.round(hit.point.x / gridSize),
+            gridZ: Math.round(hit.point.z / gridSize)
+        };
     }
 
     /* 오브젝트를 배치하는 함수 */
@@ -66,6 +85,7 @@ export function createPlacementController({
 
     return {
         onMouseDown,
+        onMouseMove,
         placeObject
     };
 }

@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { LAND_SIZE_M } from './config.js';
-
-/* 기하 설정 변수 */
+import { LAND_SIZE_M } from '../config.js';
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const miniGemetry = new THREE.BoxGeometry(0.1, 1, 0.1);
@@ -16,10 +14,10 @@ const assets = {
         mesh.receiveShadow = true;
         return mesh;
     },
-    'brick': (x, y) => {
+    'wall': (x, y) => {
         const material = new THREE.MeshLambertMaterial({ color: '#e8e8e8' });
         const mesh = new THREE.Mesh(miniGemetry, material);
-        mesh.userData = { id: 'brick', x, y };
+        mesh.userData = { id: 'wall', x, y };
         mesh.position.set(x, 0.5, y);
         mesh.receiveShadow = true;
         mesh.castShadow = true;

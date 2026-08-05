@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { createCamera } from './camera.js';
-import { createAssetInstance } from './assets.js';
+import { createAssetInstance } from './assets/basic-assets.js';
 import { LAND_SIZE_M, GRID_SIZE_M } from './config.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { createGrid } from './grid.js';
 import { createPlacementController } from './placement.js';
+import { createWallTool } from './tools/wall-tool.js';
 
 export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
@@ -15,8 +16,10 @@ export function createScene(){
     const camera = createCamera(gameWindow);
 
     /* 화면 그려주는 객체(renderer) 자체 */
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(gameWindow.offsetWidth, gameWindow.offsetHeight);
+    renderer.setPixelRatio( Math.min(window.devicePixelRatio, 2) );
+    
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     gameWindow.appendChild(renderer.domElement);
@@ -49,6 +52,9 @@ export function createScene(){
     
     let plate;
     let placement
+    let grid;
+    let onGridHoveredCallback;
+    let wallTool;
 
     /* 땅 지형 초기화 */
     function initialize(land){
@@ -63,7 +69,7 @@ export function createScene(){
         scene.add(plate);
 
         /* grid 불러오기 */
-        const grid = createGrid(LAND_SIZE_M, GRID_SIZE_M, center, center);
+        grid = createGrid(LAND_SIZE_M, GRID_SIZE_M, center, center);
         scene.add(grid);
 
         /* raycast을 비롯한 오브젝트 생성체 가져오기 */
@@ -76,31 +82,25 @@ export function createScene(){
 
             onGridSelected({ gridX, gridZ }) {
                 onObjectSelected?.({ gridX, gridZ });
+            },
+            onGridHovered({ gridX, gridZ }) {
+                onGridHoveredCallback?.({ gridX, gridZ });
             }
+        });
+
+        /* 벽 건설 봉 생성하기 */
+        wallTool = createWallTool({
+            scene,
+            gridSize: GRID_SIZE_M,
+            toolId: 'wall-tool'
         });
 
         setupLights();
     }
 
-    /* 건물을 실시간 건설하는 함수 */
+    /* 실시간 */
     function update(land){
-        for(let x = 0; x < land.size; x++){
-            for(let y = 0; y < land.size; y++){
-                const currBuildingId = buildings[x][y]?.userData.id;
-                const newBuildingId = land.data[x][y].buildingId;
 
-                if(!newBuildingId && currBuildingId){
-                    scene.remove(buildings[x][y]);
-                    buildings[x][y] = undefined;
-                }
-
-                if(newBuildingId !== currBuildingId){
-                    scene.remove(buildings[x][y]);
-                    buildings[x][y] = createAssetInstance(newBuildingId, x, y);
-                    scene.add(buildings[x][y]);
-                }
-            }
-        }
     }
 
     /* 레이케스팅 된 오브젝트 설정 */
@@ -108,13 +108,31 @@ export function createScene(){
         onObjectSelected = callback;
     }
 
+    /* 실시간 좌표 추적기 */
+    function setOnGridHovered(callback) {
+        onGridHoveredCallback = callback;
+    }
+
+    /* 벽 건설 봉 위치 바꾸기 */
+    function updateWallCursor(gridX, gridZ) {
+        wallTool?.updatePosition(gridX, gridZ);
+    }
+
+    function hideWallCursor() {
+        wallTool?.hide();
+    }
+
     /* 오브젝트 배치 함수: scene에 위임됨 */
     function placeObject(assetId, gridX, gridZ){
         return placement?.placeObject(assetId, gridX, gridZ);
     }
 
-    /* 그 외 호출 함수들 */
+    /* 실시간 연산 함수 */
     function draw(){
+        const center = new THREE.Vector3(LAND_SIZE_M / 2, 0, LAND_SIZE_M / 2);
+        const cameraDistance = camera.camera.position.distanceTo(center);
+        grid?.updateOpacity(cameraDistance);
+        
         renderer.render(scene, camera.camera);
     }
 
@@ -137,6 +155,12 @@ export function createScene(){
 
     function onMouseMove(event){
         camera.onMouseMove(event);
+        placement.onMouseMove(event);
+    }
+
+    function onWheel(event){
+        event.preventDefault();
+        camera.onWheel(event);     
     }
 
     function setupLights(){
@@ -164,9 +188,13 @@ export function createScene(){
         start,
         stop,
         setOnObjectSelected,
+        setOnGridHovered,
+        updateWallCursor,
+        hideWallCursor,
         placeObject,
         onMouseDown,
         onMouseUp,
-        onMouseMove
+        onMouseMove,
+        onWheel
     }
 }
