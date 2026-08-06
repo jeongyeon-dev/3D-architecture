@@ -13,8 +13,10 @@ export function createPlacementController({
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    /* 마우스 클릭 시 => raycast로 특정 좌표 감지 */
+    /* 왼쪽 마우스 클릭 시 => raycast로 특정 좌표 감지 */
     function onMouseDown(event) {
+        if (event.button !== 0) return;
+        
         const rect = renderer.domElement.getBoundingClientRect();
 
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;

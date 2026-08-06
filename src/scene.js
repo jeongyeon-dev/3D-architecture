@@ -11,7 +11,6 @@ export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
     const gameWindow = document.getElementById('render-target');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x777777);
 
     const camera = createCamera(gameWindow);
 
@@ -91,12 +90,13 @@ export function createScene(){
         /* 벽 건설 봉 생성하기 */
         wallTool = createWallTool({
             scene,
-            gridSize: GRID_SIZE_M,
-            toolId: 'wall-tool'
+            gridSize: GRID_SIZE_M
         });
 
         setupLights();
     }
+
+    /* ===== 위임 함수들 ===== */
 
     /* 실시간 */
     function update(land){
@@ -113,16 +113,22 @@ export function createScene(){
         onGridHoveredCallback = callback;
     }
 
-    /* 벽 건설 봉 위치 바꾸기 */
-    function updateWallCursor(gridX, gridZ) {
-        wallTool?.updatePosition(gridX, gridZ);
-    }
-
     function hideWallCursor() {
         wallTool?.hide();
     }
 
-    /* 오브젝트 배치 함수: scene에 위임됨 */
+
+    /* 벽 봉 업데이트 함수들 */
+    function updateWallHover(gridX, gridZ) {
+        wallTool?.updateHoverPoint(gridX, gridZ);
+    }
+
+    function confirmWallPoint(gridX, gridZ) {
+        return wallTool?.confirmPoint(gridX, gridZ);
+    }
+
+
+    /* 오브젝트 배치 함수 */
     function placeObject(assetId, gridX, gridZ){
         return placement?.placeObject(assetId, gridX, gridZ);
     }
@@ -189,12 +195,13 @@ export function createScene(){
         stop,
         setOnObjectSelected,
         setOnGridHovered,
-        updateWallCursor,
         hideWallCursor,
         placeObject,
         onMouseDown,
         onMouseUp,
         onMouseMove,
-        onWheel
+        onWheel,
+        updateWallHover,
+        confirmWallPoint,
     }
 }

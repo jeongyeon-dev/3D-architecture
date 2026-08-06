@@ -20,11 +20,28 @@ export function createSimulator(){
             scene.hideWallCursor();
             return;
         } 
-
-        scene.updateWallCursor(gridX, gridZ);
+        
+        scene.updateWallHover(gridX, gridZ);
+        
         console.log('벽 Grid:', gridX, gridZ);
     });
     
+    /* 좌표 클릭 시 */
+    scene.setOnObjectSelected(({ gridX, gridZ }) => {
+        if (activeToolId !== 'wall') return;
+
+        const result = scene.confirmWallPoint(gridX, gridZ);
+
+        /* 종료 되었을 경우 생성 중지하기 */
+        if (result?.finished) {
+            activeToolId = '';
+            scene.hideWallCursor();
+
+            document
+                .getElementById('button-brick')
+                .classList.remove('selected');
+        }
+    });
 
     document.addEventListener('mousedown', scene.onMouseDown.bind(scene), false);
     document.addEventListener('mouseup', scene.onMouseUp.bind(scene), false);
