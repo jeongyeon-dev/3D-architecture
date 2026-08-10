@@ -5,7 +5,7 @@ const hoverWallPoleGeometry = new THREE.CylinderGeometry(0.08, 0.08, WALL_HEIGHT
 const hoverWallFaceGeometry = new THREE.BoxGeometry(1, WALL_HEIGHT, 0.16);
 
 const assets = {
-    'wall-pole': () => {
+    'hover-wall-pole': () => {
         const material = new THREE.MeshBasicMaterial({ 
             color: '#ffffff',
             transparent: true,
@@ -13,10 +13,10 @@ const assets = {
             depthWrite: false 
         });
         const mesh = new THREE.Mesh(hoverWallPoleGeometry, material);
-        mesh.userData = { id: 'wall-pole' };
+        mesh.userData = { id: 'hover-wall-pole' };
         return mesh;
     },
-    'wall-face': () => {
+    'hover-wall-face': () => {
         const material = new THREE.MeshBasicMaterial({ 
             color: '#ffffff',
             transparent: true,
@@ -24,7 +24,7 @@ const assets = {
             depthWrite: false 
         });
         const mesh = new THREE.Mesh(hoverWallFaceGeometry, material);
-        mesh.userData = { id: 'wall-face' };
+        mesh.userData = { id: 'hover-wall-face' };
         return mesh;
     }
 }

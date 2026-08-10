@@ -1,21 +1,26 @@
 import * as THREE from 'three';
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
-import { WALL_HEIGHT } from '../config.js';
+import { createStructureInstance } from '../assets/structure-assets.js';
+import { calculateMiterWalls } from './util/miter-calculator.js';
+import { WALL_HEIGHT, GRID_SIZE_M } from '../config.js';
 
 export function createWallTool({
     scene,
     gridSize
 }){
-    /* 도구로 생성한 지점들 */
+    /* 변수 및 객체들 */
     let confirmedPoints = [];
-    let confirmedWalls = [];
+    const confirmedWalls = [];
+    let currentBuildParts = [];
+    
+    let currentStartPoint;
     let hoverPoint;
 
     /* 다음 객체를 생성한다:
        벽 건설 봉
        벽 건설 면 */
-    const hoverWallPole = createBuildToolInstance('wall-pole');
-    const hoverWallFace = createBuildToolInstance('wall-face');
+    const hoverWallPole = createBuildToolInstance('hover-wall-pole');
+    const hoverWallFace = createBuildToolInstance('hover-wall-face');
 
     hoverWallPole.visible = false;
     hoverWallFace.visible = false;
@@ -79,8 +84,7 @@ export function createWallTool({
 
     /* 실제 지점으로 확정하기 */
     function confirmPoint(gridX, gridZ){
-        const marker = createBuildToolInstance('wall-pole');    
-        const startPoint = getLastConfirmedPoint();  
+        const startPoint = currentStartPoint;  
         const endPoint = hoverPoint
             ? { ...hoverPoint }
             : { gridX, gridZ };
@@ -92,23 +96,33 @@ export function createWallTool({
             
         /* 벽 박아놓기 */
         if(startPoint){
-            let wall = createBuildToolInstance('wall-face');      
+            let wall = createBuildToolInstance('hover-wall-face');      
             const wallData = createWallData(startPoint, endPoint);
             
             doWallTransform(wall, wallData);
             
-            confirmedWalls.push(wallData);
+            currentBuildParts.push({
+                assetId: 'wall-face',
+                data: wallData,
+                toolMesh: wall
+            });
+
             scene.add(wall);
         }
 
-        /* 봉이 겹친다면? => 종료 및 반환 */
+        /* 봉이 겹친다면? => 종료 및 실제 벽 생성 */
         if(existingPoint){
+            commitCurrentBuildParts();
+
+            currentStartPoint = undefined;
+            hoverPoint = undefined;
+
             hide();
             return { finished: true };
         }
 
+        const marker = createBuildToolInstance('hover-wall-pole');
 
-        /* 봉 박아놓기 */
         marker.position.set(
             endPoint.gridX * gridSize,
             WALL_HEIGHT / 2,
@@ -116,6 +130,10 @@ export function createWallTool({
         );
 
         confirmedPoints.push(endPoint);
+        currentStartPoint = endPoint;
+        currentBuildParts.push({
+            toolMesh: marker
+        });
         scene.add(marker);
 
         return { finished: false }
@@ -129,14 +147,12 @@ export function createWallTool({
 
     /* 바로 이전 - 현재 후보 간의 점 간격(segment) 불러오기 */
     function getCurrentSegment() {
-        const startPoint = getLastConfirmedPoint();
-
-        if (!startPoint || !hoverPoint) {
+        if (!currentStartPoint || !hoverPoint) {
             return undefined;
         }
 
         return {
-            startPoint,
+            startPoint: currentStartPoint,
             endPoint: hoverPoint
         };
     }
@@ -247,6 +263,33 @@ export function createWallTool({
             gridX: startX,
             gridZ
         };        
+    }
+
+    /* 실제 구조물로 변환 */
+    function commitCurrentBuildParts() {
+        /* wall data만 파싱하여 가져오기 */
+        const wallDataList = currentBuildParts
+            .filter(part => part.assetId === 'wall-face')
+            .map(part => part.data);
+
+        const caculatedWallGeometries 
+            = calculateMiterWalls(
+                wallDataList, 
+                GRID_SIZE_M
+            )
+
+        for(const wallGeometry of caculatedWallGeometries){
+            const mesh = createStructureInstance('wall-face', wallGeometry);   
+            confirmedWalls.push(wallGeometry);
+            scene.add(mesh);
+        }
+
+        /* hover 객체 지우기 */
+        for (const part of currentBuildParts) {
+            scene.remove(part.toolMesh);
+        }
+        
+        currentBuildParts = [];
     }
 
     return {
