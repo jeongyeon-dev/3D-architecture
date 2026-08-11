@@ -1,8 +1,11 @@
 import * as THREE from 'three';
-import { WALL_HEIGHT } from '../config.js';
+import { WALL_HEIGHT, PLATFORM_HEIGHT } from '../config.js';
 
 const hoverWallPoleGeometry = new THREE.CylinderGeometry(0.08, 0.08, WALL_HEIGHT);
 const hoverWallFaceGeometry = new THREE.BoxGeometry(1, WALL_HEIGHT, 0.16);
+
+const hoverPlatformPoleGeometry = new THREE.CylinderGeometry(0.08, 0.08, PLATFORM_HEIGHT);
+const hoverPlatformCubeGeometry = new THREE.BoxGeometry(1, PLATFORM_HEIGHT, 1);
 
 const assets = {
     'hover-wall-pole': () => {
@@ -25,6 +28,28 @@ const assets = {
         });
         const mesh = new THREE.Mesh(hoverWallFaceGeometry, material);
         mesh.userData = { id: 'hover-wall-face' };
+        return mesh;
+    },
+    'hover-platform-cube': () => {
+        const material = new THREE.MeshBasicMaterial({ 
+            color: '#ffffff',
+            transparent: true,
+            opacity: 0.6,
+            depthWrite: false 
+        });
+        const mesh = new THREE.Mesh(hoverPlatformPoleGeometry, material);
+        mesh.userData = { id: 'hover-platform-cube' };
+        return mesh;
+    },
+    'hover-platform-pole': () => {
+        const material = new THREE.MeshBasicMaterial({ 
+            color: '#ffffff',
+            transparent: true,
+            opacity: 1,
+            depthWrite: false 
+        });
+        const mesh = new THREE.Mesh(hoverPlatformPoleGeometry, material);
+        mesh.userData = { id: 'hover-platform-pole' };
         return mesh;
     }
 }

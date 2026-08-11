@@ -5,7 +5,9 @@ import { LAND_SIZE_M, GRID_SIZE_M } from './config.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { createGrid } from './grid.js';
 import { createPlacementController } from './placement.js';
+
 import { createWallTool } from './tools/wall-tool.js';
+import { createPlatformTool } from './tools/platform-tool.js';
 
 export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
@@ -22,6 +24,7 @@ export function createScene(){
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     gameWindow.appendChild(renderer.domElement);
+
 
     /* sky box 생성 및 설정 */
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -40,7 +43,12 @@ export function createScene(){
             console.error('EXR 로딩 실패:', error);
         }
     )
-    
+
+    /* 구조체 */
+    const hideTools = {
+        wall: () => wallTool?.hide(),
+        platform: () => platformTool?.hide()
+    }
 
     /* raycasting 및 건설 오브젝트 추가하는 부분들 */
     const raycaster = new THREE.Raycaster();
@@ -51,9 +59,12 @@ export function createScene(){
     
     let plate;
     let placement
+    
     let grid;
     let onGridHoveredCallback;
+    
     let wallTool;
+    let platformTool;
 
     /* 땅 지형 초기화 */
     function initialize(land){
@@ -87,8 +98,14 @@ export function createScene(){
             }
         });
 
-        /* 벽 건설 봉 생성하기 */
+        /* 벽 도구 객체 생성하기 */
         wallTool = createWallTool({
+            scene,
+            gridSize: GRID_SIZE_M
+        });
+
+        /* 플랫폼 도구 객체 생성하기 */
+        platformTool = createPlatformTool({
             scene,
             gridSize: GRID_SIZE_M
         });
@@ -113,12 +130,17 @@ export function createScene(){
         onGridHoveredCallback = callback;
     }
 
-    function hideWallCursor() {
-        wallTool?.hide();
+    /* 하나를 제외한 도구를 숨기는 함수 */
+    function hideToolCursors(activeToolId) {
+        for(const [toolId, hide] of Object.entries(hideTools)){
+            if( activeToolId !== toolId){
+                hide();
+            }
+        }
     }
 
 
-    /* 벽 봉 업데이트 함수들 */
+    /* 벽 도구 호출 함수들 */
     function updateWallHover(gridX, gridZ) {
         wallTool?.updateHoverPoint(gridX, gridZ);
     }
@@ -126,6 +148,17 @@ export function createScene(){
     function confirmWallPoint(gridX, gridZ) {
         return wallTool?.confirmPoint(gridX, gridZ);
     }
+
+    
+    /* 플랫폼 도구 호출 함수들 */
+    function updatePlatformHover(gridX, gridZ){
+        platformTool?.updateHoverPoint(gridX, gridZ);
+    }
+
+    function confirmPlatformPoint(gridX, gridZ){
+        return platformTool?.confirmPoint(gridX, gridZ);
+    }
+
 
 
     /* 오브젝트 배치 함수 */
@@ -195,7 +228,7 @@ export function createScene(){
         stop,
         setOnObjectSelected,
         setOnGridHovered,
-        hideWallCursor,
+        hideToolCursors,
         placeObject,
         onMouseDown,
         onMouseUp,
@@ -203,5 +236,7 @@ export function createScene(){
         onWheel,
         updateWallHover,
         confirmWallPoint,
+        updatePlatformHover,
+        confirmPlatformPoint
     }
 }

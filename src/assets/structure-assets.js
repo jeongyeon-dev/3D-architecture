@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { WALL_HEIGHT } from '../config.js';
 
+const wallGeometry = new THREE.BufferGeometry();
+
 const assets = {
     'wall-face': (wallData) => {
         const material = new THREE.MeshStandardMaterial({ 
@@ -77,20 +79,20 @@ function createWallGeometry(wallData) {
     addQuad(SLH, ELH, ERH, SRH);
     addQuad(SL0, SR0, ER0, EL0);
 
-    const geometry = new THREE.BufferGeometry();
+    
 
-    geometry.setAttribute(
+    wallGeometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(positions, 3)
     );
 
-    geometry.setAttribute(
+    wallGeometry.setAttribute(
         'uv',
         new THREE.Float32BufferAttribute(uvs, 2)
     );
 
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
+    wallGeometry.setIndex(indices);
+    wallGeometry.computeVertexNormals();
 
-    return geometry;
+    return wallGeometry;
 }

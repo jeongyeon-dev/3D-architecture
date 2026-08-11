@@ -9,37 +9,38 @@ export function createSimulator(){
 
     scene.initialize(land);
 
-    /* 선택된 오브젝트 건설하기 */
-    scene.setOnObjectSelected(({ gridX, gridZ }) => {
-        // scene.placeObject(activeToolId, gridX, gridZ);
-    });
-
     /* 좌표 추적하기 */
     scene.setOnGridHovered(({ gridX, gridZ }) => {
-        if (activeToolId !== 'wall'){
-            scene.hideWallCursor();
-            return;
-        } 
+        scene.hideToolCursors(activeToolId);
         
-        scene.updateWallHover(gridX, gridZ);
-        
-        console.log('벽 Grid:', gridX, gridZ);
+        if(activeToolId == 'wall'){
+            scene.updateWallHover(gridX, gridZ);       
+            console.log('벽 Grid:', gridX, gridZ);
+        }
+
+        if(activeToolId == 'platform'){
+            scene.updatePlatformHover(gridX, gridZ);
+            console.log('플랫폼 Grid ', gridX, gridZ);
+        }
+
     });
     
     /* 좌표 클릭 시 */
     scene.setOnObjectSelected(({ gridX, gridZ }) => {
-        if (activeToolId !== 'wall') return;
+        let result;
 
-        const result = scene.confirmWallPoint(gridX, gridZ);
+        if(activeToolId == 'wall'){
+            result = scene.confirmWallPoint(gridX, gridZ);
+        }
+
+        if(activeToolId == 'platform'){
+            result = scene.confirmPlatformPoint(gridX, gridZ);
+        }
 
         /* 종료 되었을 경우 생성 중지하기 */
         if (result?.finished) {
             activeToolId = '';
-            scene.hideWallCursor();
-
-            document
-                .getElementById('button-brick')
-                .classList.remove('selected');
+            scene.hideToolCursors();
         }
     });
 

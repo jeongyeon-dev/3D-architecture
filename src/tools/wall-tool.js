@@ -14,7 +14,7 @@ export function createWallTool({
     let currentBuildParts = [];
     
     let currentStartPoint;
-    let hoverPoint;
+    let currentHoverPoint;
 
     /* 다음 객체를 생성한다:
        벽 건설 봉
@@ -34,7 +34,6 @@ export function createWallTool({
 
     /* 예측 건설 지점 지속적으로 바꾸기 */
     function updateHoverPoint(gridX, gridZ){
-
         /* snap 적용 */
         const lastPoint = getLastConfirmedPoint();
 
@@ -47,7 +46,7 @@ export function createWallTool({
             snappedPoint = snapHoverPoint(lastPoint, gridX, gridZ);
         }
 
-        hoverPoint = snappedPoint;
+        currentHoverPoint = snappedPoint;
         updateHoverWallPole(snappedPoint.gridX, snappedPoint.gridZ);
         updateHoverWallFace();
     }
@@ -85,8 +84,8 @@ export function createWallTool({
     /* 실제 지점으로 확정하기 */
     function confirmPoint(gridX, gridZ){
         const startPoint = currentStartPoint;  
-        const endPoint = hoverPoint
-            ? { ...hoverPoint }
+        const endPoint = currentHoverPoint
+            ? { ...currentHoverPoint }
             : { gridX, gridZ };
         
         /* 기존에 있는 봉과 겹치는지 확인 */
@@ -115,7 +114,7 @@ export function createWallTool({
             commitCurrentBuildParts();
 
             currentStartPoint = undefined;
-            hoverPoint = undefined;
+            currentHoverPoint = undefined;
 
             hide();
             return { finished: true };
@@ -147,13 +146,13 @@ export function createWallTool({
 
     /* 바로 이전 - 현재 후보 간의 점 간격(segment) 불러오기 */
     function getCurrentSegment() {
-        if (!currentStartPoint || !hoverPoint) {
+        if (!currentStartPoint || !currentHoverPoint) {
             return undefined;
         }
 
         return {
             startPoint: currentStartPoint,
-            endPoint: hoverPoint
+            endPoint: currentHoverPoint
         };
     }
 
@@ -288,7 +287,7 @@ export function createWallTool({
         for (const part of currentBuildParts) {
             scene.remove(part.toolMesh);
         }
-        
+
         currentBuildParts = [];
     }
 
