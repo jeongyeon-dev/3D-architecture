@@ -86,6 +86,7 @@ export function calculateMiterWalls(
         /* 계산된 한 벽의 좌표 객체를 push */
         const calculatedWall = {
             wallId: wallData.id,
+            baseY: wallData.midY,
 
             startLeft: startJoin.leftPoint,
             startRight: startJoin.rightPoint,

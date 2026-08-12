@@ -90,11 +90,11 @@ export function createScene(){
             plate,
             gridSize: GRID_SIZE_M,
 
-            onGridSelected({ gridX, gridZ }) {
-                onObjectSelected?.({ gridX, gridZ });
+            onGridSelected({ gridX, gridZ, gridY }) {
+                onObjectSelected?.({ gridX, gridZ, gridY });
             },
-            onGridHovered({ gridX, gridZ }) {
-                onGridHoveredCallback?.({ gridX, gridZ });
+            onGridHovered({ gridX, gridZ, gridY }) {
+                onGridHoveredCallback?.({ gridX, gridZ, gridY });
             }
         });
 
@@ -141,12 +141,12 @@ export function createScene(){
 
 
     /* 벽 도구 호출 함수들 */
-    function updateWallHover(gridX, gridZ) {
-        wallTool?.updateHoverPoint(gridX, gridZ);
+    function updateWallHover(gridX, gridZ, gridY) {
+        wallTool?.updateHoverPoint(gridX, gridZ, gridY);
     }
 
-    function confirmWallPoint(gridX, gridZ) {
-        return wallTool?.confirmPoint(gridX, gridZ);
+    function confirmWallPoint(gridX, gridZ, gridY) {
+        return wallTool?.confirmPoint(gridX, gridZ, gridY);
     }
 
     
@@ -160,7 +160,20 @@ export function createScene(){
     }
 
 
+    /* 어떤 대상을 raycast할지 결정  */
+    function setRaycastTarget(toolId) {
+        if (toolId === 'platform') {
+            placement.setRaycastTargets([plate]);
+        }
 
+        if (toolId === 'wall') {
+            placement.setRaycastTargets(
+                platformTool.getPlatformMeshes()
+            );
+        }
+    }
+
+    
     /* 오브젝트 배치 함수 */
     function placeObject(assetId, gridX, gridZ){
         return placement?.placeObject(assetId, gridX, gridZ);
@@ -237,6 +250,7 @@ export function createScene(){
         updateWallHover,
         confirmWallPoint,
         updatePlatformHover,
-        confirmPlatformPoint
+        confirmPlatformPoint,
+        setRaycastTarget
     }
 }

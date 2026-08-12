@@ -12,6 +12,12 @@ export function createPlacementController({
 }) {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
+    let raycastTargets = [plate];
+
+    /* 어떤 오브젝트가 감지되어야 하는지 설정 */
+    function setRaycastTargets(targets) {
+        raycastTargets = targets;
+    }
 
     /* 왼쪽 마우스 클릭 시 => raycast로 특정 좌표 감지 */
     function onMouseDown(event) {
@@ -24,16 +30,18 @@ export function createPlacementController({
 
         raycaster.setFromCamera(mouse, camera);
 
-        const hit = raycaster.intersectObject(plate, false)[0];
+        const hit = raycaster.intersectObjects(raycastTargets, false)[0];
         if (!hit) return;
 
         const gridX = Math.round(hit.point.x / gridSize);
         const gridZ = Math.round(hit.point.z / gridSize);
+        const gridY = Math.round(hit.point.y / 0.1 );
 
-        onGridSelected?.({ gridX, gridZ });
+        onGridSelected?.({ gridX, gridZ, gridY });
 
         const snappedX = gridX * gridSize;
         const snappedZ = gridZ * gridSize;
+        const snappedY = gridY * 0.1;
     }
 
     function onMouseMove(event){
@@ -52,42 +60,19 @@ export function createPlacementController({
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         raycaster.setFromCamera(mouse, camera);
 
-        const hit= raycaster.intersectObject(plate, false)[0];
+        const hit= raycaster.intersectObjects(raycastTargets, false)[0];
         if (!hit) return undefined;
 
         return {
             gridX: Math.round(hit.point.x / gridSize),
-            gridZ: Math.round(hit.point.z / gridSize)
+            gridZ: Math.round(hit.point.z / gridSize),
+            gridY: Math.round(hit.point.y / 0.1 )
         };
-    }
-
-    /* 오브젝트를 배치하는 함수 */
-    function placeObject(assetId, gridX, gridZ){
-        if(!assetId || assetId === 'bulldoze') return;
-
-        const worldX = gridX * gridSize;
-        const worldZ = gridZ * gridSize;
-
-        /* 여기서 ID 기반 mesh 생성 */
-        const deployedMesh = createAssetInstance(
-            assetId,
-            worldX,
-            worldZ
-        );
-
-        if(!deployedMesh) return;
-
-        deployedMesh.userData.gridX = gridX;
-        deployedMesh.userData.gridZ = gridZ;
-
-        scene.add(deployedMesh);
-
-        return deployedMesh;
     }
 
     return {
         onMouseDown,
         onMouseMove,
-        placeObject
+        setRaycastTargets
     };
 }

@@ -1,23 +1,36 @@
 import * as THREE from 'three';
-import { WALL_HEIGHT } from '../config.js';
+import { WALL_HEIGHT, PLATFORM_HEIGHT } from '../config.js';
 
-const wallGeometry = new THREE.BufferGeometry();
+const platformCubeGeometry = new THREE.BoxGeometry(1, PLATFORM_HEIGHT, 1);
 
 const assets = {
     'wall-face': (wallData) => {
         const material = new THREE.MeshStandardMaterial({ 
-            color: '#e8e8e8',
+            color: '#f1f1f1',
             roughness: 0.85,
-            metalness: 0
+            metalness: 0.1
         });
         const geometry = createWallGeometry(wallData);
         const mesh = new THREE.Mesh(geometry, material);
+        
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-
         mesh.userData = { id: 'wall-face' };
         return mesh;
-    }
+    },
+    'platform-cube': () => {
+        const material = new THREE.MeshStandardMaterial({ 
+            color: '#bdbdbd',
+            roughness: 0.85,
+            metalness: 0.1
+        });
+        const mesh = new THREE.Mesh(platformCubeGeometry, material);
+        
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { id: 'platform-cube' };
+        return mesh;
+    },
 }
 
 export function createStructureInstance(assetId, wallData) {
@@ -30,9 +43,11 @@ function createWallGeometry(wallData) {
         startLeft,
         startRight,
         endLeft,
-        endRight
+        endRight,
+        baseY
     } = wallData;
 
+    const wallGeometry = new THREE.BufferGeometry();
     const positions = [];
     const uvs = [];
     const indices = [];
@@ -60,15 +75,15 @@ function createWallGeometry(wallData) {
         );
     }
 
-    const SL0 = { x: startLeft.x,  y: 0,      z: startLeft.z };
-    const SR0 = { x: startRight.x, y: 0,      z: startRight.z };
-    const EL0 = { x: endLeft.x,    y: 0,      z: endLeft.z };
-    const ER0 = { x: endRight.x,   y: 0,      z: endRight.z };
+    const SL0 = { x: startLeft.x,  y: baseY, z: startLeft.z };
+    const SR0 = { x: startRight.x, y: baseY, z: startRight.z };
+    const EL0 = { x: endLeft.x,    y: baseY, z: endLeft.z };
+    const ER0 = { x: endRight.x,   y: baseY, z: endRight.z };
 
-    const SLH = { x: startLeft.x,  y: WALL_HEIGHT, z: startLeft.z };
-    const SRH = { x: startRight.x, y: WALL_HEIGHT, z: startRight.z };
-    const ELH = { x: endLeft.x,    y: WALL_HEIGHT, z: endLeft.z };
-    const ERH = { x: endRight.x,   y: WALL_HEIGHT, z: endRight.z };
+    const SLH = { x: startLeft.x,  y: baseY + WALL_HEIGHT, z: startLeft.z };
+    const SRH = { x: startRight.x, y: baseY + WALL_HEIGHT, z: startRight.z };
+    const ELH = { x: endLeft.x,    y: baseY + WALL_HEIGHT, z: endLeft.z };
+    const ERH = { x: endRight.x,   y: baseY + WALL_HEIGHT, z: endRight.z };
 
     addQuad(SL0, EL0, ELH, SLH);
     addQuad(ER0, SR0, SRH, ERH);
@@ -79,7 +94,6 @@ function createWallGeometry(wallData) {
     addQuad(SLH, ELH, ERH, SRH);
     addQuad(SL0, SR0, ER0, EL0);
 
-    
 
     wallGeometry.setAttribute(
         'position',

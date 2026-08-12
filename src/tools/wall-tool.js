@@ -24,6 +24,7 @@ export function createWallTool({
 
     hoverWallPole.visible = false;
     hoverWallFace.visible = false;
+    
     scene.add(hoverWallPole);
     scene.add(hoverWallFace);
 
@@ -33,29 +34,34 @@ export function createWallTool({
     }
 
     /* 예측 건설 지점 지속적으로 바꾸기 */
-    function updateHoverPoint(gridX, gridZ){
+    function updateHoverPoint(gridX, gridZ, gridY){
         /* snap 적용 */
-        const lastPoint = getLastConfirmedPoint();
+        const lastPoint = currentStartPoint;
 
         let snappedPoint = {
             gridX,
-            gridZ
+            gridZ,
+            gridY
         };
 
         if(lastPoint){
-            snappedPoint = snapHoverPoint(lastPoint, gridX, gridZ);
+            snappedPoint = snapHoverPoint(lastPoint, gridX, gridZ, gridY);
         }
 
         currentHoverPoint = snappedPoint;
-        updateHoverWallPole(snappedPoint.gridX, snappedPoint.gridZ);
-        updateHoverWallFace();
+        updateHoverWallPole(
+            snappedPoint.gridX, 
+            snappedPoint.gridZ, 
+            snappedPoint.gridY
+        );
+        updateHoverWallFace(snappedPoint.gridY);
     }
 
     /* 벽 건설 봉을 지속적으로 바꾸기 */
-    function updateHoverWallPole(gridX, gridZ){
+    function updateHoverWallPole(gridX, gridZ, gridY){
         hoverWallPole.position.set(
             gridX * gridSize,
-            WALL_HEIGHT / 2,
+            (WALL_HEIGHT / 2) + (gridY * 0.1),
             gridZ * gridSize            
         );
 
@@ -82,19 +88,27 @@ export function createWallTool({
 
 
     /* 실제 지점으로 확정하기 */
-    function confirmPoint(gridX, gridZ){
+    function confirmPoint(gridX, gridZ, gridY){
         const startPoint = currentStartPoint;  
         const endPoint = currentHoverPoint
             ? { ...currentHoverPoint }
-            : { gridX, gridZ };
+            : { gridX, gridZ, gridY };
         
         /* 기존에 있는 봉과 겹치는지 확인 */
         const existingPoint = confirmedPoints.find(point =>
             isSamePoint(point, endPoint)
         );
+
+        /* 임시 코드 */
+        if (existingPoint && !startPoint) {
+            currentStartPoint = existingPoint;
+            currentHoverPoint = { ...existingPoint };
+
+            return { finished: false };
+        }
             
         /* 벽 박아놓기 */
-        if(startPoint){
+        if(startPoint && !isSamePoint(startPoint, endPoint)){
             let wall = createBuildToolInstance('hover-wall-face');      
             const wallData = createWallData(startPoint, endPoint);
             
@@ -124,7 +138,7 @@ export function createWallTool({
 
         marker.position.set(
             endPoint.gridX * gridSize,
-            WALL_HEIGHT / 2,
+            (WALL_HEIGHT / 2) + (endPoint.gridY * 0.1),
             endPoint.gridZ * gridSize
         );
 
@@ -161,7 +175,7 @@ export function createWallTool({
         /* 해당 mesh에 적용한다 */
         mesh.position.set(
             wallData.midX,
-            wallData.height / 2,
+            (wallData.height / 2) + wallData.midY,
             wallData.midZ
         );
 
@@ -175,8 +189,11 @@ export function createWallTool({
     function createWallData(startPoint, endPoint) {
         const startWorldX = startPoint.gridX * gridSize;
         const startWorldZ = startPoint.gridZ * gridSize;
+        const startWorldY = startPoint.gridY * 0.1;
+        
         const endWorldX = endPoint.gridX * gridSize;
         const endWorldZ = endPoint.gridZ * gridSize;
+        const endWorldY = endPoint.gridY * 0.1;
 
         const dx = endWorldX - startWorldX;
         const dz = endWorldZ - startWorldZ;
@@ -189,6 +206,8 @@ export function createWallTool({
 
             midX: (startWorldX + endWorldX) / 2,
             midZ: (startWorldZ + endWorldZ) / 2,
+            midY: (startWorldY + endWorldY) / 2,
+
             wallLength: Math.hypot(dx, dz),
             rotationY: -Math.atan2(dz, dx),
 
@@ -199,11 +218,15 @@ export function createWallTool({
 
     /* 겹치는 봉 위치인지 확인하기 */
     function isSamePoint(a, b) {
-        return a.gridX === b.gridX && a.gridZ === b.gridZ;
+        return (
+            a.gridX === b.gridX &&
+            a.gridZ === b.gridZ &&
+            a.gridY === b.gridY
+        );
     }
 
-    /* 스냅을 적용하는 함수(15도 기준) */
-    function snapHoverPoint(startPoint, gridX, gridZ){
+    /* 스냅을 적용하는 함수(45도 기준) */
+    function snapHoverPoint(startPoint, gridX, gridZ, gridY){
         const _45Rad = Math.PI / 4;
 
         const startX = startPoint.gridX;
@@ -213,7 +236,7 @@ export function createWallTool({
         const dz = gridZ - startZ;
 
         /* 1. startPoint 기준 마우스의 각도
-           2. snaped된 15도 단위의 각도 */
+           2. snaped된 45도 단위의 각도 */
         const mouseAngle = Math.atan2(dz, dx);
         const snappedAngle = Math.round(mouseAngle / _45Rad) * _45Rad;
 
@@ -223,7 +246,7 @@ export function createWallTool({
         
         const calcData = {
             startX, startZ,
-            gridX, gridZ,
+            gridX, gridZ, gridY,
             dx, dz,
             dX, dZ
         };
@@ -234,7 +257,7 @@ export function createWallTool({
     /* 버그 수정용 함수.. 추후 이해 필요 */
     function diagonal(calcData){
         const { startX, startZ,
-                gridX, gridZ,
+                gridX, gridZ, gridY,
                 dx, dz,
                 dX, dZ } = calcData;
         
@@ -247,24 +270,27 @@ export function createWallTool({
 
             return {
                 gridX: startX + Math.sign(dX) * step,
-                gridZ: startZ + Math.sign(dZ) * step
+                gridZ: startZ + Math.sign(dZ) * step,
+                gridY
             };
         }
 
         if (Math.abs(dX) > Math.abs(dZ)) {
             return {
                 gridX,
-                gridZ: startZ
+                gridZ: startZ,
+                gridY
             };
         }
 
         return {
             gridX: startX,
-            gridZ
+            gridZ,
+            gridY
         };        
     }
 
-    /* 실제 구조물로 변환 */
+    /* 실제 구조물로 만듦 */
     function commitCurrentBuildParts() {
         /* wall data만 파싱하여 가져오기 */
         const wallDataList = currentBuildParts

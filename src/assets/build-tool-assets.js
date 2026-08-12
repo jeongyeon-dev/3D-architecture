@@ -11,12 +11,16 @@ const assets = {
     'hover-wall-pole': () => {
         const material = new THREE.MeshBasicMaterial({ 
             color: '#ffffff',
+            toneMapped: false,
+            fog: false,
             transparent: true,
             opacity: 1,
             depthWrite: false 
         });
         const mesh = new THREE.Mesh(hoverWallPoleGeometry, material);
+        
         mesh.userData = { id: 'hover-wall-pole' };
+        mesh.renderOrder = 2;
         return mesh;
     },
     'hover-wall-face': () => {
@@ -26,8 +30,24 @@ const assets = {
             opacity: 0.6,
             depthWrite: false 
         });
+        const outline = new THREE.LineSegments(
+            new THREE.EdgesGeometry(hoverWallFaceGeometry),
+            new THREE.LineBasicMaterial({
+                color: '#ffffff',
+                toneMapped: false,
+                fog: false,
+                transparent: true,
+                opacity: 1,
+                depthTest: false,
+                depthWrite: false
+            })
+        );
         const mesh = new THREE.Mesh(hoverWallFaceGeometry, material);
+        outline.renderOrder = 3;
+
         mesh.userData = { id: 'hover-wall-face' };
+        mesh.renderOrder = 1;
+        mesh.add(outline);
         return mesh;
     },
     'hover-platform-cube': () => {
@@ -37,13 +57,27 @@ const assets = {
             opacity: 0.6,
             depthWrite: false 
         });
-        const mesh = new THREE.Mesh(hoverPlatformPoleGeometry, material);
+        const outline = new THREE.LineSegments(
+            new THREE.EdgesGeometry(hoverPlatformCubeGeometry),
+            new THREE.LineBasicMaterial({
+                color: '#ffffff',
+                toneMapped: false,
+                fog: false,
+                transparent: false,
+                depthTest: false
+            })
+        );
+        const mesh = new THREE.Mesh(hoverPlatformCubeGeometry, material);
+        
         mesh.userData = { id: 'hover-platform-cube' };
+        mesh.add(outline);
         return mesh;
     },
     'hover-platform-pole': () => {
         const material = new THREE.MeshBasicMaterial({ 
             color: '#ffffff',
+            toneMapped: false,
+            fog: false,
             transparent: true,
             opacity: 1,
             depthWrite: false 

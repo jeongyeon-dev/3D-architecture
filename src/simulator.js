@@ -10,27 +10,27 @@ export function createSimulator(){
     scene.initialize(land);
 
     /* 좌표 추적하기 */
-    scene.setOnGridHovered(({ gridX, gridZ }) => {
+    scene.setOnGridHovered(({ gridX, gridZ, gridY }) => {
         scene.hideToolCursors(activeToolId);
         
         if(activeToolId == 'wall'){
-            scene.updateWallHover(gridX, gridZ);       
-            console.log('벽 Grid:', gridX, gridZ);
+            scene.updateWallHover(gridX, gridZ, gridY);       
+            console.log('벽 Grid:', gridX, gridZ, gridY);
         }
 
         if(activeToolId == 'platform'){
             scene.updatePlatformHover(gridX, gridZ);
-            console.log('플랫폼 Grid ', gridX, gridZ);
+            console.log('플랫폼 Grid ', gridX, gridZ, gridY);
         }
 
     });
     
     /* 좌표 클릭 시 */
-    scene.setOnObjectSelected(({ gridX, gridZ }) => {
+    scene.setOnObjectSelected(({ gridX, gridZ, gridY }) => {
         let result;
 
         if(activeToolId == 'wall'){
-            result = scene.confirmWallPoint(gridX, gridZ);
+            result = scene.confirmWallPoint(gridX, gridZ, gridY);
         }
 
         if(activeToolId == 'platform'){
@@ -57,7 +57,7 @@ export function createSimulator(){
         },
         setActiveToolId(toolId){
             activeToolId = toolId;
-            console.log(activeToolId);
+            scene.setRaycastTarget(toolId);
         }
     }
 
