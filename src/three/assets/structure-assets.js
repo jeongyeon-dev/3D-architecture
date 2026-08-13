@@ -20,7 +20,7 @@ const assets = {
     },
     'platform-cube': () => {
         const material = new THREE.MeshStandardMaterial({ 
-            color: '#bdbdbd',
+            color: '#a0a0a0',
             roughness: 0.85,
             metalness: 0.1
         });

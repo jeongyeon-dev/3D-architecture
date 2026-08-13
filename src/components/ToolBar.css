@@ -1,0 +1,42 @@
+.floor-selector {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 8px;
+    overflow: hidden;
+
+    z-index: 100;
+}
+
+.floor-button {
+    width: 50px;
+    height: 35px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.floor-button:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.floor-display {
+    width: 50px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+    font-weight: bold;
+}

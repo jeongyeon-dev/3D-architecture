@@ -48,7 +48,7 @@ export function createPlatformTool({
         }
         
         /* 이미 startPoint가 있으면 플랫폼 형태를 확정한다 */
-        commitCurrentBuildParts();
+        return commitCurrentBuildParts();
     }
 
     /* 도구 감추기 */
@@ -125,6 +125,11 @@ export function createPlatformTool({
         hoverPlatformCube.visible = false;
         currentStartPoint = null;
         currentHoverPoint = null;
+
+        return {
+            mesh,
+            cubeData
+        };
     }
 
     function getPlatformMeshes() {

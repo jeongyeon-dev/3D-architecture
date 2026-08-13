@@ -63,8 +63,10 @@ const assets = {
                 color: '#ffffff',
                 toneMapped: false,
                 fog: false,
-                transparent: false,
-                depthTest: false
+                transparent: true,
+                opacity: 1,
+                depthTest: false,
+                depthWrite: false
             })
         );
         const mesh = new THREE.Mesh(hoverPlatformCubeGeometry, material);

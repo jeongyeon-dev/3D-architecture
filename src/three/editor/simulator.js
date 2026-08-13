@@ -1,5 +1,5 @@
 import { createScene } from "./scene.js";
-import { createLand } from "./land.js";
+import { createLand } from "./components/land.js";
 
 export function createSimulator(){
     let activeToolId = '';
@@ -15,12 +15,10 @@ export function createSimulator(){
         
         if(activeToolId == 'wall'){
             scene.updateWallHover(gridX, gridZ, gridY);       
-            console.log('벽 Grid:', gridX, gridZ, gridY);
         }
 
         if(activeToolId == 'platform'){
             scene.updatePlatformHover(gridX, gridZ);
-            console.log('플랫폼 Grid ', gridX, gridZ, gridY);
         }
 
     });
@@ -58,6 +56,9 @@ export function createSimulator(){
         setActiveToolId(toolId){
             activeToolId = toolId;
             scene.setRaycastTarget(toolId);
+        },
+        setFloor(floor) {
+            scene.setFloor(floor);
         }
     }
 

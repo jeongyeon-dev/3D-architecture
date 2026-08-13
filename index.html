@@ -1,50 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./public/main.css">
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three/examples/jsm/"
-        }
-    }
-    </script>   
-    <title>Document</title>
+    <title>3D Architecture</title>
 </head>
 <body>
-    <div id="root-window">
-        <div id="render-target">
-            <div id="ui-toolbar">
-                <button id="button-bulldoze" class="ui-button selected" onclick="setActiveTool(event, 'bulldoze')">철거</button>
-                <button id="button-brick" class="ui-button" onclick="setActiveTool(event, 'platform')">플랫폼</button>
-                <button id="button-brick" class="ui-button" onclick="setActiveTool(event, 'wall')">벽</button>
-                <button id="button-floor" class="ui-button" onclick="setActiveTool(event, 'floor')">바닥</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { createSimulator } from './src/simulator.js';
-
-        let selectedControl = document.getElementById('button-bulldoze');
-
-        window.onload = () => {
-            window.simulator = createSimulator();
-        }
-
-        window.setActiveTool = (event, toolId) => {
-            if(selectedControl){
-                selectedControl.classList.remove('selected');
-            }
-
-            selectedControl = event.target;
-            selectedControl.classList.add('selected');
-
-            window.simulator.setActiveToolId(toolId);
-        }
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createAssetInstance } from './assets/basic-assets.js';
+import { createAssetInstance } from '../assets/basic-assets.js';
 
 export function createPlacementController({
     scene,

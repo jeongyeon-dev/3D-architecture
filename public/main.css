@@ -3,7 +3,7 @@ html, body {
     margin: 0;
 }
 
-#root-window {
+#root, #root-window {
     height: 100%;
 }
 

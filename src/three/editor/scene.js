@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { createCamera } from './camera.js';
-import { createAssetInstance } from './assets/basic-assets.js';
-import { LAND_SIZE_M, GRID_SIZE_M } from './config.js';
+import { createCamera } from './components/camera.js';
+import { createAssetInstance } from '../assets/basic-assets.js';
+import { LAND_SIZE_M, GRID_SIZE_M } from '../config.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
-import { createGrid } from './grid.js';
+import { createGrid } from './components/grid.js';
 import { createPlacementController } from './placement.js';
 
-import { createWallTool } from './tools/wall-tool.js';
-import { createPlatformTool } from './tools/platform-tool.js';
+import { createWallTool } from '../tools/wall-tool.js';
+import { createPlatformTool } from '../tools/platform-tool.js';
 
 export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
@@ -61,6 +61,7 @@ export function createScene(){
     let placement
     
     let grid;
+    let platformGrids = [];
     let onGridHoveredCallback;
     
     let wallTool;
@@ -79,7 +80,14 @@ export function createScene(){
         scene.add(plate);
 
         /* grid 불러오기 */
-        grid = createGrid(LAND_SIZE_M, GRID_SIZE_M, center, center);
+        grid = createGrid(
+            LAND_SIZE_M,
+            LAND_SIZE_M,
+            GRID_SIZE_M,
+            center,
+            center,
+            0
+        );
         scene.add(grid);
 
         /* raycast을 비롯한 오브젝트 생성체 가져오기 */
@@ -156,7 +164,25 @@ export function createScene(){
     }
 
     function confirmPlatformPoint(gridX, gridZ){
-        return platformTool?.confirmPoint(gridX, gridZ);
+        const result = platformTool?.confirmPoint(gridX, gridZ);
+
+        /* 만약 생성된 플랫폼 객체가 있다면? => 위에 grid 생성 */
+        if(result?.mesh){
+            const cubeData = result.cubeData;
+            const platformGrid = createGrid(
+                cubeData.width,
+                cubeData.length,
+                GRID_SIZE_M,
+                cubeData.midX,
+                cubeData.midZ,
+                cubeData.height + 0.001
+            );
+
+            platformGrids.push(platformGrid);
+            scene.add(platformGrid);
+        }
+
+        return result;
     }
 
 
@@ -185,6 +211,15 @@ export function createScene(){
         const cameraDistance = camera.camera.position.distanceTo(center);
         grid?.updateOpacity(cameraDistance);
         
+        for (const platformGrid of platformGrids) {
+            const distance =
+                camera.camera.position.distanceTo(
+                    platformGrid.position
+                );
+
+            platformGrid.updateOpacity(distance);
+        }
+
         renderer.render(scene, camera.camera);
     }
 
@@ -234,6 +269,12 @@ export function createScene(){
         scene.add(new THREE.AmbientLight(0xffffff, 0.3));
     }
 
+
+    /* 층 수 설정 함수 */
+    function setFloor(floor) {
+        console.log('바닥이 변경됨');
+    }
+
     return {
         initialize,
         update,
@@ -251,6 +292,7 @@ export function createScene(){
         confirmWallPoint,
         updatePlatformHover,
         confirmPlatformPoint,
-        setRaycastTarget
+        setRaycastTarget,
+        setFloor
     }
 }
