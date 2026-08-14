@@ -12,6 +12,7 @@ export function createWallTool({
     let confirmedPoints = [];
     const confirmedWalls = [];
     let currentBuildParts = [];
+    let confirmedWallData = [];
     
     let currentStartPoint;
     let currentHoverPoint;
@@ -292,7 +293,7 @@ export function createWallTool({
 
     /* 실제 구조물로 만듦 */
     function commitCurrentBuildParts() {
-        /* wall data만 파싱하여 가져오기 */
+        /* 임시 wall data만 파싱하여 가져오기 */
         const wallDataList = currentBuildParts
             .filter(part => part.assetId === 'wall-face')
             .map(part => part.data);
@@ -314,7 +315,14 @@ export function createWallTool({
             scene.remove(part.toolMesh);
         }
 
+        confirmedWallData.push(...wallDataList);
         currentBuildParts = [];
+    }
+
+    
+    /* 내부 데이터 가져오기 함수 */
+    function getWallData(){
+        return confirmedWallData;
     }
 
     return {
@@ -322,6 +330,7 @@ export function createWallTool({
         updateHoverPoint,
         confirmPoint,
         getLastConfirmedPoint,
-        getCurrentSegment
+        getCurrentSegment,
+        getWallData
     }
 }

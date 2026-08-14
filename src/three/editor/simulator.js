@@ -14,11 +14,13 @@ export function createSimulator(){
         scene.hideToolCursors(activeToolId);
         
         if(activeToolId == 'wall'){
-            scene.updateWallHover(gridX, gridZ, gridY);       
+            scene.updateWallHover(gridX, gridZ, gridY); 
+            // console.log(`${gridX}  ${gridZ}  ${gridY}`);      
         }
 
         if(activeToolId == 'platform'){
             scene.updatePlatformHover(gridX, gridZ);
+            // console.log(`${gridX}  ${gridZ}  ${gridY}`);  
         }
 
     });

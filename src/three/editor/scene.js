@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createCamera } from './components/camera.js';
 import { createAssetInstance } from '../assets/basic-assets.js';
-import { LAND_SIZE_M, GRID_SIZE_M } from '../config.js';
+import { LAND_SIZE_M, GRID_SIZE_M, WALL_HEIGHT, PLATFORM_HEIGHT, GRID_OUTER_RANGE } from '../config.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { createGrid } from './components/grid.js';
 import { createPlacementController } from './placement.js';
@@ -58,7 +58,7 @@ export function createScene(){
     let onObjectSelected = undefined;
     
     let plate;
-    let placement
+    let placement;
     
     let grid;
     let platformGrids = [];
@@ -209,8 +209,9 @@ export function createScene(){
     function draw(){
         const center = new THREE.Vector3(LAND_SIZE_M / 2, 0, LAND_SIZE_M / 2);
         const cameraDistance = camera.camera.position.distanceTo(center);
-        grid?.updateOpacity(cameraDistance);
         
+        grid?.updateOpacity(cameraDistance);    
+
         for (const platformGrid of platformGrids) {
             const distance =
                 camera.camera.position.distanceTo(
@@ -272,7 +273,38 @@ export function createScene(){
 
     /* 층 수 설정 함수 */
     function setFloor(floor) {
-        console.log('바닥이 변경됨');
+        const visibility = floor === 1;
+        setPlatformGridVisibility(visibility);
+
+        const currentFloorY = 
+            (floor - 1) * WALL_HEIGHT + (floor > 1 ? PLATFORM_HEIGHT : 0);
+        grid.position.y = currentFloorY + 0.01;
+        
+        /* 2층 이상일 경우? 벽면을 기준으로 grid 범위를 재설정 함 */
+        if(floor > 1){
+            updateGridScope(currentFloorY);
+        }
+    }
+
+    function setPlatformGridVisibility(visibility){
+        for (const platformGrid of platformGrids) {
+            platformGrid.visible = visibility;
+        }
+    }
+
+    /* 새 층 grid 범위 재설정 함수 */
+    function updateGridScope(currentFloorY){
+        const wallDataList = wallTool.getWallData();
+
+        for(const wallData of wallDataList){
+            if((wallData.midY + WALL_HEIGHT) !== currentFloorY) continue;
+            
+            const startPoint = wallData.startPoint;
+            const endPoint = wallData.endPoint;
+            
+
+            
+        }
     }
 
     return {
