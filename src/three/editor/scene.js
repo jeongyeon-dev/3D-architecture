@@ -9,6 +9,9 @@ import { createPlacementController } from './placement.js';
 import { createWallTool } from '../tools/wall-tool.js';
 import { createPlatformTool } from '../tools/platform-tool.js';
 
+import { calculateMiterWalls } from '../tools/miter-calculator.js';
+
+
 export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
     const gameWindow = document.getElementById('render-target');
@@ -61,6 +64,8 @@ export function createScene(){
     let placement;
     
     let grid;
+    let center
+    let upperFloorGrid;
     let platformGrids = [];
     let onGridHoveredCallback;
     
@@ -72,7 +77,7 @@ export function createScene(){
         scene.clear();
 
         /* 카메라 위치 설정 */
-        const center = LAND_SIZE_M / 2;
+        center = LAND_SIZE_M / 2;
         camera.setOrigin(center, 0, center);
 
         /* 바닥 넣기 */
@@ -212,6 +217,13 @@ export function createScene(){
         
         grid?.updateOpacity(cameraDistance);    
 
+        if (upperFloorGrid) {
+            const distance =
+                camera.camera.position.distanceTo(upperFloorGrid.position);
+
+            upperFloorGrid.updateOpacity(distance);
+        }
+
         for (const platformGrid of platformGrids) {
             const distance =
                 camera.camera.position.distanceTo(
@@ -273,17 +285,20 @@ export function createScene(){
 
     /* 층 수 설정 함수 */
     function setFloor(floor) {
-        const visibility = floor === 1;
-        setPlatformGridVisibility(visibility);
+        const isGroundFloor = floor === 1;
 
-        const currentFloorY = 
-            (floor - 1) * WALL_HEIGHT + (floor > 1 ? PLATFORM_HEIGHT : 0);
-        grid.position.y = currentFloorY + 0.01;
-        
-        /* 2층 이상일 경우? 벽면을 기준으로 grid 범위를 재설정 함 */
-        if(floor > 1){
-            updateGridScope(currentFloorY);
+        grid.visible = isGroundFloor;
+        setPlatformGridVisibility(isGroundFloor);
+
+        if (isGroundFloor) {
+            clearUpperFloorGrid();
+            return;
         }
+
+        const currentFloorY =
+            (floor - 1) * WALL_HEIGHT + (floor > 1 ? PLATFORM_HEIGHT : 0);
+
+        updateGridScope(currentFloorY);
     }
 
     function setPlatformGridVisibility(visibility){
@@ -292,20 +307,105 @@ export function createScene(){
         }
     }
 
-    /* 새 층 grid 범위 재설정 함수 */
+
+    /* 새 층 grid 범위 재설정 함수:
+       grid 선분 
+       → polygon 경계와 교차점 찾기 
+       → 선분을 여러 구간으로 나누기 
+       → 각 구간의 중점이 polygon 안인지 검사 
+       → 안쪽 구간만 grid에 다시 넣기. */
     function updateGridScope(currentFloorY){
         const wallDataList = wallTool.getWallData();
+        const supportWalls = wallDataList.filter((wallData) => {
+            const wallTopY = wallData.midY + wallData.height;
 
-        for(const wallData of wallDataList){
-            if((wallData.midY + WALL_HEIGHT) !== currentFloorY) continue;
-            
-            const startPoint = wallData.startPoint;
-            const endPoint = wallData.endPoint;
-            
+            return Math.abs(wallTopY - currentFloorY) < 0.001;
+        });
 
-            
+        clearUpperFloorGrid();
+
+        if (supportWalls.length === 0) {
+            return;
+        }
+
+        /* 벽을 기준으로 grid를 그릴 scope 만들기: Miter 연산 사용 */
+        const miterWalls = calculateMiterWalls(
+            wallDataList,
+            GRID_SIZE_M, 
+            GRID_OUTER_RANGE * 2
+        );
+
+        const polygons = miterWalls.map((wall) => [
+            wall.startLeft,
+            wall.endLeft,
+            wall.endRight,
+            wall.startRight
+        ]);
+
+        upperFloorGrid = createGrid(
+            LAND_SIZE_M,
+            LAND_SIZE_M,
+            GRID_SIZE_M,
+            center,
+            center,
+            currentFloorY + 0.01
+        );
+
+        clipGrid(upperFloorGrid, polygons);
+        scene.add(upperFloorGrid);
+    }
+
+    function clipGrid(grid, polygons){
+        for(const eachGrid of grid.children){
+            const position = eachGrid.geometry.getAttribute('position');
+            const positions = [];
+
+            for (let i = 0; i < position.count; i += 2) {
+                /* 선분 좌표만 가져옴 */
+                const start = {
+                    x: position.getX(i) + grid.position.x,
+                    z: position.getZ(i) + grid.position.z
+                };
+
+                const end = {
+                    x: position.getX(i + 1) + grid.position.x,
+                    z: position.getZ(i + 1) + grid.position.z
+                };
+
+                // console.log(`${start.x} ${start.z}  ${end.x} ${end.z}`);
+                // for (const polygon of polygons) {
+                //     const segments =
+                //         clipSegmentToPolygon(start, end, polygon);
+
+                //     for (const segment of segments) {
+                //         positions.push(
+                //             segment.start.x - grid.position.x,
+                //             position.getY(i),
+                //             segment.start.z - grid.position.z,
+
+                //             segment.end.x - grid.position.x,
+                //             position.getY(i + 1),
+                //             segment.end.z - grid.position.z
+                //         );
+                //     }
+                // }
+            }
         }
     }
+
+    function clearUpperFloorGrid(){
+        if (!upperFloorGrid) {
+            return;
+        }
+
+        scene.remove(upperFloorGrid);
+        upperFloorGrid.traverse((object) => {
+            object.geometry?.dispose();
+            object.material?.dispose();
+        });
+        upperFloorGrid = undefined;
+    }
+
 
     return {
         initialize,

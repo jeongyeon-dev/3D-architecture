@@ -1,5 +1,3 @@
-import { WALL_THICKNESS } from '../../config.js';
-
 /* 최종 반환값 형태는 다음과 같다:
    [
        {
@@ -14,9 +12,9 @@ import { WALL_THICKNESS } from '../../config.js';
    ] */
 export function calculateMiterWalls(
     wallDataList,
-    gridSize
+    gridSize, 
+    wallThickness
 ) {
-    const wallThickness = WALL_THICKNESS;
 
     /* 계산된 좌표를 반환하는 빈 객체 */
     const calculatedWalls = [];

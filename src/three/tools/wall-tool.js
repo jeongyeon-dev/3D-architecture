@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
-import { calculateMiterWalls } from './util/miter-calculator.js';
-import { WALL_HEIGHT, GRID_SIZE_M } from '../config.js';
+import { calculateMiterWalls } from './miter-calculator.js';
+import { WALL_HEIGHT, GRID_SIZE_M, WALL_THICKNESS } from '../config.js';
 
 export function createWallTool({
     scene,
@@ -301,8 +301,9 @@ export function createWallTool({
         const caculatedWallGeometries 
             = calculateMiterWalls(
                 wallDataList, 
-                GRID_SIZE_M
-            )
+                GRID_SIZE_M,
+                WALL_THICKNESS
+            );
 
         for(const wallGeometry of caculatedWallGeometries){
             const mesh = createStructureInstance('wall-face', wallGeometry);   
