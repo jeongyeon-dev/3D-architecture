@@ -4,6 +4,7 @@ import { createAssetInstance } from '../assets/basic-assets.js';
 import { LAND_SIZE_M, GRID_SIZE_M, WALL_HEIGHT, PLATFORM_HEIGHT, GRID_OUTER_RANGE } from '../config.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { createGrid } from './components/grid.js';
+import { clipGrid } from './components/grid-clipper.js';
 import { createPlacementController } from './placement.js';
 
 import { createWallTool } from '../tools/wall-tool.js';
@@ -330,7 +331,7 @@ export function createScene(){
 
         /* 벽을 기준으로 grid를 그릴 scope 만들기: Miter 연산 사용 */
         const miterWalls = calculateMiterWalls(
-            wallDataList,
+            supportWalls,
             GRID_SIZE_M, 
             GRID_OUTER_RANGE * 2
         );
@@ -355,43 +356,8 @@ export function createScene(){
         scene.add(upperFloorGrid);
     }
 
-    function clipGrid(grid, polygons){
-        for(const eachGrid of grid.children){
-            const position = eachGrid.geometry.getAttribute('position');
-            const positions = [];
+  
 
-            for (let i = 0; i < position.count; i += 2) {
-                /* 선분 좌표만 가져옴 */
-                const start = {
-                    x: position.getX(i) + grid.position.x,
-                    z: position.getZ(i) + grid.position.z
-                };
-
-                const end = {
-                    x: position.getX(i + 1) + grid.position.x,
-                    z: position.getZ(i + 1) + grid.position.z
-                };
-
-                // console.log(`${start.x} ${start.z}  ${end.x} ${end.z}`);
-                // for (const polygon of polygons) {
-                //     const segments =
-                //         clipSegmentToPolygon(start, end, polygon);
-
-                //     for (const segment of segments) {
-                //         positions.push(
-                //             segment.start.x - grid.position.x,
-                //             position.getY(i),
-                //             segment.start.z - grid.position.z,
-
-                //             segment.end.x - grid.position.x,
-                //             position.getY(i + 1),
-                //             segment.end.z - grid.position.z
-                //         );
-                //     }
-                // }
-            }
-        }
-    }
 
     function clearUpperFloorGrid(){
         if (!upperFloorGrid) {

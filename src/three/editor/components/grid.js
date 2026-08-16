@@ -11,7 +11,7 @@ export function createGrid(width, length, gridSize, x, z, y){
     const majorGrid = createRectGrid(width, length, 1, center);
     const minorGrid = createRectGrid(width, length, gridSize, center);
 
-    majorGrid.material = new THREE.LineDashedMaterial({
+    majorGrid.material = new THREE.LineBasicMaterial({
         color: '#fdfdfd',
     });
 
