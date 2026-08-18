@@ -5,7 +5,8 @@ import FloorSelector from '../components/ToolBar.jsx';
 const rightTools = [
     { id: 'bulldoze', buttonId: 'button-bulldoze', label: '철거' },
     { id: 'platform', buttonId: 'button-platform', label: '플랫폼' },
-    { id: 'wall', buttonId: 'button-brick', label: '벽' }
+    { id: 'wall', buttonId: 'button-brick', label: '벽' },
+    { id: 'floor', buttonId: 'button-floor', label: '바닥' }
 ];
 
 export default function App(){

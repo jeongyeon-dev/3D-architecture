@@ -12,6 +12,8 @@ export function createSimulator(){
     /* 좌표 추적하기 */
     scene.setOnGridHovered(({ gridX, gridZ, gridY }) => {
         scene.hideToolCursors(activeToolId);
+
+        // console.log(activeToolId);
         
         if(activeToolId == 'wall'){
             scene.updateWallHover(gridX, gridZ, gridY); 
@@ -20,6 +22,11 @@ export function createSimulator(){
 
         if(activeToolId == 'platform'){
             scene.updatePlatformHover(gridX, gridZ);
+            // console.log(`${gridX}  ${gridZ}  ${gridY}`);  
+        }
+
+        if(activeToolId == 'floor'){
+            scene.updateFloorHover(gridX, gridZ, gridY);
             // console.log(`${gridX}  ${gridZ}  ${gridY}`);  
         }
 
@@ -35,6 +42,10 @@ export function createSimulator(){
 
         if(activeToolId == 'platform'){
             result = scene.confirmPlatformPoint(gridX, gridZ);
+        }
+
+        if(activeToolId == 'floor'){
+            result = scene.confirmFloorPoint(gridX, gridZ, gridY);
         }
 
         /* 종료 되었을 경우 생성 중지하기 */

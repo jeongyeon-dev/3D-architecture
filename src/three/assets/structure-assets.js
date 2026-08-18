@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { WALL_HEIGHT, PLATFORM_HEIGHT } from '../config.js';
+import { GRID_SIZE_M, WALL_HEIGHT, PLATFORM_HEIGHT, FLOOR_THICKENSS } from '../config.js';
 
 const platformCubeGeometry = new THREE.BoxGeometry(1, PLATFORM_HEIGHT, 1);
 
@@ -31,13 +31,31 @@ const assets = {
         mesh.userData = { id: 'platform-cube' };
         return mesh;
     },
+    'floor-polygon': (floorData) => {
+        const material = new THREE.MeshStandardMaterial({ 
+            color: '#666666',
+            roughness: 0.85,
+            metalness: 0.1
+        });
+        const geometry = createFloorGeometry(floorData);
+        const mesh = new THREE.Mesh(geometry, material);
+        const y = floorData[0].gridY * 0.1;
+        
+        mesh.rotation.x = Math.PI / 2;
+        mesh.position.y = y + 0.002;
+        
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { id: 'floor-polygon' };
+        return mesh;       
+    }
 }
 
 export function createStructureInstance(assetId, wallData) {
     return assets[assetId](wallData);
 }
 
-/* geometry 계산 함수 */
+/* 벽 geometry 계산 함수 */
 function createWallGeometry(wallData) {
     const {
         startLeft,
@@ -109,4 +127,29 @@ function createWallGeometry(wallData) {
     wallGeometry.computeVertexNormals();
 
     return wallGeometry;
+}
+
+/* 바닥 geometry 계산 함수 */
+function createFloorGeometry(floorData){
+    const shape = new THREE.Shape();
+
+    floorData.forEach((point, index) => {
+        const x = point.gridX * GRID_SIZE_M;
+        const z = point.gridZ * GRID_SIZE_M;
+
+        if (index === 0) {
+            shape.moveTo(x, z);
+        } else {
+            shape.lineTo(x, z);
+        }
+    });
+
+    shape.closePath();
+
+    const floorGeometry = new THREE.ExtrudeGeometry(shape, {
+        depth: FLOOR_THICKENSS,
+        bevelEnabled: false
+    });
+
+    return floorGeometry;
 }

@@ -9,8 +9,9 @@ import { createPlacementController } from './placement.js';
 
 import { createWallTool } from '../tools/wall-tool.js';
 import { createPlatformTool } from '../tools/platform-tool.js';
+import { createFloorTool } from '../tools/floor-tool.js';
 
-import { calculateMiterWalls } from '../tools/miter-calculator.js';
+import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
 
 
 export function createScene(){
@@ -51,7 +52,8 @@ export function createScene(){
     /* 구조체 */
     const hideTools = {
         wall: () => wallTool?.hide(),
-        platform: () => platformTool?.hide()
+        platform: () => platformTool?.hide(),
+        floor: () => floorTool?.hide()
     }
 
     /* raycasting 및 건설 오브젝트 추가하는 부분들 */
@@ -72,8 +74,9 @@ export function createScene(){
     
     let wallTool;
     let platformTool;
+    let floorTool;
 
-    /* 땅 지형 초기화 */
+    /* 초기화 함수 */
     function initialize(land){
         scene.clear();
 
@@ -124,10 +127,14 @@ export function createScene(){
             gridSize: GRID_SIZE_M
         });
 
+        /* 바닥 도구 객체 생성하기 */
+        floorTool = createFloorTool({
+            scene,
+            gridSize: GRID_SIZE_M          
+        });
+
         setupLights();
     }
-
-    /* ===== 위임 함수들 ===== */
 
     /* 실시간 */
     function update(land){
@@ -192,6 +199,16 @@ export function createScene(){
     }
 
 
+    /* 바닥 도구 호출 함수들 */
+    function updateFloorHover(gridX, gridZ, gridY) {
+        floorTool?.updateHoverPoint(gridX, gridZ, gridY);
+    }
+
+    function confirmFloorPoint(gridX, gridZ, gridY) {
+        return floorTool?.confirmPoint(gridX, gridZ, gridY);
+    }
+
+
     /* 어떤 대상을 raycast할지 결정  */
     function setRaycastTarget(toolId) {
         if (toolId === 'platform') {
@@ -199,6 +216,12 @@ export function createScene(){
         }
 
         if (toolId === 'wall') {
+            placement.setRaycastTargets(
+                platformTool.getPlatformMeshes()
+            );
+        }
+
+        if (toolId == 'floor'){
             placement.setRaycastTargets(
                 platformTool.getPlatformMeshes()
             );
@@ -308,7 +331,6 @@ export function createScene(){
         }
     }
 
-
     /* 새 층 grid 범위 재설정 함수:
        grid 선분 
        → polygon 경계와 교차점 찾기 
@@ -356,9 +378,6 @@ export function createScene(){
         scene.add(upperFloorGrid);
     }
 
-  
-
-
     function clearUpperFloorGrid(){
         if (!upperFloorGrid) {
             return;
@@ -390,6 +409,8 @@ export function createScene(){
         confirmWallPoint,
         updatePlatformHover,
         confirmPlatformPoint,
+        updateFloorHover,
+        confirmFloorPoint,
         setRaycastTarget,
         setFloor
     }

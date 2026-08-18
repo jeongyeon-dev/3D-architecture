@@ -9,3 +9,7 @@ export const GRID_OUTER_RANGE = 2;
 export const WALL_HEIGHT = 2.4;
 export const WALL_THICKNESS = 0.16;
 export const PLATFORM_HEIGHT = 0.4;
+export const FLOOR_THICKENSS = 0.08;
+
+/* 건축 보조 척도 설정 */
+export const HOVER_FLOOR_SPHERE_RADIUS = 0.08;

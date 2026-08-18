@@ -4,6 +4,7 @@ export function clipGrid(grid, polygons){
     for(const eachGrid of grid.children){
         const position = eachGrid.geometry.getAttribute('position');
         const positions = [];
+        const distances = [];
 
         for (let i = 0; i < position.count; i += 2) {
             /* 선분 좌표만 가져옴 */
@@ -22,6 +23,11 @@ export function clipGrid(grid, polygons){
                 const segments =
                     clipSegmentToPolygon(start, end, polygon);
 
+                const lineLength = Math.hypot(
+                    end.x - start.x,
+                    end.z - start.z
+                );
+
                 /* 내부 구간을 점으로 정보 저장하기 */
                 for (const segment of segments) {
                     positions.push(
@@ -33,6 +39,11 @@ export function clipGrid(grid, polygons){
                         position.getY(i + 1),
                         segment.end.z - grid.position.z
                     );
+
+                    distances.push(
+                        lineLength * segment.startT,
+                        lineLength * segment.endT
+                    );
                 }
             }
         }
@@ -42,8 +53,12 @@ export function clipGrid(grid, polygons){
             new THREE.Float32BufferAttribute(positions, 3)
         );
 
+        eachGrid.geometry.setAttribute(
+            'lineDistance',
+            new THREE.Float32BufferAttribute(distances, 1)
+        );
+
         eachGrid.geometry.computeBoundingSphere();
-        eachGrid.computeLineDistances();
     }
 }
 
@@ -87,7 +102,9 @@ function clipSegmentToPolygon(start, end, polygon) {
 
         segments.push({
             start: getPointOnSegment(start, end, startT),
-            end: getPointOnSegment(start, end, endT)
+            end: getPointOnSegment(start, end, endT),
+            startT,
+            endT
         });
     }
 
