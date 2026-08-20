@@ -51,8 +51,8 @@ const assets = {
     }
 }
 
-export function createStructureInstance(assetId, wallData) {
-    return assets[assetId](wallData);
+export function createStructureInstance(assetId, data) {
+    return assets[assetId](data);
 }
 
 /* 벽 geometry 계산 함수 */

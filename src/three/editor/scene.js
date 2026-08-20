@@ -6,6 +6,7 @@ import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { createGrid } from './components/grid.js';
 import { clipGrid } from './components/grid-clipper.js';
 import { createPlacementController } from './placement.js';
+import { createInvisibleInstance } from '../assets/invisible-assets.js';
 
 import { createWallTool } from '../tools/wall-tool.js';
 import { createPlatformTool } from '../tools/platform-tool.js';
@@ -65,6 +66,8 @@ export function createScene(){
     
     let plate;
     let placement;
+    let currentFloor;
+    let raycastMeshes;
     
     let grid;
     let center
@@ -223,7 +226,9 @@ export function createScene(){
 
         if (toolId == 'floor'){
             placement.setRaycastTargets(
-                platformTool.getPlatformMeshes()
+                currentFloor === 1
+                    ? platformTool.getPlatformMeshes()
+                    : raycastMeshes
             );
         }
     }
@@ -310,6 +315,7 @@ export function createScene(){
     /* 층 수 설정 함수 */
     function setFloor(floor) {
         const isGroundFloor = floor === 1;
+        currentFloor = floor;
 
         grid.visible = isGroundFloor;
         setPlatformGridVisibility(isGroundFloor);
@@ -373,6 +379,15 @@ export function createScene(){
             center,
             currentFloorY + 0.01
         );
+
+        /* raycast용 빈 도형 만들기 */
+        raycastMeshes = polygons.map((polygon) => {
+            const mesh = createInvisibleInstance('invisible-polygon', polygon);
+            
+            mesh.position.y = currentFloorY;
+            scene.add(mesh);
+            return mesh;
+        });
 
         clipGrid(upperFloorGrid, polygons);
         scene.add(upperFloorGrid);
