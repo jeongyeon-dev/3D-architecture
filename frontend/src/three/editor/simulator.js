@@ -27,7 +27,7 @@ export function createSimulator(){
 
         if(activeToolId == 'floor'){
             scene.updateFloorHover(gridX, gridZ, gridY);
-            console.log(`${gridX}  ${gridZ}  ${gridY}`);  
+            // console.log(`${gridX}  ${gridZ}  ${gridY}`);  
         }
 
     });
