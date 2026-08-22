@@ -1,0 +1,14 @@
+.home-layout {
+    display: flex;
+    height: 100vh;
+}
+
+.home-layout > *:first-child {
+    width: 320px;
+    border-right: 1px solid #ddd;
+}
+
+.home-layout > *:last-child {
+    flex: 1;
+    overflow-y: auto;
+}

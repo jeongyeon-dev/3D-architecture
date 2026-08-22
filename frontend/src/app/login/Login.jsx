@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { login } from "../../api/auth.js";
 
 export default function Login({ onLogin }) {
     const [username, setUsername] = useState("");
@@ -7,23 +8,14 @@ export default function Login({ onLogin }) {
     async function handleLogin(event) {
         event.preventDefault();
 
-        const response = await fetch("http://localhost:8000/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username,
-                password,
-            }),
-        });
+        try {
+            const data = await login(username, password);
 
-        const data = await response.json();
-
-        console.log(data);
-
-        if(data.success){
-            onLogin();
+            if (data.success) {
+                onLogin();
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
