@@ -13,6 +13,11 @@ class User(Base):
         unique=True,
         nullable=False,
     )
+    nickname: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+    )
     password: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
