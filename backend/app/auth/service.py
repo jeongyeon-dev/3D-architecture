@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from app.auth.jwt import create_access_token
 from app.auth.repository import (
     find_user,
     create_user,
@@ -7,7 +8,11 @@ from app.auth.repository import (
 )
 
 
-def login(db: Session, username: str, password: str):
+def login(
+    db: Session,
+    username: str,
+    password: str,
+):
     user = find_user(db, username)
 
     if user is None:
@@ -16,7 +21,9 @@ def login(db: Session, username: str, password: str):
     if user.password != password:
         return None
 
-    return user
+    access_token = create_access_token(user.id)
+
+    return access_token
 
 
 def signup(

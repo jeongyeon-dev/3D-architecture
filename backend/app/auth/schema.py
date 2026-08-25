@@ -8,6 +8,8 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     success: bool
+    access_token: str | None = None
+    token_type: str | None = None
 
 
 class SignupRequest(BaseModel):

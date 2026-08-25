@@ -22,19 +22,21 @@ def login_user(
     request: LoginRequest,
     db: Session = Depends(get_db)
 ):
-    user = login(
+    access_token = login(
         db,
         request.username,
         request.password,
     )
 
-    if user is None:
+    if access_token is None:
         return LoginResponse(
             success=False
         )
 
     return LoginResponse(
-        success=True
+        success=True,
+        access_token=access_token,
+        token_type="bearer"
     )
 
 

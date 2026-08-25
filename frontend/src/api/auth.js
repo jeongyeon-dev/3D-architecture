@@ -15,12 +15,21 @@ export async function login(username, password) {
         }
     );
 
+    const data = await response.json();
+
     if (!response.ok) {
         throw new Error("로그인에 실패했습니다.");
     }
 
-    return response.json();
+    if (!data.success) {
+        throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+    }
+
+    localStorage.setItem("access_token", data.access_token);
+
+    return data;
 }
+
 
 
 export async function signup(username, nickname, password) {
