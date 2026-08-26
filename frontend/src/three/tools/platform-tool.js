@@ -1,7 +1,9 @@
-import * as THREE from 'three';
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
-import { PLATFORM_HEIGHT, GRID_SIZE_M } from '../config.js';
+import { PLATFORM_HEIGHT } from '../config.js';
+
+import { addObject } from "../project/project-state.js";
+
 
 export function createPlatformTool({
     scene,
@@ -125,6 +127,24 @@ export function createPlatformTool({
         hoverPlatformCube.visible = false;
         currentStartPoint = null;
         currentHoverPoint = null;
+
+
+        /* 실제 모형 데이터 양식 작성 => 저장*/
+        const id = addObject({
+            type: "platform",
+            position: {
+                x: mesh.position.x,
+                y: mesh.position.y,
+                z: mesh.position.z
+            },
+            scale: {
+                x: mesh.scale.x,
+                y: mesh.scale.y,
+                z: mesh.scale.z
+            }
+        });
+
+        mesh.userData.objectId = id;
 
         return {
             mesh,

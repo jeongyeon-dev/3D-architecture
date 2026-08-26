@@ -1,8 +1,10 @@
-import * as THREE from 'three';
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
 import { GRID_SIZE_M, HOVER_FLOOR_SPHERE_RADIUS } from '../config.js';
 import { snapHoverPoint } from './utils/snapper.js';
+
+import { addObject } from "../project/project-state.js";
+
 
 export function createFloorTool({
     scene,

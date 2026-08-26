@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
 import { WALL_HEIGHT, GRID_SIZE_M, WALL_THICKNESS } from '../config.js';
