@@ -184,7 +184,12 @@ export function createFloorTool({
     /* 실제 구조물로 만듦 */
     function commitCurrentBuildParts() {
         const mesh = createStructureInstance('floor-polygon', confirmedPoints);
-        
+        const id = addObject({
+            type: "floor",
+            data: confirmedPoints
+        });
+
+        mesh.userData.objectId = id;    
         confirmedBuildParts.push(mesh);
         scene.add(mesh);
 

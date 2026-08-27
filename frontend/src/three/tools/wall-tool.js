@@ -4,6 +4,9 @@ import { WALL_HEIGHT, GRID_SIZE_M, WALL_THICKNESS } from '../config.js';
 import { calculateMiterWalls } from './utils/miter-calculator.js';
 import { snapHoverPoint } from './utils/snapper.js';
 
+import { addObject } from "../project/project-state.js";
+
+
 export function createWallTool({
     scene,
     gridSize
@@ -243,6 +246,14 @@ export function createWallTool({
         for(const wallGeometry of caculatedWallGeometries){
             const mesh = createStructureInstance('wall-face', wallGeometry);   
             confirmedWalls.push(wallGeometry);
+            
+            const id = addObject({
+                type: 'wall-face',
+                data: wallGeometry
+            });
+
+            mesh.userData.objectId = id;
+
             scene.add(mesh);
         }
 

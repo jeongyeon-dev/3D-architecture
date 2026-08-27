@@ -12,3 +12,35 @@
     flex: 1;
     overflow-y: auto;
 }
+
+.save-project-button {
+    position: fixed;
+    left: 30px;
+    bottom: 30px;
+
+    padding: 12px 24px;
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.project-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

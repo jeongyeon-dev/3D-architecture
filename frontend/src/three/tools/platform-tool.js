@@ -132,16 +132,7 @@ export function createPlatformTool({
         /* 실제 모형 데이터 양식 작성 => 저장*/
         const id = addObject({
             type: "platform",
-            position: {
-                x: mesh.position.x,
-                y: mesh.position.y,
-                z: mesh.position.z
-            },
-            scale: {
-                x: mesh.scale.x,
-                y: mesh.scale.y,
-                z: mesh.scale.z
-            }
+            data: cubeData
         });
 
         mesh.userData.objectId = id;
