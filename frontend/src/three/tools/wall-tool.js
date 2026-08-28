@@ -4,7 +4,7 @@ import { WALL_HEIGHT, GRID_SIZE_M, WALL_THICKNESS } from '../config.js';
 import { calculateMiterWalls } from './utils/miter-calculator.js';
 import { snapHoverPoint } from './utils/snapper.js';
 
-import { addObject } from "../project/project-state.js";
+import { addObject, getObjectsByType } from "../project/project-state.js";
 
 
 export function createWallTool({
@@ -262,6 +262,12 @@ export function createWallTool({
             scene.remove(part.toolMesh);
         }
 
+        /* 마지막에 벽 좌표 데이터 넣기 */
+        addObject({
+            type: 'wall-data',
+            data: wallDataList
+        });
+
         confirmedWallData.push(...wallDataList);
         currentBuildParts = [];
     }
@@ -269,7 +275,8 @@ export function createWallTool({
     
     /* 내부 데이터 가져오기 함수 */
     function getWallData(){
-        return confirmedWallData;
+        const data = getObjectsByType('wall-data');
+        return data.flatMap(object => object.data);
     }
 
     return {
@@ -280,4 +287,26 @@ export function createWallTool({
         getCurrentSegment,
         getWallData
     }
+}
+
+
+export function loadWall(scene, data){
+    const mesh = createStructureInstance('wall-face', data);
+    
+    const id = addObject({
+        type: 'wall-face',
+        data: data
+    });
+
+    mesh.userData.objectId = id;
+
+    scene.add(mesh);
+}
+
+
+export function loadWallData(data){
+    addObject({
+        type: 'wall-data',
+        data: data
+    });
 }

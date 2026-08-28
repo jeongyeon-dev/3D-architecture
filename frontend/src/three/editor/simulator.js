@@ -1,13 +1,13 @@
 import { createScene } from "./scene.js";
 import { createLand } from "./components/land.js";
 
-export function createSimulator(){
+export function createSimulator({ projectObjects = [] } = {}){
     let activeToolId = '';
 
     const scene = createScene();
     const land = createLand(1);
 
-    scene.initialize(land);
+    scene.initialize(projectObjects);
 
     /* 좌표 추적하기 */
     scene.setOnGridHovered(({ gridX, gridZ, gridY }) => {
@@ -62,6 +62,7 @@ export function createSimulator(){
     document.addEventListener('contextmenu', (event) => event.preventDefault(), false);
 
     const simulator = {
+        threeScene: scene.threeScene,
         update(){
             // land.update();
             // scene.update(land);

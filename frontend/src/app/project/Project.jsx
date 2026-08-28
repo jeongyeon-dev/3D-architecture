@@ -29,14 +29,12 @@ export default function Project({ onProjectSelect }) {
         }
 
         fetchProjects();
-    }, []);
+    }, [loggedIn]);
 
 
     async function handleProjectClick(projectId) {
         try {
             const project = await getProject(projectId);    
-            console.log("프로젝트 오브젝트 정보 아래: ");
-            console.log(project.objects); 
             onProjectSelect(project);
         } catch (error) {
             console.error(error);

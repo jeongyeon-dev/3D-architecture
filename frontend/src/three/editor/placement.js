@@ -38,10 +38,6 @@ export function createPlacementController({
         const gridY = Math.round(hit.point.y / 0.1 );
 
         onGridSelected?.({ gridX, gridZ, gridY });
-
-        const snappedX = gridX * gridSize;
-        const snappedZ = gridZ * gridSize;
-        const snappedY = gridY * 0.1;
     }
 
     function onMouseMove(event){

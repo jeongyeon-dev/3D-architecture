@@ -13,6 +13,8 @@ import { createPlatformTool } from '../tools/platform-tool.js';
 import { createFloorTool } from '../tools/floor-tool.js';
 
 import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
+import { loadProject } from '../project/project-loader.js';
+import { getObjectsByType } from '../project/project-state.js';
 
 
 export function createScene(){
@@ -66,7 +68,7 @@ export function createScene(){
     
     let plate;
     let placement;
-    let currentFloor;
+    let currentFloor = 1;
     let raycastMeshes;
     
     let grid;
@@ -80,7 +82,7 @@ export function createScene(){
     let floorTool;
 
     /* 초기화 함수 */
-    function initialize(land){
+    function initialize(projectObjects = []){
         scene.clear();
 
         /* 카메라 위치 설정 */
@@ -136,6 +138,15 @@ export function createScene(){
             gridSize: GRID_SIZE_M          
         });
 
+
+        /* previousData로 기존 오브젝트 불러오기 */
+        loadProject(projectObjects, scene);
+        
+        const platformData = getObjectsByType('platform');
+        for(const data of platformData){
+            drawGrid(data.data);
+        }
+
         setupLights();
     }
 
@@ -184,21 +195,24 @@ export function createScene(){
 
         /* 만약 생성된 플랫폼 객체가 있다면? => 위에 grid 생성 */
         if(result?.mesh){
-            const cubeData = result.cubeData;
-            const platformGrid = createGrid(
-                cubeData.width,
-                cubeData.length,
-                GRID_SIZE_M,
-                cubeData.midX,
-                cubeData.midZ,
-                cubeData.height + 0.001
-            );
-
-            platformGrids.push(platformGrid);
-            scene.add(platformGrid);
+            drawGrid(result.cubeData);
         }
-
         return result;
+    }
+
+    /* 플랫폼 위에 grid 그리기 */
+    function drawGrid(platformData){
+        const platformGrid = createGrid(
+            platformData.width,
+            platformData.length,
+            GRID_SIZE_M,
+            platformData.midX,
+            platformData.midZ,
+            platformData.height + 0.001
+        );
+
+        platformGrids.push(platformGrid);
+        scene.add(platformGrid);
     }
 
 
@@ -344,6 +358,7 @@ export function createScene(){
        → 각 구간의 중점이 polygon 안인지 검사 
        → 안쪽 구간만 grid에 다시 넣기. */
     function updateGridScope(currentFloorY){
+        // 수정 필요! 바로 아래
         const wallDataList = wallTool.getWallData();
         const supportWalls = wallDataList.filter((wallData) => {
             const wallTopY = wallData.midY + wallData.height;
@@ -408,6 +423,7 @@ export function createScene(){
 
 
     return {
+        threeScene: scene,
         initialize,
         update,
         start,

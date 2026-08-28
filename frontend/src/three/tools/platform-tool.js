@@ -2,7 +2,7 @@ import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
 import { PLATFORM_HEIGHT } from '../config.js';
 
-import { addObject } from "../project/project-state.js";
+import { addObject, addPlatformMesh, getPlatformObjectMeshes } from "../project/project-state.js";
 
 
 export function createPlatformTool({
@@ -104,17 +104,6 @@ export function createPlatformTool({
         };
     }
 
-    function doCubeTransform(mesh, cubeData){
-        mesh.position.set(
-            cubeData.midX,
-            cubeData.height / 2,
-            cubeData.midZ
-        );
-
-        mesh.scale.set(cubeData.width, 1, cubeData.length);
-        mesh.visible = true;
-    }
-
     /* 건설 확정: hover 객체 없애고 실제 모형 넣기 */
     function commitCurrentBuildParts(){
         const cubeData = createCubeData(currentStartPoint, currentHoverPoint);
@@ -135,6 +124,7 @@ export function createPlatformTool({
             data: cubeData
         });
 
+        addPlatformMesh(mesh);
         mesh.userData.objectId = id;
 
         return {
@@ -144,7 +134,7 @@ export function createPlatformTool({
     }
 
     function getPlatformMeshes() {
-        return confirmedPlatforms;
+        return getPlatformObjectMeshes();
     }
 
     return {
@@ -153,4 +143,31 @@ export function createPlatformTool({
         hide,
         getPlatformMeshes
     }
+}
+
+
+export function loadPlatform(scene, data){
+    const mesh = createStructureInstance('platform-cube');
+    doCubeTransform(mesh, data);
+    
+    mesh.userData.objectId = addObject({
+        type: "platform",
+        data: data
+    });
+
+    addPlatformMesh(mesh);
+    scene.add(mesh);
+}
+
+
+/* 공통 함수 */
+function doCubeTransform(mesh, cubeData){
+    mesh.position.set(
+        cubeData.midX,
+        cubeData.height / 2,
+        cubeData.midZ
+    );
+
+    mesh.scale.set(cubeData.width, 1, cubeData.length);
+    mesh.visible = true;
 }

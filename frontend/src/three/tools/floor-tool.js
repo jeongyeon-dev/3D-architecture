@@ -219,3 +219,16 @@ export function createFloorTool({
         hide
     }
 }
+
+
+/* 데이터를 받아 floor 오브젝트 로드하는 함수 */
+export function loadFloor(scene, data){
+    const mesh = createStructureInstance('floor-polygon', data);
+
+    mesh.userData.objectId = addObject({
+        type: "floor",
+        data
+    });
+
+    scene.add(mesh);
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { saveProject, getProject } from "../../api/project.js";
+
 import { createSimulator } from "../../three/editor/simulator.js";
-import { saveProject } from "../../api/project.js";
 import { getAllObjects } from "../../three/project/project-state.js";
 
 import FloorSelector from "../../components/ToolBar.jsx";
@@ -18,10 +19,26 @@ export default function Editor({ projectId }) {
     const simulatorRef = useRef(null);
     const [activeToolId, setActiveToolId] = useState('bulldoze');
 
+
+    /* 프로젝트 id 기반하여 기존 오브젝트 불러오기 */
     useEffect(() => {
-        simulatorRef.current = createSimulator();
-        window.simulator = simulatorRef.current;
-    }, []);
+        async function initializeProject() {
+            try {
+                const project = await getProject(projectId);
+                const projectObjects = project.objects ?? [];
+
+                simulatorRef.current = createSimulator({
+                    projectObjects
+                });
+
+                window.simulator = simulatorRef.current;
+            } catch (error) {
+                console.error("프로젝트 로딩 실패: ", error);
+            }
+        }
+
+        initializeProject();
+    }, [projectId]);
 
     useEffect(() => {
         simulatorRef.current?.setFloor(floor);
