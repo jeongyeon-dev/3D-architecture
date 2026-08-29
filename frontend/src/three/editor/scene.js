@@ -234,7 +234,9 @@ export function createScene(){
 
         if (toolId === 'wall') {
             placement.setRaycastTargets(
-                platformTool.getPlatformMeshes()
+                currentFloor === 1
+                    ? platformTool.getPlatformMeshes()
+                    : raycastMeshes
             );
         }
 
