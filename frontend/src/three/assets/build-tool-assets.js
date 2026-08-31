@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { WALL_HEIGHT, PLATFORM_HEIGHT, HOVER_FLOOR_SPHERE_RADIUS } from '../config.js';
+import { createPrismGeometry } from './util/geometry-calculator.js';
 
 const hoverWallPoleGeometry = new THREE.CylinderGeometry(0.08, 0.08, WALL_HEIGHT);
 const hoverWallFaceGeometry = new THREE.BoxGeometry(1, WALL_HEIGHT, 0.16);
@@ -28,6 +29,12 @@ const nodeMaterial = new THREE.MeshBasicMaterial({
         opacity: 1,
         depthWrite: false 
     });
+const faceMaterial = new THREE.MeshBasicMaterial({ 
+        color: '#ffffff',
+        transparent: true,
+        opacity: 0.6,
+        depthWrite: false 
+    });
 
 
 const assets = {
@@ -38,17 +45,11 @@ const assets = {
         return mesh;
     },
     'hover-wall-face': () => {
-        const material = new THREE.MeshBasicMaterial({ 
-            color: '#ffffff',
-            transparent: true,
-            opacity: 0.6,
-            depthWrite: false 
-        });
         const outline = new THREE.LineSegments(
             new THREE.EdgesGeometry(hoverWallFaceGeometry),
             lineMaterial
         );
-        const mesh = new THREE.Mesh(hoverWallFaceGeometry, material);
+        const mesh = new THREE.Mesh(hoverWallFaceGeometry, faceMaterial);
         outline.renderOrder = 3;
 
         mesh.userData = { id: 'hover-wall-face' };
@@ -62,17 +63,11 @@ const assets = {
         return mesh;
     },
     'hover-platform-cube': () => {
-        const material = new THREE.MeshBasicMaterial({ 
-            color: '#ffffff',
-            transparent: true,
-            opacity: 0.6,
-            depthWrite: false 
-        });
         const outline = new THREE.LineSegments(
             new THREE.EdgesGeometry(hoverPlatformCubeGeometry),
             lineMaterial
         );
-        const mesh = new THREE.Mesh(hoverPlatformCubeGeometry, material);
+        const mesh = new THREE.Mesh(hoverPlatformCubeGeometry, faceMaterial);
         
         mesh.userData = { id: 'hover-platform-cube' };
         mesh.add(outline);
@@ -93,6 +88,23 @@ const assets = {
         
         line.userData = { id: 'hover-floor-line' };  
         return line;
+    },
+    'hover-roof-dot': () => {
+        const mesh = new THREE.Mesh(hoverFloorDotGeometry, nodeMaterial);
+        mesh.userData = { id: 'hover-roof-dot' };
+        return mesh;
+    },
+    'hover-roof-prism': () => {
+        const prismGeometry = createPrismGeometry();
+        const outline = new THREE.LineSegments(
+            new THREE.EdgesGeometry(prismGeometry),
+            lineMaterial           
+        );
+        const mesh = new THREE.Mesh(prismGeometry, faceMaterial);
+
+        mesh.userData = { id: 'hover-roof-prism' };
+        mesh.add(outline);
+        return mesh;
     }
 }
 
@@ -104,3 +116,6 @@ export function createBuildToolInstance(assetId){
         return undefined;
     }
 }
+
+
+

@@ -11,7 +11,8 @@ const rightTools = [
     { id: 'bulldoze', buttonId: 'button-bulldoze', label: '철거' },
     { id: 'platform', buttonId: 'button-platform', label: '플랫폼' },
     { id: 'wall', buttonId: 'button-brick', label: '벽' },
-    { id: 'floor', buttonId: 'button-floor', label: '바닥' }
+    { id: 'floor', buttonId: 'button-floor', label: '바닥' },
+    { id: 'roof', buttonId: 'button-roof', label: '지붕' }
 ];
 
 export default function Editor({ projectId }) {

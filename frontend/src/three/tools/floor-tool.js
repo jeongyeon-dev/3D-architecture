@@ -141,11 +141,6 @@ export function createFloorTool({
         hoverFloorLine.visible = true;
     }
     
-    /* 바로 이전의 실제 지점 불러오기 */
-    function getLastConfirmedPoint() {
-        return confirmedPoints.at(-1);
-    }
-
     /* 바로 이전 - 현재 후보 간의 점 간격(segment) 불러오기 */
     function getCurrentSegment() {
         if (!currentStartPoint || !currentHoverPoint) {

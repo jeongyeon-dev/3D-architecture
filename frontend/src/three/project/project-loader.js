@@ -1,6 +1,7 @@
 import { loadFloor } from "../tools/floor-tool.js";
 import { loadPlatform } from "../tools/platform-tool.js";
 import { loadWall, loadWallData } from "../tools/wall-tool.js";
+import { loadRoof } from "../tools/roof-tool.js";
 
 export function loadProject(objects, scene) {
     if (!Array.isArray(objects)) {
@@ -17,6 +18,10 @@ export function loadProject(objects, scene) {
                 break;
             case "wall-face":
                 loadWall(scene, object.data);
+                break;
+            case "roof":
+                loadRoof(scene, object.data);
+                break;
             case "wall-data":
                 loadWallData(object.data);
                 break;

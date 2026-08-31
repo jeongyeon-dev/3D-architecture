@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GRID_SIZE_M, WALL_HEIGHT, PLATFORM_HEIGHT, FLOOR_THICKENSS } from '../config.js';
+import { createPrismGeometry } from './util/geometry-calculator.js';
 
 const platformCubeGeometry = new THREE.BoxGeometry(1, PLATFORM_HEIGHT, 1);
 
@@ -35,7 +36,8 @@ const assets = {
         const material = new THREE.MeshStandardMaterial({ 
             color: '#666666',
             roughness: 0.85,
-            metalness: 0.1
+            metalness: 0.1,
+            flatShading: true
         });
         const geometry = createFloorGeometry(floorData);
         const mesh = new THREE.Mesh(geometry, material);
@@ -48,6 +50,20 @@ const assets = {
         mesh.receiveShadow = true;
         mesh.userData = { id: 'floor-polygon' };
         return mesh;       
+    },
+    'roof-prism': () => {
+        const material = new THREE.MeshStandardMaterial({ 
+            color: '#ffcece',
+            roughness: 0.85,
+            metalness: 0.1
+        });
+        const prismGeometry = createPrismGeometry();
+        const mesh = new THREE.Mesh(prismGeometry, material);
+
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { id: 'roof-prism' };
+        return mesh;
     }
 }
 

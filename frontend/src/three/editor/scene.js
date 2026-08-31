@@ -11,6 +11,7 @@ import { createInvisibleInstance } from '../assets/invisible-assets.js';
 import { createWallTool } from '../tools/wall-tool.js';
 import { createPlatformTool } from '../tools/platform-tool.js';
 import { createFloorTool } from '../tools/floor-tool.js';
+import { createRoofTool } from '../tools/roof-tool.js';
 
 import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
 import { loadProject } from '../project/project-loader.js';
@@ -56,7 +57,8 @@ export function createScene(){
     const hideTools = {
         wall: () => wallTool?.hide(),
         platform: () => platformTool?.hide(),
-        floor: () => floorTool?.hide()
+        floor: () => floorTool?.hide(),
+        roof: () => roofTool?.hide()
     }
 
     /* raycasting 및 건설 오브젝트 추가하는 부분들 */
@@ -80,6 +82,7 @@ export function createScene(){
     let wallTool;
     let platformTool;
     let floorTool;
+    let roofTool;
 
     /* 초기화 함수 */
     function initialize(projectObjects = []){
@@ -137,6 +140,12 @@ export function createScene(){
             scene,
             gridSize: GRID_SIZE_M          
         });
+
+        /* 지붕 도구 객체 생성하기 */
+        roofTool = createRoofTool({
+            scene,
+            gridSize: GRID_SIZE_M
+        })
 
 
         /* previousData로 기존 오브젝트 불러오기 */
@@ -226,6 +235,16 @@ export function createScene(){
     }
 
 
+    /* 지붕 도구 호출 함수들 */
+    function updateRoofHover(gridX, gridZ, gridY) {
+        roofTool?.updateHoverPoint(gridX, gridZ, gridY);
+    }
+
+    function confirmRoofPoint(gridX, gridZ, gridY) {
+        return roofTool?.confirmPoint(gridX, gridZ, gridY);
+    }
+
+
     /* 어떤 대상을 raycast할지 결정  */
     function setRaycastTarget(toolId) {
         if (toolId === 'platform') {
@@ -244,6 +263,14 @@ export function createScene(){
             placement.setRaycastTargets(
                 currentFloor === 1
                     ? platformTool.getPlatformMeshes()
+                    : raycastMeshes
+            );
+        }
+
+        if (toolId == 'roof'){
+            placement.setRaycastTargets(
+                currentFloor === 1
+                    ? []
                     : raycastMeshes
             );
         }
@@ -444,6 +471,8 @@ export function createScene(){
         confirmPlatformPoint,
         updateFloorHover,
         confirmFloorPoint,
+        updateRoofHover,
+        confirmRoofPoint,
         setRaycastTarget,
         setFloor
     }

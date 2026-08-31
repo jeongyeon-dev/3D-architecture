@@ -13,39 +13,43 @@ export function createSimulator({ projectObjects = [] } = {}){
     scene.setOnGridHovered(({ gridX, gridZ, gridY }) => {
         scene.hideToolCursors(activeToolId);
 
-        // console.log(activeToolId);
-        
-        if(activeToolId == 'wall'){
-            scene.updateWallHover(gridX, gridZ, gridY); 
-            // console.log(`${gridX}  ${gridZ}  ${gridY}`);      
-        }
-
-        if(activeToolId == 'platform'){
-            scene.updatePlatformHover(gridX, gridZ);
-            // console.log(`${gridX}  ${gridZ}  ${gridY}`);  
-        }
-
-        if(activeToolId == 'floor'){
-            scene.updateFloorHover(gridX, gridZ, gridY);
-            // console.log(`${gridX}  ${gridZ}  ${gridY}`);  
-        }
-
+        switch(activeToolId){
+            case 'wall':
+                scene.updateWallHover(gridX, gridZ, gridY); 
+                break;
+            case 'platform':
+                scene.updatePlatformHover(gridX, gridZ);
+                break;
+            case 'floor':
+                scene.updateFloorHover(gridX, gridZ, gridY);
+                break;
+            case 'roof':
+                scene.updateRoofHover(gridX, gridZ, gridY);
+                break;
+            default:
+                return;
+        }        
     });
     
     /* 좌표 클릭 시 */
     scene.setOnObjectSelected(({ gridX, gridZ, gridY }) => {
         let result;
 
-        if(activeToolId == 'wall'){
-            result = scene.confirmWallPoint(gridX, gridZ, gridY);
-        }
-
-        if(activeToolId == 'platform'){
-            result = scene.confirmPlatformPoint(gridX, gridZ);
-        }
-
-        if(activeToolId == 'floor'){
-            result = scene.confirmFloorPoint(gridX, gridZ, gridY);
+        switch (activeToolId) {
+            case 'wall':
+                result = scene.confirmWallPoint(gridX, gridZ, gridY);
+                break;
+            case 'platform':
+                result = scene.confirmPlatformPoint(gridX, gridZ);
+                break;
+            case 'floor':
+                result = scene.confirmFloorPoint(gridX, gridZ, gridY);
+                break;
+            case 'roof':
+                result = scene.confirmRoofPoint(gridX, gridZ, gridY);
+                break;
+            default:
+                return;
         }
 
         /* 종료 되었을 경우 생성 중지하기 */
