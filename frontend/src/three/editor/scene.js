@@ -13,6 +13,8 @@ import { createPlatformTool } from '../tools/platform-tool.js';
 import { createFloorTool } from '../tools/floor-tool.js';
 import { createRoofTool } from '../tools/roof-tool.js';
 
+import { createEditorTool } from '../tools/editor-tool.js';
+
 import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
 import { loadProject } from '../project/project-loader.js';
 import { getObjectsByType } from '../project/project-state.js';
@@ -83,6 +85,7 @@ export function createScene(){
     let platformTool;
     let floorTool;
     let roofTool;
+    let editorTool;
 
     /* 초기화 함수 */
     function initialize(projectObjects = []){
@@ -115,8 +118,8 @@ export function createScene(){
             plate,
             gridSize: GRID_SIZE_M,
 
-            onGridSelected({ gridX, gridZ, gridY }) {
-                onObjectSelected?.({ gridX, gridZ, gridY });
+            onGridSelected({ gridX, gridZ, gridY, object }) {
+                onObjectSelected?.({ gridX, gridZ, gridY, object });
             },
             onGridHovered({ gridX, gridZ, gridY }) {
                 onGridHoveredCallback?.({ gridX, gridZ, gridY });
@@ -143,6 +146,12 @@ export function createScene(){
 
         /* 지붕 도구 객체 생성하기 */
         roofTool = createRoofTool({
+            scene,
+            gridSize: GRID_SIZE_M
+        })
+
+        /* 편집 도구 객체 생성하기 */
+        editorTool = createEditorTool({
             scene,
             gridSize: GRID_SIZE_M
         })
@@ -245,6 +254,16 @@ export function createScene(){
     }
 
 
+    /* 편집 도구 호출 함수들 */
+    function updateEditorHover(gridX, gridZ, gridY) {
+        editorTool?.updateHoverPoint(gridX, gridZ, gridY);
+    }
+
+    function confirmEditorPoint(gridX, gridZ, gridY, object) {
+        return editorTool?.confirmPoint(gridX, gridZ, gridY, object);
+    }
+
+
     /* 어떤 대상을 raycast할지 결정  */
     function setRaycastTarget(toolId) {
         if (toolId === 'platform') {
@@ -272,6 +291,15 @@ export function createScene(){
                 currentFloor === 1
                     ? []
                     : raycastMeshes
+            );
+        }
+
+        if (toolId == 'editor'){
+            const meshes = scene.children.filter(
+                object => object.isMesh
+            );
+            placement.setRaycastTargets(
+                meshes
             );
         }
     }
@@ -473,6 +501,8 @@ export function createScene(){
         confirmFloorPoint,
         updateRoofHover,
         confirmRoofPoint,
+        updateEditorHover,
+        confirmEditorPoint,
         setRaycastTarget,
         setFloor
     }

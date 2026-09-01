@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
+import { createOutline } from './utils/selection.js';
 import { HOVER_ROOF_SPHERE_RADIUS, ROOF_ANGLE } from '../config.js';
 
 import { 
@@ -11,7 +12,7 @@ import {
 } from "../project/project-state.js";
 
 
-export function createRoofTool({
+export function createEditorTool({
     scene,
     gridSize
 }){
@@ -19,6 +20,7 @@ export function createRoofTool({
     const confirmedRoofs = [];
     let currentStartPoint;
     let currentHoverPoint;
+    let currentSelecteMesh;
 
 
     /* 가시적 도구 객체들 호출 */
@@ -35,28 +37,22 @@ export function createRoofTool({
     /* 실시간 좌표 갱신 */
     function updateHoverPoint(gridX, gridZ, gridY){
         currentHoverPoint = { gridX, gridZ, gridY };
-
-        if(!currentStartPoint){
-            updateHoverRoofDot(gridX, gridZ, gridY);
-            return;
-        }      
-
-        /* 실시간 hover 지붕 모형 생성 */
-        updateHoverRoofPrism();
+        // updateHoverRoofDot(gridX, gridZ, gridY);        
     }
 
-    /* 클릭하여 hoverPoint 확정 했을 때 */
-    function confirmPoint(gridX, gridZ, gridY){
+    /* 클릭시 => 해당 mesh에 outline 그린다 */
+    function confirmPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
+        currentSelecteMesh = object;
 
-        if(!currentStartPoint){
-            currentStartPoint = currentHoverPoint;
-            hoverRoofDot.visible = false;
-            return;
-        }
-        
-        /* 이미 startPoint가 있으면 지붕 형태를 확정한다 */
-        return commitCurrentBuildParts();
+        createOutline(object);
+
+        // if(!currentStartPoint){
+        //     currentStartPoint = currentHoverPoint;
+        //     hoverRoofDot.visible = false;
+        //     return;
+        // }
+
     }
 
     /* 도구 감추기 */

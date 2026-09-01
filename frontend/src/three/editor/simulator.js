@@ -26,13 +26,16 @@ export function createSimulator({ projectObjects = [] } = {}){
             case 'roof':
                 scene.updateRoofHover(gridX, gridZ, gridY);
                 break;
+            case 'editor':
+                scene.updateEditorHover(gridX, gridZ, gridY);
+                break;
             default:
                 return;
         }        
     });
     
     /* 좌표 클릭 시 */
-    scene.setOnObjectSelected(({ gridX, gridZ, gridY }) => {
+    scene.setOnObjectSelected(({ gridX, gridZ, gridY, object }) => {
         let result;
 
         switch (activeToolId) {
@@ -47,6 +50,9 @@ export function createSimulator({ projectObjects = [] } = {}){
                 break;
             case 'roof':
                 result = scene.confirmRoofPoint(gridX, gridZ, gridY);
+                break;
+            case 'editor':
+                result = scene.confirmEditorPoint(gridX, gridZ, gridY, object);
                 break;
             default:
                 return;

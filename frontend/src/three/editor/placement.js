@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { createAssetInstance } from '../assets/basic-assets.js';
 
 export function createPlacementController({
     scene,
@@ -37,7 +36,7 @@ export function createPlacementController({
         const gridZ = Math.round(hit.point.z / gridSize);
         const gridY = Math.round(hit.point.y / 0.1 );
 
-        onGridSelected?.({ gridX, gridZ, gridY });
+        onGridSelected?.({ gridX, gridZ, gridY, object: hit.object });
     }
 
     function onMouseMove(event){
@@ -58,11 +57,12 @@ export function createPlacementController({
 
         const hit= raycaster.intersectObjects(raycastTargets, false)[0];
         if (!hit) return undefined;
-
+ 
         return {
             gridX: Math.round(hit.point.x / gridSize),
             gridZ: Math.round(hit.point.z / gridSize),
-            gridY: Math.round(hit.point.y / 0.1 )
+            gridY: Math.round(hit.point.y / 0.1 ),
+            object: hit.object
         };
     }
 
