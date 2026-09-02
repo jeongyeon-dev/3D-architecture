@@ -18,6 +18,12 @@ export function createPlacementController({
         raycastTargets = targets;
     }
 
+    function getRaycastTargets() {
+        return typeof raycastTargets === 'function'
+            ? raycastTargets()
+            : raycastTargets;
+    }
+
     /* 왼쪽 마우스 클릭 시 => raycast로 특정 좌표 감지 */
     function onMouseDown(event) {
         if (event.button !== 0) return;
@@ -29,7 +35,7 @@ export function createPlacementController({
 
         raycaster.setFromCamera(mouse, camera);
 
-        const hit = raycaster.intersectObjects(raycastTargets, false)[0];
+        const hit = raycaster.intersectObjects(getRaycastTargets(), false)[0];
         if (!hit) return;
 
         const gridX = Math.round(hit.point.x / gridSize);
@@ -55,7 +61,7 @@ export function createPlacementController({
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         raycaster.setFromCamera(mouse, camera);
 
-        const hit= raycaster.intersectObjects(raycastTargets, false)[0];
+        const hit = raycaster.intersectObjects(getRaycastTargets(), false)[0];
         if (!hit) return undefined;
  
         return {

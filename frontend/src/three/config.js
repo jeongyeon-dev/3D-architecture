@@ -15,3 +15,4 @@ export const ROOF_ANGLE = 30;
 /* 건축 보조 척도 설정 */
 export const HOVER_FLOOR_SPHERE_RADIUS = 0.08;
 export const HOVER_ROOF_SPHERE_RADIUS = 0.08;
+export const GIZMO_OFFSET = 0.2;

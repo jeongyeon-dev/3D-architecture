@@ -2,9 +2,14 @@ import * as THREE from 'three';
 
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
 import { createStructureInstance } from '../assets/structure-assets.js';
-import { createOutline } from './utils/selection.js';
 import { HOVER_ROOF_SPHERE_RADIUS, ROOF_ANGLE } from '../config.js';
 
+import { 
+    createOutline, 
+    removeOutline,
+    createGizmo,
+    removeGizmo
+} from './utils/selection.js';
 import { 
     addObject, 
     addPlatformMesh, 
@@ -18,6 +23,7 @@ export function createEditorTool({
 }){
     /* 빈 변수들 */
     const confirmedRoofs = [];
+    let currentGizmoTargets = [];
     let currentStartPoint;
     let currentHoverPoint;
     let currentSelecteMesh;
@@ -43,9 +49,26 @@ export function createEditorTool({
     /* 클릭시 => 해당 mesh에 outline 그린다 */
     function confirmPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
+        let arrow = object;
+
+        
+        while (arrow && !arrow.userData.isGizmoArrow) {
+            arrow = arrow.parent;
+        }
+
+        if (arrow?.userData.isGizmoArrow) {
+            console.log("화살표", arrow.userData.direction);
+            return;
+        }
+
+        removeOutline(currentSelecteMesh);
+        removeGizmo();
+
         currentSelecteMesh = object;
 
-        createOutline(object);
+        createOutline(currentSelecteMesh);
+        currentGizmoTargets = createGizmo(currentSelecteMesh);
+
 
         // if(!currentStartPoint){
         //     currentStartPoint = currentHoverPoint;
@@ -59,6 +82,10 @@ export function createEditorTool({
     function hide(){
         hoverRoofPrism.visible = false;
         hoverRoofDot.visible = false;
+    }
+
+    function getGizmoTargets() {
+        return currentGizmoTargets;
     }
 
 
@@ -143,6 +170,7 @@ export function createEditorTool({
     return {
         updateHoverPoint,
         confirmPoint,
+        getGizmoTargets,
         hide
     }
 }

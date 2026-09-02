@@ -16,6 +16,7 @@ import { createRoofTool } from '../tools/roof-tool.js';
 import { createEditorTool } from '../tools/editor-tool.js';
 
 import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
+import { getGizmoRaycastTargets } from '../tools/utils/selection.js';
 import { loadProject } from '../project/project-loader.js';
 import { getObjectsByType } from '../project/project-state.js';
 
@@ -295,12 +296,16 @@ export function createScene(){
         }
 
         if (toolId == 'editor'){
-            const meshes = scene.children.filter(
-                object => object.isMesh
-            );
-            placement.setRaycastTargets(
-                meshes
-            );
+            placement.setRaycastTargets(() => {
+                const targetMeshes = scene.children.filter(
+                    object => object.isMesh
+                );
+
+                return [
+                    ...targetMeshes,
+                    ...getGizmoRaycastTargets()
+                ];
+            });
         }
     }
 
