@@ -8,7 +8,10 @@ import {
     createOutline, 
     removeOutline,
     createGizmo,
-    removeGizmo
+    removeGizmo,
+    createSelectionHighlight,
+    removeSelectionHighlight,
+    setGizmoArrowScale
 } from './utils/selection.js';
 import { 
     addObject, 
@@ -24,9 +27,13 @@ export function createEditorTool({
     /* 빈 변수들 */
     const confirmedRoofs = [];
     let currentGizmoTargets = [];
+    
     let currentStartPoint;
     let currentHoverPoint;
     let currentSelecteMesh;
+    let currentHoveredMesh;
+    
+    let hoveredArrow = undefined;
 
 
     /* 가시적 도구 객체들 호출 */
@@ -40,41 +47,55 @@ export function createEditorTool({
     scene.add(hoverRoofDot);
 
 
-    /* 실시간 좌표 갱신 */
-    function updateHoverPoint(gridX, gridZ, gridY){
+    /* 마우스 커서 추적 */
+    function updateHoverPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
-        // updateHoverRoofDot(gridX, gridZ, gridY);        
-    }
-
-    /* 클릭시 => 해당 mesh에 outline 그린다 */
-    function confirmPoint(gridX, gridZ, gridY, object){
-        currentHoverPoint = { gridX, gridZ, gridY };
-        let arrow = object;
-
+        highlightObject(object)
         
-        while (arrow && !arrow.userData.isGizmoArrow) {
-            arrow = arrow.parent;
-        }
+        const arrow = getArrow(object);
 
-        if (arrow?.userData.isGizmoArrow) {
-            console.log("화살표", arrow.userData.direction);
+        /* 마우스 커서가 화살표를 가리키지 않는 경우 */
+        if(!arrow){
+            if(hoveredArrow){
+                setGizmoArrowScale(hoveredArrow, 1);
+                hoveredArrow = undefined;    
+            }
             return;
         }
 
+
+        /* 다른 화살표로 이동한 경우 => 기존 scale 원래대로 */
+        if(hoveredArrow && hoveredArrow !== arrow){
+            setGizmoArrowScale(hoveredArrow, 1);
+        }
+        
+        /* 새 화살표 scale 하기 */
+        if(arrow){
+            setGizmoArrowScale(arrow, 1.2);
+        }
+
+        hoveredArrow = arrow;
+    }
+
+    /* 마우스 클릭 시 */
+    function confirmPoint(gridX, gridZ, gridY, object){
+        currentHoverPoint = { gridX, gridZ, gridY };
+        const arrow = getArrow(object);
+        if(arrow) return;
+        
         removeOutline(currentSelecteMesh);
+        removeSelectionHighlight(currentSelecteMesh);
         removeGizmo();
 
         currentSelecteMesh = object;
 
         createOutline(currentSelecteMesh);
-        currentGizmoTargets = createGizmo(currentSelecteMesh);
+        createSelectionHighlight(currentSelecteMesh);
+        createGizmo(currentSelecteMesh);
+    }
 
-
-        // if(!currentStartPoint){
-        //     currentStartPoint = currentHoverPoint;
-        //     hoverRoofDot.visible = false;
-        //     return;
-        // }
+    /* 마우스 클릭 + 드래그 시 */
+    function holding(event){
 
     }
 
@@ -86,6 +107,38 @@ export function createEditorTool({
 
     function getGizmoTargets() {
         return currentGizmoTargets;
+    }
+
+    function getArrow(object){
+        while (object && !object.userData.isGizmoArrow) {
+            object = object.parent;
+        }
+
+        if (object?.userData.isGizmoArrow) {
+            return object;
+        }
+    }
+
+    
+    /* hover 오브젝트 highlight 하기 */
+    function highlightObject(object){
+        if(!object){
+            if(currentHoveredMesh){
+                removeSelectionHighlight(currentHoveredMesh);
+                currentHoveredMesh = undefined;
+                return;
+            }
+        }
+
+        if(currentHoveredMesh && currentHoveredMesh !== object){
+            removeSelectionHighlight(currentHoveredMesh);
+        }
+
+        if(object){
+            createSelectionHighlight(object);
+        }
+
+        currentHoveredMesh = object;
     }
 
 
@@ -171,6 +224,7 @@ export function createEditorTool({
         updateHoverPoint,
         confirmPoint,
         getGizmoTargets,
+        holding,
         hide
     }
 }

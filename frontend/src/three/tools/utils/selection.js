@@ -120,8 +120,10 @@ function createArrow(x, y, z, origin){
     const shaftLength = length - headLength;
     const shaftRadius = 0.035;
 
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshStandardMaterial({
         color: 0xfdfdfd,
+        emissive: '#009ae7',
+        emissiveIntensity: 4,
         toneMapped: false
     });
 
@@ -170,4 +172,58 @@ export function getGizmoRaycastTargets() {
     });
 
     return targets;
+}
+
+/* 화살표 크기 변경 */
+export function setGizmoArrowScale(arrow, scale) {
+    if (!arrow) return;
+
+    arrow.scale.setScalar(scale);
+}
+
+/* 하이라이트 추가 */
+export function createSelectionHighlight(mesh) {
+    if (!mesh?.isMesh) return;
+
+    /* 중복 생성 방지 */
+    const existing = mesh.children.find(
+        child => child.userData.isSelectionHighlight
+    );
+
+    if (existing) return;
+
+    const material = new THREE.MeshStandardMaterial({
+        color: 0xfdfdfd,
+        emissive: '#009ae7',
+        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.2,
+        depthWrite: false,
+        toneMapped: false
+    });
+
+    const highlight = new THREE.Mesh(
+        mesh.geometry,
+        material
+    );
+
+    highlight.userData.isSelectionHighlight = true;
+
+    mesh.add(highlight);
+}
+
+
+/* 하이라이트 제거 */
+export function removeSelectionHighlight(mesh) {
+    if (!mesh) return;
+
+    const highlight = mesh.children.find(
+        child => child.userData.isSelectionHighlight
+    );
+
+    if (!highlight) return;
+
+    mesh.remove(highlight);
+
+    highlight.material.dispose();
 }

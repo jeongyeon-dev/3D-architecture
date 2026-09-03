@@ -122,8 +122,8 @@ export function createScene(){
             onGridSelected({ gridX, gridZ, gridY, object }) {
                 onObjectSelected?.({ gridX, gridZ, gridY, object });
             },
-            onGridHovered({ gridX, gridZ, gridY }) {
-                onGridHoveredCallback?.({ gridX, gridZ, gridY });
+            onGridHovered({ gridX, gridZ, gridY, object }) {
+                onGridHoveredCallback?.({ gridX, gridZ, gridY, object });
             }
         });
 
@@ -256,8 +256,8 @@ export function createScene(){
 
 
     /* 편집 도구 호출 함수들 */
-    function updateEditorHover(gridX, gridZ, gridY) {
-        editorTool?.updateHoverPoint(gridX, gridZ, gridY);
+    function updateEditorHover(gridX, gridZ, gridY, object) {
+        editorTool?.updateHoverPoint(gridX, gridZ, gridY, object);
     }
 
     function confirmEditorPoint(gridX, gridZ, gridY, object) {
@@ -354,8 +354,10 @@ export function createScene(){
         placement.onMouseDown(event);
     }
 
+    /* 마우스를 클릭한 채 드래그 */
     function onMouseUp(event){
         camera.onMouseUp(event);
+        editorTool?.holding(event);
     }
 
     function onMouseMove(event){

@@ -10,7 +10,7 @@ export function createSimulator({ projectObjects = [] } = {}){
     scene.initialize(projectObjects);
 
     /* 좌표 추적하기 */
-    scene.setOnGridHovered(({ gridX, gridZ, gridY }) => {
+    scene.setOnGridHovered(({ gridX, gridZ, gridY, object }) => {
         scene.hideToolCursors(activeToolId);
 
         switch(activeToolId){
@@ -27,7 +27,7 @@ export function createSimulator({ projectObjects = [] } = {}){
                 scene.updateRoofHover(gridX, gridZ, gridY);
                 break;
             case 'editor':
-                scene.updateEditorHover(gridX, gridZ, gridY);
+                scene.updateEditorHover(gridX, gridZ, gridY, object);
                 break;
             default:
                 return;
