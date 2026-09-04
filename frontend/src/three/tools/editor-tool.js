@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
-import { createStructureInstance } from '../assets/structure-assets.js';
-import { HOVER_ROOF_SPHERE_RADIUS, ROOF_ANGLE } from '../config.js';
+
+import { doPrismTransform } from './roof-tool.js';
 
 import { 
     createOutline, 
@@ -14,6 +14,7 @@ import {
     setGizmoArrowScale
 } from './utils/selection.js';
 import { 
+    getObject,
     addObject, 
     addPlatformMesh, 
     getPlatformObjectMeshes 
@@ -32,7 +33,9 @@ export function createEditorTool({
     let currentHoverPoint;
     let currentSelecteMesh;
     let currentHoveredMesh;
-    
+
+    let draggingArrow = undefined;
+    let dragStartPoint = undefined; 
     let hoveredArrow = undefined;
 
 
@@ -50,11 +53,23 @@ export function createEditorTool({
     /* 마우스 커서 추적 */
     function updateHoverPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
+
+        /* 드래그 하고 있을 경우 => 선택된 mesh 스케일링 하기 */
+        if (draggingArrow) {
+            /* 해당 object를 기준으로 objectData 가져오기 */
+            const objectId = currentSelecteMesh.userData.objectId;
+            const _object = getObject(objectId);
+            console.log(_object)
+            updatePrismForm(_object, currentSelecteMesh);
+            return;
+        }
+        
+        /* 커서 가리키는 오브젝트 하이라이트 하기 */
         highlightObject(object)
         
-        const arrow = getArrow(object);
-
         /* 마우스 커서가 화살표를 가리키지 않는 경우 */
+        const arrow = getArrow(object);
+        
         if(!arrow){
             if(hoveredArrow){
                 setGizmoArrowScale(hoveredArrow, 1);
@@ -81,7 +96,13 @@ export function createEditorTool({
     function confirmPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
         const arrow = getArrow(object);
-        if(arrow) return;
+        
+        /* 화살표 클릭 시 => 드래그 시작 */
+        if(arrow){
+            draggingArrow = arrow;
+            dragStartPoint = currentHoverPoint;
+            return;
+        }
         
         removeOutline(currentSelecteMesh);
         removeSelectionHighlight(currentSelecteMesh);
@@ -94,9 +115,13 @@ export function createEditorTool({
         createGizmo(currentSelecteMesh);
     }
 
-    /* 마우스 클릭 + 드래그 시 */
-    function holding(event){
+    /* 마우스 클릭 상태가 끝났을 시 */
+    function endDraggingPoint(event){
+        if (event.button !== 0) return;
 
+        currentStartPoint = null;
+        draggingArrow = undefined;
+        dragStartPoint = undefined;
     }
 
     /* 도구 감추기 */
@@ -105,10 +130,7 @@ export function createEditorTool({
         hoverRoofDot.visible = false;
     }
 
-    function getGizmoTargets() {
-        return currentGizmoTargets;
-    }
-
+    /* object에서 화살표만 빼오기 */
     function getArrow(object){
         while (object && !object.userData.isGizmoArrow) {
             object = object.parent;
@@ -119,6 +141,13 @@ export function createEditorTool({
         }
     }
 
+    function getGizmoTargets() {
+        return currentGizmoTargets;
+    }
+
+    function isDragging(){
+        return hoveredArrow !== undefined;
+    }
     
     /* hover 오브젝트 highlight 하기 */
     function highlightObject(object){
@@ -141,130 +170,41 @@ export function createEditorTool({
         currentHoveredMesh = object;
     }
 
+    /* currentSeletedMesh를 스케일링 하기 */
+    function updatePrismForm(object, mesh) {
+        const prismData = object.data;
 
-    function updateHoverRoofDot(gridX, gridZ, gridY){
-        hoverRoofDot.position.set(
-            gridX * gridSize,
-            (gridY * 0.1) + HOVER_ROOF_SPHERE_RADIUS,
-            gridZ * gridSize            
-        );
-
-        hoverRoofDot.visible = true;
-    }
-
-    function updateHoverRoofPrism(){
-        const prismData 
-            = createPrismData(currentStartPoint, currentHoverPoint);
-
-        doPrismTransform(hoverRoofPrism, prismData);
-        hoverRoofPrism.visible = true;
-    }
-
-    function createPrismData(startPoint, endPoint){
-        const startWorldX = startPoint.gridX * gridSize;
-        const startWorldZ = startPoint.gridZ * gridSize;
+        /* 방향과 delta(작용 정도) 구하기 */
+        const direction = draggingArrow.userData.direction;
         
-        const endWorldX = endPoint.gridX * gridSize;
-        const endWorldZ = endPoint.gridZ * gridSize;
+        const deltaX = (currentHoverPoint.gridX - dragStartPoint.gridX) * gridSize;
+        const deltaZ = (currentHoverPoint.gridZ - dragStartPoint.gridZ) * gridSize; 
+        const delta = direction.x !== 0 ? deltaX * direction.x : deltaZ * direction.z;
 
-        const width = Math.abs(startWorldX - endWorldX);
-        const length = Math.abs(startWorldZ - endWorldZ);
-
-        return {
-            id: crypto.randomUUID(),
-
-            startPoint: { ...startPoint },
-            endPoint: { ...endPoint },
-
-            midX: (startWorldX + endWorldX) / 2,
-            midZ: (startWorldZ + endWorldZ) / 2,
-            baseY: startPoint.gridY * 0.1,
-
-            width,
-            length,
-
-            materialId: 'default-roof'
-        };
-    }
-
-    /* 건설 확정: hover 객체 없애고 실제 모형 넣기 */
-    function commitCurrentBuildParts(){
-        const prismData =
-            createPrismData(currentStartPoint, currentHoverPoint);
-
-        const mesh = createStructureInstance('roof-prism');
-
+        resizePrism(prismData, direction, delta)
         doPrismTransform(mesh, prismData);
-
-        confirmedRoofs.push(mesh);
-        scene.add(mesh);
-
-        hoverRoofPrism.visible = false;
-        currentStartPoint = null;
-        currentHoverPoint = null;
-
-        const id = addObject({
-            type: "roof",
-            data: prismData
-        });
-
-        mesh.userData.objectId = id;
-
-        return {
-            mesh,
-            prismData
-        };
     }
 
-    function getPlatformMeshes() {
-        return getPlatformObjectMeshes();
+    /* 프리즘 사이즈 재정의 */
+    function resizePrism(prismData, direction, delta) {
+        if (direction.x !== 0) {
+            prismData.width += delta;
+            prismData.midX += delta * direction.x / 2;
+        }
+
+        if (direction.z !== 0) {
+            prismData.length += delta;
+            prismData.midZ += delta * direction.z / 2;
+    }
     }
 
     return {
         updateHoverPoint,
         confirmPoint,
         getGizmoTargets,
-        holding,
+        endDraggingPoint,
+        isDragging,
         hide
     }
 }
 
-
-export function loadRoof(scene, data){
-    const mesh = createStructureInstance('roof-prism');
-    doPrismTransform(mesh, data);
-    
-    mesh.userData.objectId = addObject({
-        type: "roof",
-        data: data
-    });
-
-    addPlatformMesh(mesh);
-    scene.add(mesh);
-}
-
-
-/* 공통 함수 */
-function doPrismTransform(mesh, prismData){
-    /* 각도 기준 높이 설정 */
-    const roofHeight = getRoofHeight(prismData.width);
-
-    mesh.position.set(
-        prismData.midX,
-        prismData.baseY,
-        prismData.midZ
-    );
-
-    mesh.scale.set(
-        prismData.width, 
-        roofHeight, 
-        prismData.length
-    );
-    mesh.visible = true;
-}
-
-function getRoofHeight(width) {
-    const angle = THREE.MathUtils.degToRad(ROOF_ANGLE);
-
-    return (width / 2) * Math.tan(angle);
-}

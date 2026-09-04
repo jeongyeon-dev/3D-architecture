@@ -354,15 +354,19 @@ export function createScene(){
         placement.onMouseDown(event);
     }
 
-    /* 마우스를 클릭한 채 드래그 */
+    /* 클릭을 뗐을 때 */
     function onMouseUp(event){
         camera.onMouseUp(event);
-        editorTool?.holding(event);
+        editorTool?.endDraggingPoint(event);
     }
 
+    /* 커서를 움직이고 있을 때(클릭 유무 상관 없이) */
     function onMouseMove(event){
+        placement.onMouseMove(event);    
+        if(editorTool?.isDragging()) return;
+        
+        /* dragging 상태에서는 카메라 이동 무효화 */
         camera.onMouseMove(event);
-        placement.onMouseMove(event);
     }
 
     function onWheel(event){

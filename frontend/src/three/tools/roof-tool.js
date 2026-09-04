@@ -6,8 +6,7 @@ import { HOVER_ROOF_SPHERE_RADIUS, ROOF_ANGLE } from '../config.js';
 
 import { 
     addObject, 
-    addPlatformMesh, 
-    getPlatformObjectMeshes 
+    addPlatformMesh
 } from "../project/project-state.js";
 
 
@@ -140,10 +139,6 @@ export function createRoofTool({
         };
     }
 
-    function getPlatformMeshes() {
-        return getPlatformObjectMeshes();
-    }
-
     return {
         updateHoverPoint,
         confirmPoint,
@@ -167,7 +162,7 @@ export function loadRoof(scene, data){
 
 
 /* 공통 함수 */
-function doPrismTransform(mesh, prismData){
+export function doPrismTransform(mesh, prismData){
     /* 각도 기준 높이 설정 */
     const roofHeight = getRoofHeight(prismData.width);
 
