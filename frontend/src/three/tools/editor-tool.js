@@ -1,7 +1,5 @@
-import * as THREE from 'three';
-
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
-
+import { GIZMO_OFFSET } from '../config.js';
 import { doPrismTransform } from './roof-tool.js';
 
 import { 
@@ -16,8 +14,6 @@ import {
 import { 
     getObject,
     addObject, 
-    addPlatformMesh, 
-    getPlatformObjectMeshes 
 } from "../project/project-state.js";
 
 
@@ -119,6 +115,14 @@ export function createEditorTool({
     function endDraggingPoint(event){
         if (event.button !== 0) return;
 
+        /* 오브젝트 데이터가 변경 됨 */
+        if (draggingArrow && currentSelecteMesh) {
+            const objectId = currentSelecteMesh.userData.objectId;
+            const object = getObject(objectId);
+
+            object.data = draggingPrismData;
+        }
+
         currentStartPoint = null;
         draggingArrow = undefined;
         dragStartPoint = undefined;
@@ -173,29 +177,69 @@ export function createEditorTool({
     /* currentSeletedMesh를 스케일링 하기 */
     function updatePrismForm(object, mesh) {
         const prismData = object.data;
-
-        /* 방향과 delta(작용 정도) 구하기 */
         const direction = draggingArrow.userData.direction;
-        
-        const deltaX = (currentHoverPoint.gridX - dragStartPoint.gridX) * gridSize;
-        const deltaZ = (currentHoverPoint.gridZ - dragStartPoint.gridZ) * gridSize; 
-        const delta = direction.x !== 0 ? deltaX * direction.x : deltaZ * direction.z;
 
-        resizePrism(prismData, direction, delta)
+
+        /* 변형 data 생성하기 => 이에 기반하여 prism 형태 변형하기 */
+        resizePrism(prismData, direction, currentHoverPoint);
         doPrismTransform(mesh, prismData);
+
+        /* 변형된 prism에 맞춰 화살표 위치 갱신 */
+        updateGizmoPosition(draggingArrow, prismData);
     }
 
-    /* 프리즘 사이즈 재정의 */
-    function resizePrism(prismData, direction, delta) {
-        if (direction.x !== 0) {
-            prismData.width += delta;
-            prismData.midX += delta * direction.x / 2;
+    /* 방향에 따른 prism 모형 data 변경하기:
+        동 -> 서 -> 남 -> 북 순으로 if 문 */
+    function resizePrism(prismData, direction, currentHoverPoint) {
+        if (direction.x > 0) {
+            const fixedX = prismData.midX - prismData.width / 2;
+            const newX = currentHoverPoint.gridX * gridSize;
+
+            prismData.width = newX - fixedX;
+            prismData.midX = (fixedX + newX) / 2;
         }
 
-        if (direction.z !== 0) {
-            prismData.length += delta;
-            prismData.midZ += delta * direction.z / 2;
+        if (direction.x < 0) {
+            const fixedX = prismData.midX + prismData.width / 2;
+            const newX = currentHoverPoint.gridX * gridSize;
+
+            prismData.width = fixedX - newX;
+            prismData.midX = (fixedX + newX) / 2;
+        }
+
+        if (direction.z > 0) {
+            const fixedZ = prismData.midZ - prismData.length / 2;
+            const newZ = currentHoverPoint.gridZ * gridSize;
+
+            prismData.length = newZ - fixedZ;
+            prismData.midZ = (fixedZ + newZ) / 2;
+        }
+
+        if (direction.z < 0) {
+            const fixedZ = prismData.midZ + prismData.length / 2;
+            const newZ = currentHoverPoint.gridZ * gridSize;
+
+            prismData.length = fixedZ - newZ;
+            prismData.midZ = (fixedZ + newZ) / 2;
+        }
     }
+
+    function updateGizmoPosition(arrow, prismData) {
+        if (arrow.userData.direction.x > 0) {
+            arrow.position.x = prismData.midX + prismData.width / 2 + GIZMO_OFFSET;
+        }
+
+        if (arrow.userData.direction.x < 0) {
+            arrow.position.x = prismData.midX - prismData.width / 2 - GIZMO_OFFSET;
+        }
+
+        if (arrow.userData.direction.z > 0) {
+            arrow.position.z = prismData.midZ + prismData.length / 2 + GIZMO_OFFSET;
+        }
+
+        if (arrow.userData.direction.z < 0) {
+            arrow.position.z = prismData.midZ - prismData.length / 2 - GIZMO_OFFSET;
+        }
     }
 
     return {
