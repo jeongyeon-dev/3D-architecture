@@ -24,7 +24,13 @@ const assets = {
         mesh.userDate = { id: 'invisible-polygon' };
         mesh.rotation.x = Math.PI / 2;
         return mesh;
-    },  
+    }, 
+    'invisible-plane':(y) => {
+        return new THREE.Plane(
+            new THREE.Vector3(0, 1, 0),
+            -y
+        );       
+    } 
 }
 
 export function createInvisibleInstance(assetId, data) {

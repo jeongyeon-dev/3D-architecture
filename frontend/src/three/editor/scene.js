@@ -362,11 +362,19 @@ export function createScene(){
 
     /* 커서를 움직이고 있을 때(클릭 유무 상관 없이) */
     function onMouseMove(event){
-        placement.onMouseMove(event);    
-        if(editorTool?.isDragging()) return;
+        
+        /* drag 상태에서는 가상 plane을 기준으로 raycast 되어야 함 */
+        placement.onMouseMove(
+            event,
+            editorTool?.isDragging()
+                ? editorTool.getDragPlane()
+                : undefined
+        );
         
         /* dragging 상태에서는 카메라 이동 무효화 */
-        camera.onMouseMove(event);
+        if (!editorTool?.isDragging()) {
+            camera.onMouseMove(event);
+        }
     }
 
     function onWheel(event){

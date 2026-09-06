@@ -45,11 +45,19 @@ export function createPlacementController({
         onGridSelected?.({ gridX, gridZ, gridY, object: hit.object });
     }
 
-    function onMouseMove(event){
-        const currGridPoint = getGridPoint(event);
-        if (!currGridPoint) return;
+    /* 평시 마우스 커서 감지 */
+    function onMouseMove(event, dragPlane){
+        let point;
 
-        onGridHovered?.(currGridPoint);
+        if (dragPlane) {
+            point = getDragPlanePoint(event, dragPlane);
+        } else {
+            point = getGridPoint(event);
+        }
+
+        if (!point) return;
+
+        onGridHovered?.(point);
     }
 
     /* 마우스 커서(event)를 grid 좌표로 반환하는 함수 */
@@ -72,9 +80,33 @@ export function createPlacementController({
         };
     }
 
+    /* 가상 plane 기준으로 교차점 구하기 */
+    function getDragPlanePoint(event, dragPlane) {
+        const rect = renderer.domElement.getBoundingClientRect();
+
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+
+        const point = new THREE.Vector3();
+
+        if (!dragPlane || !raycaster.ray.intersectPlane(dragPlane, point)) {
+            return undefined;
+        }
+
+        return {
+            gridX: Math.round(point.x / gridSize),
+            gridZ: Math.round(point.z / gridSize),
+            gridY: Math.round(point.y / 0.1),
+            object: undefined
+        };
+    }
+
     return {
         onMouseDown,
         onMouseMove,
-        setRaycastTargets
+        setRaycastTargets,
+        getDragPlanePoint
     };
 }

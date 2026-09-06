@@ -1,4 +1,5 @@
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
+import { createInvisibleInstance } from '../assets/invisible-assets.js';
 import { GIZMO_OFFSET } from '../config.js';
 import { doPrismTransform } from './roof-tool.js';
 
@@ -9,7 +10,8 @@ import {
     removeGizmo,
     createSelectionHighlight,
     removeSelectionHighlight,
-    setGizmoArrowScale
+    setGizmoArrowScale,
+    updateGizmoPosition
 } from './utils/selection.js';
 import { 
     getObject,
@@ -33,6 +35,9 @@ export function createEditorTool({
     let draggingArrow = undefined;
     let dragStartPoint = undefined; 
     let hoveredArrow = undefined;
+    let draggingPrismData = undefined;
+
+    let dragPlane;
 
 
     /* 가시적 도구 객체들 호출 */
@@ -52,11 +57,7 @@ export function createEditorTool({
 
         /* 드래그 하고 있을 경우 => 선택된 mesh 스케일링 하기 */
         if (draggingArrow) {
-            /* 해당 object를 기준으로 objectData 가져오기 */
-            const objectId = currentSelecteMesh.userData.objectId;
-            const _object = getObject(objectId);
-            console.log(_object)
-            updatePrismForm(_object, currentSelecteMesh);
+            updatePrismForm(currentSelecteMesh);
             return;
         }
         
@@ -97,6 +98,11 @@ export function createEditorTool({
         if(arrow){
             draggingArrow = arrow;
             dragStartPoint = currentHoverPoint;
+
+            /* 변형 데이터 지속적 반영 */
+            const objectId = currentSelecteMesh.userData.objectId;
+            const _object = getObject(objectId);
+            draggingPrismData = structuredClone(_object.data);
             return;
         }
         
@@ -109,6 +115,12 @@ export function createEditorTool({
         createOutline(currentSelecteMesh);
         createSelectionHighlight(currentSelecteMesh);
         createGizmo(currentSelecteMesh);
+
+        /* drag plane y 위치 설정 */
+        dragPlane = createInvisibleInstance(
+            'invisible-plane',
+            currentSelecteMesh.position.y
+        );
     }
 
     /* 마우스 클릭 상태가 끝났을 시 */
@@ -123,6 +135,7 @@ export function createEditorTool({
             object.data = draggingPrismData;
         }
 
+        draggingPrismData = undefined;
         currentStartPoint = null;
         draggingArrow = undefined;
         dragStartPoint = undefined;
@@ -145,13 +158,20 @@ export function createEditorTool({
         }
     }
 
+
+    /* scene에서 조정될 반환 함수들 */
     function getGizmoTargets() {
         return currentGizmoTargets;
     }
 
     function isDragging(){
-        return hoveredArrow !== undefined;
+        return draggingArrow !== undefined;
     }
+
+    function getDragPlane(){
+        return dragPlane;
+    }
+
     
     /* hover 오브젝트 highlight 하기 */
     function highlightObject(object){
@@ -175,17 +195,16 @@ export function createEditorTool({
     }
 
     /* currentSeletedMesh를 스케일링 하기 */
-    function updatePrismForm(object, mesh) {
-        const prismData = object.data;
+    function updatePrismForm(mesh) {
+        const prismData = draggingPrismData;
         const direction = draggingArrow.userData.direction;
-
 
         /* 변형 data 생성하기 => 이에 기반하여 prism 형태 변형하기 */
         resizePrism(prismData, direction, currentHoverPoint);
         doPrismTransform(mesh, prismData);
 
         /* 변형된 prism에 맞춰 화살표 위치 갱신 */
-        updateGizmoPosition(draggingArrow, prismData);
+        updateGizmoPosition(prismData);
     }
 
     /* 방향에 따른 prism 모형 data 변경하기:
@@ -224,23 +243,28 @@ export function createEditorTool({
         }
     }
 
-    function updateGizmoPosition(arrow, prismData) {
-        if (arrow.userData.direction.x > 0) {
-            arrow.position.x = prismData.midX + prismData.width / 2 + GIZMO_OFFSET;
-        }
+    /* gizmo 위치 재계산 함수 */
+    // function updateGizmoPosition(arrow, prismData) {
 
-        if (arrow.userData.direction.x < 0) {
-            arrow.position.x = prismData.midX - prismData.width / 2 - GIZMO_OFFSET;
-        }
+    //     if (arrow.userData.direction.x > 0) {
+    //         arrow.position.x = prismData.midX + prismData.width / 2 + GIZMO_OFFSET;
+    //     }
 
-        if (arrow.userData.direction.z > 0) {
-            arrow.position.z = prismData.midZ + prismData.length / 2 + GIZMO_OFFSET;
-        }
+    //     if (arrow.userData.direction.x < 0) {
+    //         arrow.position.x = prismData.midX - prismData.width / 2 - GIZMO_OFFSET;
+    //     }
 
-        if (arrow.userData.direction.z < 0) {
-            arrow.position.z = prismData.midZ - prismData.length / 2 - GIZMO_OFFSET;
-        }
-    }
+    //     if (arrow.userData.direction.z > 0) {
+    //         arrow.position.z = prismData.midZ + prismData.length / 2 + GIZMO_OFFSET;
+    //     }
+
+    //     if (arrow.userData.direction.z < 0) {
+    //         arrow.position.z = prismData.midZ - prismData.length / 2 - GIZMO_OFFSET;
+    //     }
+    // }
+
+
+
 
     return {
         updateHoverPoint,
@@ -248,6 +272,7 @@ export function createEditorTool({
         getGizmoTargets,
         endDraggingPoint,
         isDragging,
+        getDragPlane,
         hide
     }
 }

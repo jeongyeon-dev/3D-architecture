@@ -227,3 +227,38 @@ export function removeSelectionHighlight(mesh) {
 
     highlight.material.dispose();
 }
+
+
+/* 화살표들 위치 재 position 하기 */
+export function updateGizmoPosition(prismData) {
+    const east = gizmo.children[0];
+    const west = gizmo.children[1];
+    const north = gizmo.children[2];
+    const south = gizmo.children[3];
+
+    const y = east.position.y;
+
+    east.position.set(
+        prismData.midX + prismData.width / 2 + GIZMO_OFFSET,
+        y,
+        prismData.midZ
+    );
+
+    west.position.set(
+        prismData.midX - prismData.width / 2 - GIZMO_OFFSET,
+        y,
+        prismData.midZ
+    );
+
+    north.position.set(
+        prismData.midX,
+        y,
+        prismData.midZ - prismData.length / 2 - GIZMO_OFFSET
+    );
+
+    south.position.set(
+        prismData.midX,
+        y,
+        prismData.midZ + prismData.length / 2 + GIZMO_OFFSET
+    );
+}
