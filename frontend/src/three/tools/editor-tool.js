@@ -243,29 +243,6 @@ export function createEditorTool({
         }
     }
 
-    /* gizmo 위치 재계산 함수 */
-    // function updateGizmoPosition(arrow, prismData) {
-
-    //     if (arrow.userData.direction.x > 0) {
-    //         arrow.position.x = prismData.midX + prismData.width / 2 + GIZMO_OFFSET;
-    //     }
-
-    //     if (arrow.userData.direction.x < 0) {
-    //         arrow.position.x = prismData.midX - prismData.width / 2 - GIZMO_OFFSET;
-    //     }
-
-    //     if (arrow.userData.direction.z > 0) {
-    //         arrow.position.z = prismData.midZ + prismData.length / 2 + GIZMO_OFFSET;
-    //     }
-
-    //     if (arrow.userData.direction.z < 0) {
-    //         arrow.position.z = prismData.midZ - prismData.length / 2 - GIZMO_OFFSET;
-    //     }
-    // }
-
-
-
-
     return {
         updateHoverPoint,
         confirmPoint,

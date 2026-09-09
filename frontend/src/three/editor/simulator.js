@@ -26,6 +26,9 @@ export function createSimulator({ projectObjects = [] } = {}){
             case 'roof':
                 scene.updateRoofHover(gridX, gridZ, gridY);
                 break;
+            case 'window':
+                scene.updateWindowHover(gridX, gridZ, gridY);
+                break;
             case 'editor':
                 scene.updateEditorHover(gridX, gridZ, gridY, object);
                 break;
@@ -50,6 +53,9 @@ export function createSimulator({ projectObjects = [] } = {}){
                 break;
             case 'roof':
                 result = scene.confirmRoofPoint(gridX, gridZ, gridY);
+                break;
+            case 'window':
+                result = scene.confirmWindowPoint(gridX, gridZ, gridY);
                 break;
             case 'editor':
                 result = scene.confirmEditorPoint(gridX, gridZ, gridY, object);

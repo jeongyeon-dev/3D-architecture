@@ -13,6 +13,7 @@ const rightTools = [
     { id: 'wall', buttonId: 'button-brick', label: '벽' },
     { id: 'floor', buttonId: 'button-floor', label: '바닥' },
     { id: 'roof', buttonId: 'button-roof', label: '지붕' },
+    { id: 'window', buttonId: 'button-window', label: '창문' },
     { id: 'editor', buttonId: 'button-editor', label: '편집기' }
 ];
 

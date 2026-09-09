@@ -12,6 +12,7 @@ import { createWallTool } from '../tools/wall-tool.js';
 import { createPlatformTool } from '../tools/platform-tool.js';
 import { createFloorTool } from '../tools/floor-tool.js';
 import { createRoofTool } from '../tools/roof-tool.js';
+import { createWindowTool } from '../tools/window-tool.js';
 
 import { createEditorTool } from '../tools/editor-tool.js';
 
@@ -86,6 +87,7 @@ export function createScene(){
     let platformTool;
     let floorTool;
     let roofTool;
+    let windowTool;
     let editorTool;
 
     /* 초기화 함수 */
@@ -149,13 +151,19 @@ export function createScene(){
         roofTool = createRoofTool({
             scene,
             gridSize: GRID_SIZE_M
-        })
+        });
+
+        /* 창문 도구 객체 생성하기 */
+        windowTool = createWindowTool({
+            scene,
+            gridSize: GRID_SIZE_M
+        });
 
         /* 편집 도구 객체 생성하기 */
         editorTool = createEditorTool({
             scene,
             gridSize: GRID_SIZE_M
-        })
+        });
 
 
         /* previousData로 기존 오브젝트 불러오기 */
@@ -255,6 +263,16 @@ export function createScene(){
     }
 
 
+    /* 창문 도구 호출 함수들 */
+    function updateWindowHover(gridX, gridZ, gridY) {
+        windowTool?.updateHoverPoint(gridX, gridZ, gridY);
+    }
+
+    function confirmWindowPoint(gridX, gridZ, gridY) {
+        return windowTool?.confirmPoint(gridX, gridZ, gridY);
+    }
+
+    
     /* 편집 도구 호출 함수들 */
     function updateEditorHover(gridX, gridZ, gridY, object) {
         editorTool?.updateHoverPoint(gridX, gridZ, gridY, object);
@@ -520,6 +538,8 @@ export function createScene(){
         confirmFloorPoint,
         updateRoofHover,
         confirmRoofPoint,
+        updateWindowHover,
+        confirmWindowPoint,
         updateEditorHover,
         confirmEditorPoint,
         setRaycastTarget,
