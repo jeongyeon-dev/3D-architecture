@@ -80,3 +80,50 @@ export function createPrismGeometry() {
     geometry.computeVertexNormals();
     return geometry;
 }
+
+
+/* 창문을 생성하는 geometry */
+export function createWindowGroupGeometry(
+    width = 1.2,
+    height = 1.5,
+    frameThickness = 0.1,
+    depth = 0.1
+) {
+    const pane = new THREE.BoxGeometry(
+        width - frameThickness * 2,
+        height - frameThickness * 2,
+        depth
+    );
+
+    const top = new THREE.BoxGeometry(
+        width,
+        frameThickness,
+        depth
+    );
+
+    const bottom = new THREE.BoxGeometry(
+        width,
+        frameThickness,
+        depth
+    );
+
+    const left = new THREE.BoxGeometry(
+        frameThickness,
+        height - frameThickness * 2,
+        depth
+    );
+
+    const right = new THREE.BoxGeometry(
+        frameThickness,
+        height - frameThickness * 2,
+        depth
+    );
+
+    return {
+        pane,
+        top,
+        bottom,
+        left,
+        right
+    };
+}

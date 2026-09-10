@@ -1,6 +1,14 @@
 import * as THREE from 'three';
-import { WALL_HEIGHT, PLATFORM_HEIGHT, HOVER_FLOOR_SPHERE_RADIUS } from '../config.js';
-import { createPrismGeometry } from './util/geometry-calculator.js';
+import { 
+    WALL_HEIGHT, 
+    PLATFORM_HEIGHT, 
+    HOVER_FLOOR_SPHERE_RADIUS
+} from '../config.js';
+import { 
+    createPrismGeometry,
+    createWindowGroupGeometry
+} from './util/geometry-calculator.js';
+
 
 const hoverWallPoleGeometry = new THREE.CylinderGeometry(0.08, 0.08, WALL_HEIGHT);
 const hoverWallFaceGeometry = new THREE.BoxGeometry(1, WALL_HEIGHT, 0.16);
@@ -105,6 +113,27 @@ const assets = {
         mesh.userData = { id: 'hover-roof-prism' };
         mesh.add(outline);
         return mesh;
+    },
+    'hover-window-group': () => {
+        /* 창문 group과 geometries */
+        const geometries = createWindowGroupGeometry();
+        const group = new THREE.Group();
+        
+        /* for 문으로 각 순회하면서 적용 group에 더하기 */
+        Object.entries(geometries).forEach(([name, geometry]) => {
+            const mesh = new THREE.Mesh(geometry, faceMaterial);
+            const outline = new THREE.LineSegments(
+                new THREE.EdgesGeometry(geometry),
+                lineMaterial           
+            );            
+
+            mesh.userData = { id: `hover-window-${name}` };
+            mesh.add(outline);
+            
+            group.add(mesh);
+        }); 
+        
+        return group;
     }
 }
 
