@@ -39,52 +39,20 @@ export function createWindowTool({
 
 
     /* 가시적 도구 객체들 호출 */
-    const hoverRoofPrism = createBuildToolInstance('hover-roof-prism');
+    const hoverWindowGroup = createBuildToolInstance('hover-window-group');
     const hoverRoofDot = createBuildToolInstance('hover-roof-dot');
 
-    hoverRoofPrism.visible = false;
+    hoverWindowGroup.visible = false;
     hoverRoofDot.visible = false;
 
-    scene.add(hoverRoofPrism);
+    scene.add(hoverWindowGroup);
     scene.add(hoverRoofDot);
 
 
     /* 마우스 커서 추적 */
     function updateHoverPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
-
-        /* 드래그 하고 있을 경우 => 선택된 mesh 스케일링 하기 */
-        if (draggingArrow) {
-            updatePrismForm(currentSelecteMesh);
-            return;
-        }
-        
-        /* 커서 가리키는 오브젝트 하이라이트 하기 */
-        highlightObject(object)
-        
-        /* 마우스 커서가 화살표를 가리키지 않는 경우 */
-        const arrow = getArrow(object);
-        
-        if(!arrow){
-            if(hoveredArrow){
-                setGizmoArrowScale(hoveredArrow, 1);
-                hoveredArrow = undefined;    
-            }
-            return;
-        }
-
-
-        /* 다른 화살표로 이동한 경우 => 기존 scale 원래대로 */
-        if(hoveredArrow && hoveredArrow !== arrow){
-            setGizmoArrowScale(hoveredArrow, 1);
-        }
-        
-        /* 새 화살표 scale 하기 */
-        if(arrow){
-            setGizmoArrowScale(arrow, 1.2);
-        }
-
-        hoveredArrow = arrow;
+        updateHoverWindowGroup(gridX, gridZ, gridY);
     }
 
     /* 마우스 클릭 시 */
@@ -123,8 +91,20 @@ export function createWindowTool({
 
     /* 도구 감추기 */
     function hide(){
-        hoverRoofPrism.visible = false;
+        hoverWindowGroup.visible = false;
         hoverRoofDot.visible = false;
+    }
+
+
+    /* hoverWindowGroup 위치 업데이트 */
+    function updateHoverWindowGroup(gridX, gridZ, gridY){
+        hoverWindowGroup.position.set(
+            gridX * gridSize,
+            (gridY * 0.1) + 2,
+            gridZ * gridSize            
+        );
+
+        hoverWindowGroup.visible = true;
     }
 
 

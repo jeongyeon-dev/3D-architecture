@@ -43,7 +43,26 @@ const faceMaterial = new THREE.MeshBasicMaterial({
         opacity: 0.6,
         depthWrite: false 
     });
-
+  
+/* 창문 전용 메테리얼 */   
+const hoverGlassMaterial = new THREE.MeshBasicMaterial({
+    color: '#ffffff',
+    transparent: true,
+    opacity: 0.5,
+    depthWrite: false
+});
+const hoverFrameMaterial = new THREE.MeshBasicMaterial({
+    color: '#ffffff',
+    transparent: false,
+    depthWrite: true
+});
+const windowLineMaterial = new THREE.LineBasicMaterial({
+    color: '#ffffff',
+    toneMapped: false,
+    fog: false,
+    depthTest: true,
+    depthWrite: false
+});
 
 const assets = {
     'hover-wall-pole': () => {
@@ -116,19 +135,52 @@ const assets = {
     },
     'hover-window-group': () => {
         /* 창문 group과 geometries */
-        const geometries = createWindowGroupGeometry();
+        const width = 1.2;
+        const height = 1.5;
+        const frameThickness = 0.1;
+
+        const geometries = createWindowGroupGeometry(
+            width, 
+            height,
+            frameThickness
+        );
+
+        /* 위치 지정하기 */
+        const positions = {
+            pane:   [0, 0, 0],
+
+            top:    [0,  (height - frameThickness) / 2, 0],
+            bottom: [0, -(height - frameThickness) / 2, 0],
+
+            left:   [-(width - frameThickness) / 2, 0, 0],
+            right:  [ (width - frameThickness) / 2, 0, 0]
+        };
+        
         const group = new THREE.Group();
         
         /* for 문으로 각 순회하면서 적용 group에 더하기 */
         Object.entries(geometries).forEach(([name, geometry]) => {
-            const mesh = new THREE.Mesh(geometry, faceMaterial);
-            const outline = new THREE.LineSegments(
-                new THREE.EdgesGeometry(geometry),
-                lineMaterial           
-            );            
+            /* 외곽선 더하기 */
+            if(name === 'outerBox' || name === 'innerBox'){
+                const outerLine = new THREE.LineSegments(
+                    new THREE.EdgesGeometry(geometry),
+                    windowLineMaterial
+                );
+                
+                outerLine.renderOrder = 2;
+                group.add(outerLine);
+                return;
+            }   
+            
+            const material = name === 'pane'
+                ? hoverGlassMaterial
+                : hoverFrameMaterial;
 
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            mesh.renderOrder = 1;
+            mesh.position.set(...positions[name]);
             mesh.userData = { id: `hover-window-${name}` };
-            mesh.add(outline);
             
             group.add(mesh);
         }); 

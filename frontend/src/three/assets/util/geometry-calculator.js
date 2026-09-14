@@ -89,34 +89,53 @@ export function createWindowGroupGeometry(
     frameThickness = 0.1,
     depth = 0.1
 ) {
+
+    const glassDepth = 0.02;
+    const frameDepth = 0.12;
+    const outlineOffset = 0.004;
+
     const pane = new THREE.BoxGeometry(
         width - frameThickness * 2,
         height - frameThickness * 2,
-        depth
+        glassDepth
     );
 
     const top = new THREE.BoxGeometry(
         width,
         frameThickness,
-        depth
+        frameDepth
     );
 
     const bottom = new THREE.BoxGeometry(
         width,
         frameThickness,
-        depth
+        frameDepth
     );
 
     const left = new THREE.BoxGeometry(
         frameThickness,
         height - frameThickness * 2,
-        depth
+        frameDepth
     );
 
     const right = new THREE.BoxGeometry(
         frameThickness,
         height - frameThickness * 2,
-        depth
+        frameDepth
+    );
+
+
+    /* 창 틀 외곽선을 표현하기 위한 geometry */
+    const outerBox = new THREE.BoxGeometry(
+        width + outlineOffset,
+        height + outlineOffset,
+        frameDepth + outlineOffset
+    );
+
+    const innerBox = new THREE.BoxGeometry(
+        (width - frameThickness * 2) - outlineOffset,
+        (height - frameThickness * 2) - outlineOffset,
+        frameDepth + outlineOffset
     );
 
     return {
@@ -124,6 +143,8 @@ export function createWindowGroupGeometry(
         top,
         bottom,
         left,
-        right
+        right,
+        outerBox,
+        innerBox
     };
 }
