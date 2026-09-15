@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { 
     WALL_HEIGHT, 
     PLATFORM_HEIGHT, 
-    HOVER_FLOOR_SPHERE_RADIUS
+    HOVER_FLOOR_SPHERE_RADIUS,
+    WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_FRAME_THICKNESS
 } from '../config.js';
 import { 
     createPrismGeometry,
@@ -135,9 +136,9 @@ const assets = {
     },
     'hover-window-group': () => {
         /* 창문 group과 geometries */
-        const width = 1.2;
-        const height = 1.5;
-        const frameThickness = 0.1;
+        const width = WINDOW_WIDTH;
+        const height = WINDOW_HEIGHT;
+        const frameThickness = WINDOW_FRAME_THICKNESS;
 
         const geometries = createWindowGroupGeometry(
             width, 

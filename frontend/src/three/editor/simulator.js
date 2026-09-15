@@ -10,7 +10,7 @@ export function createSimulator({ projectObjects = [] } = {}){
     scene.initialize(projectObjects);
 
     /* 좌표 추적하기 */
-    scene.setOnGridHovered(({ gridX, gridZ, gridY, object }) => {
+    scene.setOnGridHovered(({ gridX, gridZ, gridY, object, normal }) => {
         scene.hideToolCursors(activeToolId);
 
         switch(activeToolId){
@@ -27,7 +27,7 @@ export function createSimulator({ projectObjects = [] } = {}){
                 scene.updateRoofHover(gridX, gridZ, gridY);
                 break;
             case 'window':
-                scene.updateWindowHover(gridX, gridZ, gridY);
+                scene.updateWindowHover(gridX, gridZ, gridY, object, normal);
                 break;
             case 'editor':
                 scene.updateEditorHover(gridX, gridZ, gridY, object);
@@ -55,7 +55,7 @@ export function createSimulator({ projectObjects = [] } = {}){
                 result = scene.confirmRoofPoint(gridX, gridZ, gridY);
                 break;
             case 'window':
-                result = scene.confirmWindowPoint(gridX, gridZ, gridY);
+                result = scene.confirmWindowPoint(gridX, gridZ, gridY, object);
                 break;
             case 'editor':
                 result = scene.confirmEditorPoint(gridX, gridZ, gridY, object);

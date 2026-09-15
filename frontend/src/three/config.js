@@ -16,3 +16,8 @@ export const ROOF_ANGLE = 30;
 export const HOVER_FLOOR_SPHERE_RADIUS = 0.08;
 export const HOVER_ROOF_SPHERE_RADIUS = 0.08;
 export const GIZMO_OFFSET = 0.2;
+
+/* 창문 척도 설정 */
+export const WINDOW_HEIGHT = 1.5;
+export const WINDOW_WIDTH = 1.2;
+export const WINDOW_FRAME_THICKNESS = 0.16;

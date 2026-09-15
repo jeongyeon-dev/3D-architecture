@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 
+/* raycast가 되어 어떤 object가 닿는지 등 정보를 산출하는 함수 */
 export function createPlacementController({
     scene,
     renderer,
@@ -71,12 +72,18 @@ export function createPlacementController({
 
         const hit = raycaster.intersectObjects(getRaycastTargets(), false)[0];
         if (!hit) return undefined;
+
+        /* 방향 벡터 구하기 */
+        const normal = hit.face.normal
+            .clone()
+            .transformDirection(hit.object.matrixWorld);
  
         return {
             gridX: Math.round(hit.point.x / gridSize),
             gridZ: Math.round(hit.point.z / gridSize),
             gridY: Math.round(hit.point.y / 0.1 ),
-            object: hit.object
+            object: hit.object,
+            normal
         };
     }
 

@@ -19,6 +19,20 @@ const assets = {
         mesh.userData = { id: 'wall-face' };
         return mesh;
     },
+    'wall-segment': (segmentData) => {
+        const material = new THREE.MeshStandardMaterial({ 
+            color: '#f1f1f1',
+            roughness: 0.85,
+            metalness: 0.1
+        });
+        const geometry = createWallGeometry(segmentData);
+        const mesh = new THREE.Mesh(geometry, material);
+        
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { id: 'wall-segment' };
+        return mesh;
+    },
     'platform-cube': () => {
         const material = new THREE.MeshStandardMaterial({ 
             color: '#a0a0a0',

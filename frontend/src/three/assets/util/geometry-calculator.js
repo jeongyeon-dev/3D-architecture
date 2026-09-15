@@ -91,7 +91,7 @@ export function createWindowGroupGeometry(
 ) {
 
     const glassDepth = 0.02;
-    const frameDepth = 0.12;
+    const frameDepth = 0.18;
     const outlineOffset = 0.004;
 
     const pane = new THREE.BoxGeometry(

@@ -62,7 +62,8 @@ export function createScene(){
         wall: () => wallTool?.hide(),
         platform: () => platformTool?.hide(),
         floor: () => floorTool?.hide(),
-        roof: () => roofTool?.hide()
+        roof: () => roofTool?.hide(),
+        window: () => windowTool?.hide()
     }
 
     /* raycasting 및 건설 오브젝트 추가하는 부분들 */
@@ -124,8 +125,8 @@ export function createScene(){
             onGridSelected({ gridX, gridZ, gridY, object }) {
                 onObjectSelected?.({ gridX, gridZ, gridY, object });
             },
-            onGridHovered({ gridX, gridZ, gridY, object }) {
-                onGridHoveredCallback?.({ gridX, gridZ, gridY, object });
+            onGridHovered({ gridX, gridZ, gridY, object, normal }) {
+                onGridHoveredCallback?.({ gridX, gridZ, gridY, object, normal });
             }
         });
 
@@ -264,8 +265,8 @@ export function createScene(){
 
 
     /* 창문 도구 호출 함수들 */
-    function updateWindowHover(gridX, gridZ, gridY) {
-        windowTool?.updateHoverPoint(gridX, gridZ, gridY);
+    function updateWindowHover(gridX, gridZ, gridY, object, normal) {
+        windowTool?.updateHoverPoint(gridX, gridZ, gridY, object, normal);
     }
 
     function confirmWindowPoint(gridX, gridZ, gridY) {
@@ -311,6 +312,21 @@ export function createScene(){
                     ? []
                     : raycastMeshes
             );
+        }
+
+        if (toolId == 'window'){
+            placement.setRaycastTargets(() => {
+                const wallMeshes = scene.children.filter(
+                    (object) =>
+                        object.isMesh &&
+                        object.userData.id === 'wall-face'
+                );
+
+                return [
+                    plate,
+                    ...wallMeshes
+                ];
+            });           
         }
 
         if (toolId == 'editor'){
