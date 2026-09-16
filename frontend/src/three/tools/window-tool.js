@@ -1,21 +1,18 @@
+import * as THREE from 'three';
+
 import { createBuildToolInstance } from '../assets/build-tool-assets.js';
-import { createInvisibleInstance } from '../assets/invisible-assets.js';
+
+import { 
+    createStructureInstance, 
+    updateWallSegmentInstance 
+} from '../assets/structure-assets.js';
+
 import { 
     WALL_HEIGHT,
     WINDOW_HEIGHT, 
     WINDOW_WIDTH 
 } from '../config.js';
 
-import { 
-    createOutline, 
-    removeOutline,
-    createGizmo,
-    removeGizmo,
-    createSelectionHighlight,
-    removeSelectionHighlight,
-    setGizmoArrowScale,
-    updateGizmoPosition
-} from './utils/selection.js';
 import { 
     getObject,
     addObject, 
@@ -26,78 +23,64 @@ export function createWindowTool({
     scene,
     gridSize
 }){
-    /* 빈 변수들 */
-    const confirmedRoofs = [];
-    let currentGizmoTargets = [];
+    /* 벽 절편 mesh를 미리 선언 => 초기화 */
+    const hoverWallSegmentGroup = new THREE.Group();
+    const hoverWallSegments = [];
+
+    /* 변화 감지를 인식하기 위한 변수 */
+    let currentGridPoint = undefined;
+    let previewedWallMesh = undefined;
     
-    let currentStartPoint;
-    let currentHoverPoint;
-    let currentSelecteMesh;
-    let currentHoveredMesh;
-
-    let draggingArrow = undefined;
-    let dragStartPoint = undefined; 
-    let hoveredArrow = undefined;
-    let draggingPrismData = undefined;
-
-    let dragPlane;
+    scene.add(hoverWallSegmentGroup);
+    initialzieWallSegments();
 
 
     /* 가시적 도구 객체들 호출 */
     const hoverWindowGroup = createBuildToolInstance('hover-window-group');
-    const hoverRoofDot = createBuildToolInstance('hover-roof-dot');
-
     hoverWindowGroup.visible = false;
-    hoverRoofDot.visible = false;
-
     scene.add(hoverWindowGroup);
-    scene.add(hoverRoofDot);
 
 
     /* 마우스 커서 추적 */
-    function updateHoverPoint(gridX, gridZ, gridY, object, normal){
-        currentHoverPoint = { gridX, gridZ, gridY };
+    function updateHoverPoint(gridX, gridZ, gridY, object, normal){   
         updateHoverWindowGroup(gridX, gridZ, gridY, object, normal);
+        
+        if (object?.userData.id !== 'wall-face'){
+            clearWallSegmentationPreview();
+            return;
+        }
+
+        /* 커서의 좌표가 변했는지 판별하기 */
+        const nextGridPoint = {gridX, gridZ, gridY};
+        const isSameGridPoint =
+            currentGridPoint &&
+            currentGridPoint.gridX === nextGridPoint.gridX &&
+            currentGridPoint.gridZ === nextGridPoint.gridZ &&
+            currentGridPoint.gridY === nextGridPoint.gridY;
+        const isSameWall = previewedWallMesh === object;
+
+        /* 조건 판별 부분 */
+        if (isSameGridPoint && isSameWall) return;
+        if (previewedWallMesh && !isSameWall) {
+            previewedWallMesh.visible = true;
+        }
+
+        /* 현재 원본 벽을 숨김 => 변경된 커서 좌표를 업데이트 */
+        previewedWallMesh = object;
+        previewedWallMesh.visible = false;
+        currentGridPoint = nextGridPoint;
+
+        doWallSegmentation(gridX, gridZ, gridY, object);
     }
 
     /* 마우스 클릭 시 */
     function confirmPoint(gridX, gridZ, gridY, object){
-        currentHoverPoint = { gridX, gridZ, gridY };
-        const arrow = getArrow(object);
-        
-        /* 화살표 클릭 시 => 드래그 시작 */
-        if(arrow){
-            draggingArrow = arrow;
-            dragStartPoint = currentHoverPoint;
 
-            /* 변형 데이터 지속적 반영 */
-            const objectId = currentSelecteMesh.userData.objectId;
-            const _object = getObject(objectId);
-            draggingPrismData = structuredClone(_object.data);
-            return;
-        }
-        
-        removeOutline(currentSelecteMesh);
-        removeSelectionHighlight(currentSelecteMesh);
-        removeGizmo();
-
-        currentSelecteMesh = object;
-
-        createOutline(currentSelecteMesh);
-        createSelectionHighlight(currentSelecteMesh);
-        createGizmo(currentSelecteMesh);
-
-        /* drag plane y 위치 설정 */
-        dragPlane = createInvisibleInstance(
-            'invisible-plane',
-            currentSelecteMesh.position.y
-        );
     }
 
     /* 도구 감추기 */
     function hide(){
         hoverWindowGroup.visible = false;
-        hoverRoofDot.visible = false;
     }
 
 
@@ -116,20 +99,85 @@ export function createWindowTool({
         if (object?.userData.id !== 'wall-face') return;
 
         const rotationY = Math.atan2(normal.x, normal.z);
-        hoverWindowGroup.rotation.y = rotationY;
+        hoverWindowGroup.rotation.y = rotationY; 
+    }
 
+
+    /* 벽을 창문으로 뚫어서 재구성 하는 함수 */
+    function doWallSegmentation(gridX, gridZ, gridY, object){
+        
         /* 해당 wall 오브젝트의 wall data를 가져오기 */
         const wallObjectId = object.userData.objectId;
         const wallData = getObject(wallObjectId).data;
         
-        splitWallByWindow(
-            wallData, 
-            gridX, 
-            gridZ, 
-            WINDOW_WIDTH, 
-            WINDOW_HEIGHT
-        );
+        /* wall data 기반으로 각 벽 절편(segment) 데이터 구하기 */
+        const splitResult = splitWallByWindow(
+                wallData, 
+                gridX, 
+                gridZ, 
+                gridY,
+                WINDOW_WIDTH, 
+                WINDOW_HEIGHT
+            );
+        
+        const segmentList = [
+            splitResult.leftWall,
+            splitResult.rightWall,
+            splitResult.bottomWall,
+            splitResult.topWall
+        ].filter(Boolean);
+
+        if (previewedWallMesh && previewedWallMesh !== object) {
+            previewedWallMesh.visible = true;
+        }
+
+        previewedWallMesh = object;
+        previewedWallMesh.visible = false;
+
+        /* 벽 절편들을 실시간으로 변형을 수행 */
+        hoverWallSegments.forEach((mesh, index) => {
+            const segmentData = segmentList[index];
+
+            if (!segmentData) {
+                mesh.visible = false;
+                return;
+            }
+
+            updateWallSegmentInstance(mesh, segmentData);
+            mesh.visible = true;
+        });
+
     }
+
+    /* 초기 벽 절편 생성 함수 */
+    function initialzieWallSegments(){
+        for (let i = 0; i < 4; i++) {
+            const mesh = createStructureInstance('wall-segment', {
+                start: { x: 0, z: 0 },
+                end: { x: 1, z: 0 },
+                baseY: 0,
+                height: 1
+            });
+
+            mesh.visible = false;
+
+            hoverWallSegments.push(mesh);
+            hoverWallSegmentGroup.add(mesh);
+        }      
+    }
+
+    /* 절편 없애는 함수 */
+    function clearWallSegmentationPreview() {
+        if (previewedWallMesh) {
+            previewedWallMesh.visible = true;
+            previewedWallMesh = undefined;
+        }
+
+        for (const mesh of hoverWallSegments) {
+            mesh.visible = false;
+        }
+    }
+
 
     /* 창문을 기준으로 벽을 쪼개는 함수 */
     function splitWallByWindow(

@@ -1,5 +1,10 @@
 import * as THREE from 'three';
-import { GRID_SIZE_M, WALL_HEIGHT, PLATFORM_HEIGHT, FLOOR_THICKENSS } from '../config.js';
+import { 
+    GRID_SIZE_M, 
+    WALL_HEIGHT, 
+    WALL_THICKNESS,
+    PLATFORM_HEIGHT, 
+    FLOOR_THICKENSS } from '../config.js';
 import { createPrismGeometry } from './util/geometry-calculator.js';
 
 const platformCubeGeometry = new THREE.BoxGeometry(1, PLATFORM_HEIGHT, 1);
@@ -25,8 +30,15 @@ const assets = {
             roughness: 0.85,
             metalness: 0.1
         });
-        const geometry = createWallGeometry(segmentData);
+        const geometry = new THREE.BoxGeometry(
+            1,
+            1,
+            WALL_THICKNESS
+        );
         const mesh = new THREE.Mesh(geometry, material);
+        
+        /* segment data를 기준으로 기본 벽 형태 변형하기 */
+        applyWallSegmentTransform(mesh, segmentData);
         
         mesh.castShadow = true;
         mesh.receiveShadow = true;
@@ -83,6 +95,10 @@ const assets = {
 
 export function createStructureInstance(assetId, data) {
     return assets[assetId](data);
+}
+
+export function updateWallSegmentInstance(mesh, segmentData) {
+    applyWallSegmentTransform(mesh, segmentData);
 }
 
 /* 벽 geometry 계산 함수 */
@@ -182,4 +198,25 @@ function createFloorGeometry(floorData){
     });
 
     return floorGeometry;
+}
+
+/* 벽 segment 변형하기 */
+function applyWallSegmentTransform(mesh, segmentData) {
+    const { start, end, baseY, height } = segmentData;
+
+    const dx = end.x - start.x;
+    const dz = end.z - start.z;
+
+    const length = Math.hypot(dx, dz);
+    const rotationY = -Math.atan2(dz, dx);
+
+    /* 위치, 크기, 회전 각도 반영하기 */
+    mesh.position.set(
+        (start.x + end.x) / 2,
+        baseY + height / 2,
+        (start.z + end.z) / 2
+    );
+
+    mesh.scale.set(length, height, 1);
+    mesh.rotation.set(0, rotationY, 0);
 }

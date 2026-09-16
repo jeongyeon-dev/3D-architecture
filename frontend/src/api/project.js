@@ -1,10 +1,23 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const token = localStorage.getItem("access_token")
+
+/* 토큰을 구하는 함수 */
+function getAuthHeaders() {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        throw new Error("로그인이 필요합니다.");
+    }
+
+    return {
+        Authorization: `Bearer ${token}`,
+    };
+}
+
 
 export async function getProjects() {
     const response = await fetch(`${API_BASE_URL}/projects`, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: getAuthHeaders(),
         },
     });
 
@@ -20,7 +33,7 @@ export async function createProject(title) {
     const response = await fetch(`${API_BASE_URL}/projects/create`, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${token}`,
+            ...getAuthHeaders(),
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
