@@ -148,3 +148,122 @@ export function createWindowGroupGeometry(
         innerBox
     };
 }
+
+
+/* miter 좌/우 벽을 생성하는 geometry */
+export function createMiterWallSegmentGeometry(segmentData) {
+    const {
+        startLeft,
+        startRight,
+        endLeft,
+        endRight,
+        baseY,
+        height
+    } = segmentData;
+
+    const topY = baseY + height;
+
+    const bottomStartLeft = new THREE.Vector3(
+        startLeft.x,
+        baseY,
+        startLeft.z
+    );
+
+    const bottomStartRight = new THREE.Vector3(
+        startRight.x,
+        baseY,
+        startRight.z
+    );
+
+    const bottomEndRight = new THREE.Vector3(
+        endRight.x,
+        baseY,
+        endRight.z
+    );
+
+    const bottomEndLeft = new THREE.Vector3(
+        endLeft.x,
+        baseY,
+        endLeft.z
+    );
+
+    const topStartLeft = bottomStartLeft.clone();
+    topStartLeft.y = topY;
+
+    const topStartRight = bottomStartRight.clone();
+    topStartRight.y = topY;
+
+    const topEndRight = bottomEndRight.clone();
+    topEndRight.y = topY;
+
+    const topEndLeft = bottomEndLeft.clone();
+    topEndLeft.y = topY;
+
+    const positions = [];
+
+    function addQuad(a, b, c, d) {
+        positions.push(
+            a.x, a.y, a.z,
+            b.x, b.y, b.z,
+            c.x, c.y, c.z,
+
+            a.x, a.y, a.z,
+            c.x, c.y, c.z,
+            d.x, d.y, d.z
+        );
+    }
+
+    /* 각 면을 만들기 */
+    addQuad(
+        bottomStartLeft,
+        bottomEndLeft,
+        bottomEndRight,
+        bottomStartRight
+    );
+
+    addQuad(
+        topStartLeft,
+        topStartRight,
+        topEndRight,
+        topEndLeft
+    );
+
+    addQuad(
+        bottomStartLeft,
+        bottomStartRight,
+        topStartRight,
+        topStartLeft
+    );
+
+    addQuad(
+        bottomEndRight,
+        bottomEndLeft,
+        topEndLeft,
+        topEndRight
+    );
+
+    addQuad(
+        bottomEndLeft,
+        bottomStartLeft,
+        topStartLeft,
+        topEndLeft
+    );
+
+    addQuad(
+        bottomStartRight,
+        bottomEndRight,
+        topEndRight,
+        topStartRight
+    );
+
+    const geometry = new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(positions, 3)
+    );
+
+    geometry.computeVertexNormals();
+
+    return geometry;
+}

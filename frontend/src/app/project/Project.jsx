@@ -29,7 +29,7 @@ export default function Project({ onProjectSelect }) {
         }
 
         fetchProjects();
-    }, [loggedIn]);
+    }, []);
 
 
     async function handleProjectClick(projectId) {

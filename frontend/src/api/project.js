@@ -16,9 +16,7 @@ function getAuthHeaders() {
 
 export async function getProjects() {
     const response = await fetch(`${API_BASE_URL}/projects`, {
-        headers: {
-            Authorization: getAuthHeaders(),
-        },
+        headers: getAuthHeaders(),   
     });
 
     if (!response.ok) {

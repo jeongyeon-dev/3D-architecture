@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 
-import { createBuildToolInstance } from '../assets/build-tool-assets.js';
+import { 
+    createBuildToolInstance
+} from '../assets/build-tool-assets.js';
 
 import { 
-    createStructureInstance, 
-    updateWallSegmentInstance 
+    createStructureInstance
 } from '../assets/structure-assets.js';
 
 import { 
@@ -25,14 +26,18 @@ export function createWindowTool({
 }){
     /* 벽 절편 mesh를 미리 선언 => 초기화 */
     const hoverWallSegmentGroup = new THREE.Group();
-    const hoverWallSegments = [];
+    
+    let hoverLeftMiterWall;
+    let hoverRightMiterWall;
+    let hoverBottomWall;
+    let hoverTopWall;
 
     /* 변화 감지를 인식하기 위한 변수 */
     let currentGridPoint = undefined;
     let previewedWallMesh = undefined;
     
     scene.add(hoverWallSegmentGroup);
-    initialzieWallSegments();
+    initializeWallSegments();
 
 
     /* 가시적 도구 객체들 호출 */
@@ -104,67 +109,85 @@ export function createWindowTool({
 
 
     /* 벽을 창문으로 뚫어서 재구성 하는 함수 */
-    function doWallSegmentation(gridX, gridZ, gridY, object){
-        
-        /* 해당 wall 오브젝트의 wall data를 가져오기 */
-        const wallObjectId = object.userData.objectId;
-        const wallData = getObject(wallObjectId).data;
-        
-        /* wall data 기반으로 각 벽 절편(segment) 데이터 구하기 */
-        const splitResult = splitWallByWindow(
-                wallData, 
-                gridX, 
-                gridZ, 
-                gridY,
-                WINDOW_WIDTH, 
-                WINDOW_HEIGHT
-            );
-        
-        const segmentList = [
-            splitResult.leftWall,
-            splitResult.rightWall,
-            splitResult.bottomWall,
-            splitResult.topWall
-        ].filter(Boolean);
-
+    function doWallSegmentation(gridX, gridZ, gridY, object) {
+        /* 다른 벽으로 옮겨졌다면 이전 원본 벽 복구 */
         if (previewedWallMesh && previewedWallMesh !== object) {
             previewedWallMesh.visible = true;
         }
 
+        /* 현재 창문이 닿은 원본 벽 숨김 */
         previewedWallMesh = object;
         previewedWallMesh.visible = false;
 
-        /* 벽 절편들을 실시간으로 변형을 수행 */
-        hoverWallSegments.forEach((mesh, index) => {
-            const segmentData = segmentList[index];
+        const wallObjectId = object.userData.objectId;
+        const wallData = getObject(wallObjectId).data;
 
-            if (!segmentData) {
-                mesh.visible = false;
-                return;
-            }
+        const splitResult = splitWallByWindow(
+            wallData,
+            gridX,
+            gridZ,
+            gridY,
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT
+        );
 
-            updateWallSegmentInstance(mesh, segmentData);
-            mesh.visible = true;
-        });
-
+        /* 벽 절편 geometry 변경 개시 */
+        updateMiterWallSegmentMesh(hoverLeftMiterWall, splitResult.leftWall);
+        updateMiterWallSegmentMesh(hoverRightMiterWall, splitResult.rightWall);
+        updateWallSegmentMesh(hoverBottomWall, splitResult.bottomWall);
+        updateWallSegmentMesh(hoverTopWall, splitResult.topWall);
     }
 
     /* 초기 벽 절편 생성 함수 */
-    function initialzieWallSegments(){
-        for (let i = 0; i < 4; i++) {
-            const mesh = createStructureInstance('wall-segment', {
-                start: { x: 0, z: 0 },
-                end: { x: 1, z: 0 },
-                baseY: 0,
-                height: 1
-            });
+    function initializeWallSegments() {
+        const initialBoxData = {
+            start: { x: 0, z: 0 },
+            end: { x: 1, z: 0 },
+            baseY: 0,
+            height: 1
+        };
 
+        const initialMiterData = {
+            startLeft: { x: 0, z: -0.08 },
+            startRight: { x: 0, z: 0.08 },
+            endLeft: { x: 1, z: -0.08 },
+            endRight: { x: 1, z: 0.08 },
+            baseY: 0,
+            height: 1
+        };
+
+        hoverLeftMiterWall = createBuildToolInstance(
+            'miter-wall-segment',
+            initialMiterData
+        );
+
+        hoverRightMiterWall = createBuildToolInstance(
+            'miter-wall-segment',
+            initialMiterData
+        );
+
+        hoverBottomWall = createBuildToolInstance(
+            'wall-segment',
+            initialBoxData
+        );
+
+        hoverTopWall = createBuildToolInstance(
+            'wall-segment',
+            initialBoxData
+        );
+
+        const meshes = [
+            hoverLeftMiterWall,
+            hoverRightMiterWall,
+            hoverBottomWall,
+            hoverTopWall
+        ];
+
+        for (const mesh of meshes) {
             mesh.visible = false;
-
-            hoverWallSegments.push(mesh);
-            hoverWallSegmentGroup.add(mesh);
-        }      
-    }
+            scene.add(mesh);
+        }
+}
 
     /* 절편 없애는 함수 */
     function clearWallSegmentationPreview() {
@@ -248,37 +271,77 @@ export function createWindowTool({
 
         /* 계산된 data 값들을 반환한다 */
         return {
+            /* 좌 우는 cube geometry가 바로 적용되지 않는다 */
             leftWall: {
-                start: wallStart,
-                end: windowStart,
-                baseY: wallBaseY,
+                type: 'miter-segment',
+                startLeft: wallData.startLeft,
+                startRight: wallData.startRight,
+                endLeft: windowStartLeft,
+                endRight: windowStartRight,
+                baseY: wallData.baseY,
                 height: WALL_HEIGHT
             },
             rightWall: {
-                start: windowEnd,
-                end: wallEnd,
-                baseY: wallBaseY,
+                type: 'miter-segment',
+                startLeft: windowEndLeft,
+                startRight: windowEndRight,
+                endLeft: wallData.endLeft,
+                endRight: wallData.endRight,
+                baseY: wallData.baseY,
                 height: WALL_HEIGHT
             },
+
+            /* 요 둘은 cube geometry로 바로 적용 가능 */
             bottomWall: {
+                type: 'wall-segment',
                 start: windowStart,
                 end: windowEnd,
-                baseY: wallBaseY,
-                height: windowBottomY - wallBaseY
+                baseY: wallData.baseY,
+                height: windowBottomY - wallData.baseY
             },
             topWall: {
+                type: 'wall-segment',
                 start: windowStart,
                 end: windowEnd,
                 baseY: windowTopY,
                 height: wallTopY - windowTopY
-            },
-            opening: {
-                start: windowStart,
-                end: windowEnd,
-                bottomY: windowBottomY,
-                topY: windowTopY
             }
         };
+    }
+
+
+    /* 각각 miter 벽 절편, cube 벽 절편을 수시로 변경하는 함수 */
+    function updateMiterWallSegmentMesh(mesh, segmentData) {
+        const nextGeometry =
+            createMiterWallSegmentGeometry(segmentData);
+
+        mesh.geometry.dispose();
+        mesh.geometry = nextGeometry;
+        mesh.visible = true;
+    }
+
+    function updateWallSegmentMesh(mesh, segmentData) {
+        const { start, end, baseY, height } = segmentData;
+
+        const dx = end.x - start.x;
+        const dz = end.z - start.z;
+
+        const wallLength = Math.hypot(dx, dz);
+
+        if (wallLength <= 0 || height <= 0) {
+            mesh.visible = false;
+            return;
+        }
+
+        mesh.position.set(
+            (start.x + end.x) / 2,
+            baseY + height / 2,
+            (start.z + end.z) / 2
+        );
+
+        mesh.scale.set(wallLength, height, 1);
+        mesh.rotation.set(0, -Math.atan2(dz, dx), 0);
+        mesh.visible = true;
     }
 
     return {

@@ -7,7 +7,8 @@ import {
 } from '../config.js';
 import { 
     createPrismGeometry,
-    createWindowGroupGeometry
+    createWindowGroupGeometry,
+    createMiterWallSegmentGeometry
 } from './util/geometry-calculator.js';
 
 
@@ -187,7 +188,25 @@ const assets = {
         }); 
         
         return group;
-    }
+    },
+    'miter-wall-segment': (segmentData) => {
+        const geometry = createMiterWallSegmentGeometry(segmentData);
+
+        const material = new THREE.MeshBasicMaterial({
+            color: '#ffffff',
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+
+        mesh.userData = {
+            id: 'hover-miter-wall-segment'
+        };
+
+        return mesh;
+    },
 }
 
 export function createBuildToolInstance(assetId){
@@ -198,6 +217,3 @@ export function createBuildToolInstance(assetId){
         return undefined;
     }
 }
-
-
-

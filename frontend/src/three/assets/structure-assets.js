@@ -200,7 +200,7 @@ function createFloorGeometry(floorData){
     return floorGeometry;
 }
 
-/* 벽 segment 변형하기 */
+/* 벽 segment 변형하기: cube 형태 */
 function applyWallSegmentTransform(mesh, segmentData) {
     const { start, end, baseY, height } = segmentData;
 
