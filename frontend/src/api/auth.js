@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const ACCESS_TOKEN_KEY = "access_token";
 
 export async function login(username, password) {
     const response = await fetch(
@@ -52,4 +53,50 @@ export async function signup(username, nickname, password) {
     }
 
     return data;
+}
+
+
+/* 토큰 관련 로직 */
+export function getAccessToken() {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+export function removeAccessToken() {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+export function isAccessTokenExpired() {
+    const token = getAccessToken();
+
+    if (!token) {
+        return true;
+    }
+
+    try {
+        const encodedPayload = token.split(".")[1];
+
+        const base64 = encodedPayload
+            .replace(/-/g, "+")
+            .replace(/_/g, "/")
+            .padEnd(Math.ceil(encodedPayload.length / 4) * 4, "=");
+
+        const payload = JSON.parse(atob(base64));
+
+        if (!payload.exp) {
+            return true;
+        }
+
+        return Date.now() >= payload.exp * 1000;
+    } catch {
+        return true;
+    }
+}
+
+export function getValidAccessToken() {
+    if (isAccessTokenExpired()) {
+        removeAccessToken();
+        return null;
+    }
+
+    return getAccessToken();
 }

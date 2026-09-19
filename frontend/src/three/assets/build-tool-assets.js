@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { 
     WALL_HEIGHT, 
+    WALL_THICKNESS,
     PLATFORM_HEIGHT, 
     HOVER_FLOOR_SPHERE_RADIUS,
-    WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_FRAME_THICKNESS
+    WINDOW_HEIGHT, 
+    WINDOW_WIDTH, 
+    WINDOW_FRAME_THICKNESS
 } from '../config.js';
 import { 
     createPrismGeometry,
@@ -207,11 +210,33 @@ const assets = {
 
         return mesh;
     },
+    'wall-segment': () => {
+        const geometry = new THREE.BoxGeometry(
+            1,
+            1,
+            WALL_THICKNESS
+        );
+
+        const material = new THREE.MeshBasicMaterial({
+            color: '#ffffff',
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+
+        mesh.userData = {
+            id: 'hover-wall-segment'
+        };
+
+        return mesh;
+    },
 }
 
-export function createBuildToolInstance(assetId){
+export function createBuildToolInstance(assetId, assetData){
     if(assetId in assets){
-        return assets[assetId]();
+        return assets[assetId](assetData);
     }else{
         console.warn(`해당 에셋 ID ${assetId}를 찾지 못했습니다.`);
         return undefined;

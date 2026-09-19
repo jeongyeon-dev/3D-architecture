@@ -1,11 +1,17 @@
+import { 
+    getValidAccessToken, 
+    removeAccessToken 
+} from "./auth";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 /* 토큰을 구하는 함수 */
 function getAuthHeaders() {
-    const token = localStorage.getItem("access_token");
+    const token = getValidAccessToken();
 
     if (!token) {
-        throw new Error("로그인이 필요합니다.");
+        throw new Error("로그인이 만료되었거나, 로그인이 되지 않았습니다.");
     }
 
     return {
@@ -18,6 +24,12 @@ export async function getProjects() {
     const response = await fetch(`${API_BASE_URL}/projects`, {
         headers: getAuthHeaders(),   
     });
+
+    if (response.status === 401) {
+        removeAccessToken();
+        window.location.reload();
+        throw new Error("로그인이 만료되었습니다.");
+    }
 
     if (!response.ok) {
         throw new Error("프로젝트를 불러오지 못했습니다.");

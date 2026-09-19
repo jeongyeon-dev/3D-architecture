@@ -8,12 +8,13 @@ import Community from './community/Community.jsx';
 import Project from './project/Project.jsx';
 
 import { createProject } from '../api/project.js';
+import { getValidAccessToken } from '../api/auth.js';
 
 
 export default function App() {
     /* 토큰 유무에 따른 로그인 상태 구별하기 */
     const [loggedIn, setLoggedIn] = useState(
-        () => Boolean(localStorage.getItem("access_token"))
+        () => Boolean(getValidAccessToken())
     );
     const [page, setPage] = useState("home");
     const [projectId, setProjectId] = useState(null);
