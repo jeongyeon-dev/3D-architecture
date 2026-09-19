@@ -8,10 +8,15 @@ import {
     createStructureInstance
 } from '../assets/structure-assets.js';
 
+import {
+    createMiterWallSegmentGeometry
+} from '../assets/util/geometry-calculator.js';
+
 import { 
     WALL_HEIGHT,
     WINDOW_HEIGHT, 
-    WINDOW_WIDTH 
+    WINDOW_WIDTH,
+    WALL_THICKNESS
 } from '../config.js';
 
 import { 
@@ -196,7 +201,14 @@ export function createWindowTool({
             previewedWallMesh = undefined;
         }
 
-        for (const mesh of hoverWallSegments) {
+        const meshes = [
+            hoverLeftMiterWall,
+            hoverRightMiterWall,
+            hoverBottomWall,
+            hoverTopWall
+        ];
+
+        for (const mesh of meshes) {
             mesh.visible = false;
         }
     }
@@ -253,6 +265,10 @@ export function createWindowTool({
         );
 
         /* 창문의 좌, 우 끝 지점을 구한다 */
+        const normalX = -unitZ;
+        const normalZ = unitX;
+        const halfThickness = WALL_THICKNESS / 2;
+
         const windowStart = {
             x: wallStart.x + unitX * (windowCenterDistance - halfWidth),
             z: wallStart.z + unitZ * (windowCenterDistance - halfWidth)
@@ -261,6 +277,27 @@ export function createWindowTool({
             x: wallStart.x + unitX * (windowCenterDistance + halfWidth),
             z: wallStart.z + unitZ * (windowCenterDistance + halfWidth)
         };
+
+        const windowStartLeft = {
+            x: windowStart.x + normalX * halfThickness,
+            z: windowStart.z + normalZ * halfThickness
+        };
+
+        const windowStartRight = {
+            x: windowStart.x - normalX * halfThickness,
+            z: windowStart.z - normalZ * halfThickness
+        };
+
+        const windowEndLeft = {
+            x: windowEnd.x + normalX * halfThickness,
+            z: windowEnd.z + normalZ * halfThickness
+        };
+
+        const windowEndRight = {
+            x: windowEnd.x - normalX * halfThickness,
+            z: windowEnd.z - normalZ * halfThickness
+        };
+
 
         /* 창문의 위, 아래 끝 지점을 구한다 */
         const windowBottomY = Math.max(

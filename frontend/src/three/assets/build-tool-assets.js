@@ -48,7 +48,12 @@ const faceMaterial = new THREE.MeshBasicMaterial({
         opacity: 0.6,
         depthWrite: false 
     });
-  
+const realFaceMaterial = new THREE.MeshStandardMaterial({ 
+        color: '#f1f1f1',
+        roughness: 0.85,
+        metalness: 0.1
+    });
+
 /* 창문 전용 메테리얼 */   
 const hoverGlassMaterial = new THREE.MeshBasicMaterial({
     color: '#ffffff',
@@ -194,15 +199,7 @@ const assets = {
     },
     'miter-wall-segment': (segmentData) => {
         const geometry = createMiterWallSegmentGeometry(segmentData);
-
-        const material = new THREE.MeshBasicMaterial({
-            color: '#ffffff',
-            transparent: true,
-            opacity: 0.35,
-            depthWrite: false
-        });
-
-        const mesh = new THREE.Mesh(geometry, material);
+        const mesh = new THREE.Mesh(geometry, realFaceMaterial);
 
         mesh.userData = {
             id: 'hover-miter-wall-segment'
@@ -211,20 +208,8 @@ const assets = {
         return mesh;
     },
     'wall-segment': () => {
-        const geometry = new THREE.BoxGeometry(
-            1,
-            1,
-            WALL_THICKNESS
-        );
-
-        const material = new THREE.MeshBasicMaterial({
-            color: '#ffffff',
-            transparent: true,
-            opacity: 0.35,
-            depthWrite: false
-        });
-
-        const mesh = new THREE.Mesh(geometry, material);
+        const geometry = new THREE.BoxGeometry(1, 1, WALL_THICKNESS);
+        const mesh = new THREE.Mesh(geometry, realFaceMaterial);
 
         mesh.userData = {
             id: 'hover-wall-segment'

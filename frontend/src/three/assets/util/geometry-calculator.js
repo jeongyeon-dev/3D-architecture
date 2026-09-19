@@ -204,12 +204,12 @@ export function createMiterWallSegmentGeometry(segmentData) {
     function addQuad(a, b, c, d) {
         positions.push(
             a.x, a.y, a.z,
-            b.x, b.y, b.z,
             c.x, c.y, c.z,
+            b.x, b.y, b.z,
 
             a.x, a.y, a.z,
-            c.x, c.y, c.z,
-            d.x, d.y, d.z
+            d.x, d.y, d.z,
+            c.x, c.y, c.z
         );
     }
 
