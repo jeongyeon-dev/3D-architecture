@@ -43,7 +43,12 @@ export function createPlacementController({
         const gridZ = Math.round(hit.point.z / gridSize);
         const gridY = Math.round(hit.point.y / 0.1 );
 
-        onGridSelected?.({ gridX, gridZ, gridY, object: hit.object });
+        onGridSelected?.({ 
+            gridX, 
+            gridZ, 
+            gridY, 
+            object: hit.object
+        });
     }
 
     /* 평시 마우스 커서 감지 */

@@ -1,13 +1,41 @@
 import * as THREE from 'three';
+
 import { 
     GRID_SIZE_M, 
     WALL_HEIGHT, 
     WALL_THICKNESS,
     PLATFORM_HEIGHT, 
-    FLOOR_THICKENSS } from '../config.js';
-import { createPrismGeometry } from './util/geometry-calculator.js';
+    FLOOR_THICKENSS,
+    WINDOW_HEIGHT, 
+    WINDOW_WIDTH, 
+    WINDOW_FRAME_THICKNESS 
+} from '../config.js';
 
+import { 
+    createPrismGeometry,
+    createWindowGroupGeometry 
+} from './util/geometry-calculator.js';
+
+/* 기하학적 정보 */
 const platformCubeGeometry = new THREE.BoxGeometry(1, PLATFORM_HEIGHT, 1);
+
+/* 메테리얼 */   
+const glassMaterial = new THREE.MeshPhysicalMaterial({
+    color: '#b9d8e8',
+    transmission: 0.88,
+    roughness: 0.08,
+    metalness: 0,
+    ior: 1.45,
+    thickness: 0.06,
+    transparent: true,
+    opacity: 1,
+    side: THREE.DoubleSide
+});
+const windowFrameMaterial = new THREE.MeshStandardMaterial({
+    color: '#555b63',
+    roughness: 0.38,
+    metalness: 0.7
+});
 
 const assets = {
     'wall-face': (wallData) => {
@@ -90,6 +118,45 @@ const assets = {
         mesh.receiveShadow = true;
         mesh.userData = { id: 'roof-prism' };
         return mesh;
+    },    
+    'window-group': () => {
+        /* 창문 group과 geometries */
+        const geometries = createWindowGroupGeometry(
+            WINDOW_WIDTH, 
+            WINDOW_HEIGHT,
+            WINDOW_FRAME_THICKNESS
+        );
+
+        /* 위치 지정하기 */
+        const positions = {
+            pane:   [0, 0, 0],
+
+            top:    [0,  (WINDOW_HEIGHT - WINDOW_FRAME_THICKNESS) / 2, 0],
+            bottom: [0, -(WINDOW_HEIGHT - WINDOW_FRAME_THICKNESS) / 2, 0],
+
+            left:   [-(WINDOW_WIDTH - WINDOW_FRAME_THICKNESS) / 2, 0, 0],
+            right:  [ (WINDOW_WIDTH - WINDOW_FRAME_THICKNESS) / 2, 0, 0]
+        };
+        
+        const group = new THREE.Group();
+        
+        /* for 문으로 각 순회하면서 적용 group에 더하기 */
+        Object.entries(geometries).forEach(([name, geometry]) => {  
+            if (name === 'outerBox' || name === 'innerBox') return;
+            
+            const material = name === 'pane'
+                ? glassMaterial
+                : windowFrameMaterial;
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            mesh.renderOrder = 1;
+            mesh.position.set(...positions[name]);
+            mesh.userData = { id: `window-${name}` };
+            
+            group.add(mesh);
+        }); 
+        
+        return group;
     }
 }
 

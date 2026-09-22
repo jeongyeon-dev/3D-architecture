@@ -25,6 +25,7 @@ import {
 } from "../project/project-state.js";
 
 
+
 export function createWindowTool({
     scene,
     gridSize
@@ -85,12 +86,26 @@ export function createWindowTool({
 
     /* 마우스 클릭 시 */
     function confirmPoint(gridX, gridZ, gridY, object){
+        const windowGroup = createStructureInstance('window-group');
+        const rotationY = hoverWindowGroup.rotation.y;
+        
+        /* 위치 및 방향 설정 */
+        windowGroup.position.set(
+            gridX * gridSize,
+            (gridY * 0.1) + (WINDOW_HEIGHT / 2),
+            gridZ * gridSize            
+        );
+        windowGroup.rotation.y = rotationY; 
+        scene.add(windowGroup);
 
+        /* 벽 절편화 확정 */
+        commitWallSegmentation();
     }
 
-    /* 도구 감추기 */
+    /* 도구 감추기 && 임시 벽 절변 상태 원복 */
     function hide(){
         hoverWindowGroup.visible = false;
+        clearWallSegmentationPreview();
     }
 
 
@@ -165,17 +180,14 @@ export function createWindowTool({
             'miter-wall-segment',
             initialMiterData
         );
-
         hoverRightMiterWall = createBuildToolInstance(
             'miter-wall-segment',
             initialMiterData
         );
-
         hoverBottomWall = createBuildToolInstance(
             'wall-segment',
             initialBoxData
         );
-
         hoverTopWall = createBuildToolInstance(
             'wall-segment',
             initialBoxData
@@ -192,7 +204,7 @@ export function createWindowTool({
             mesh.visible = false;
             scene.add(mesh);
         }
-}
+    }
 
     /* 절편 없애는 함수 */
     function clearWallSegmentationPreview() {
@@ -379,6 +391,11 @@ export function createWindowTool({
         mesh.scale.set(wallLength, height, 1);
         mesh.rotation.set(0, -Math.atan2(dz, dx), 0);
         mesh.visible = true;
+    }
+
+    /* 창문 위치 확정하는 함수 */
+    function commitWallSegmentation(){
+
     }
 
     return {

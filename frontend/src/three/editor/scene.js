@@ -269,8 +269,8 @@ export function createScene(){
         windowTool?.updateHoverPoint(gridX, gridZ, gridY, object, normal);
     }
 
-    function confirmWindowPoint(gridX, gridZ, gridY) {
-        return windowTool?.confirmPoint(gridX, gridZ, gridY);
+    function confirmWindowPoint(gridX, gridZ, gridY, object) {
+        return windowTool?.confirmPoint(gridX, gridZ, gridY, object);
     }
 
     
