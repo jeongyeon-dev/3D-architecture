@@ -32,21 +32,22 @@ export function createWindowTool({
 }){
     /* 벽 절편 mesh를 미리 선언 => 초기화 */
     const hoverWallSegmentGroup = new THREE.Group();
-    
-    let hoverLeftMiterWall;
-    let hoverRightMiterWall;
-    let hoverBottomWall;
-    let hoverTopWall;
 
     /* 변화 감지를 인식하기 위한 변수 */
     let currentGridPoint = undefined;
     let previewedWallMesh = undefined;
     
     scene.add(hoverWallSegmentGroup);
-    initializeWallSegments();
+    
+    let {
+        leftMiterWall: hoverLeftMiterWall,
+        rightMiterWall: hoverRightMiterWall,
+        bottomWall: hoverBottomWall,
+        topWall: hoverTopWall  
+    } = createBasicWallSegments();
 
 
-    /* 가시적 도구 객체들 호출 */
+    /* hover 창문 객체 만들기 */
     const hoverWindowGroup = createBuildToolInstance('hover-window-group');
     hoverWindowGroup.visible = false;
     scene.add(hoverWindowGroup);
@@ -99,7 +100,7 @@ export function createWindowTool({
         scene.add(windowGroup);
 
         /* 벽 절편화 확정 */
-        commitWallSegmentation();
+        commitWallSegmentation(gridX, gridZ, gridY, object);
     }
 
     /* 도구 감추기 && 임시 벽 절변 상태 원복 */
@@ -159,7 +160,7 @@ export function createWindowTool({
     }
 
     /* 초기 벽 절편 생성 함수 */
-    function initializeWallSegments() {
+    function createBasicWallSegments() {
         const initialBoxData = {
             start: { x: 0, z: 0 },
             end: { x: 1, z: 0 },
@@ -176,33 +177,41 @@ export function createWindowTool({
             height: 1
         };
 
-        hoverLeftMiterWall = createBuildToolInstance(
+        const leftMiterWall = createBuildToolInstance(
             'miter-wall-segment',
             initialMiterData
         );
-        hoverRightMiterWall = createBuildToolInstance(
+        const rightMiterWall = createBuildToolInstance(
             'miter-wall-segment',
             initialMiterData
         );
-        hoverBottomWall = createBuildToolInstance(
+        const bottomWall = createBuildToolInstance(
             'wall-segment',
             initialBoxData
         );
-        hoverTopWall = createBuildToolInstance(
+        const topWall = createBuildToolInstance(
             'wall-segment',
             initialBoxData
         );
 
         const meshes = [
-            hoverLeftMiterWall,
-            hoverRightMiterWall,
-            hoverBottomWall,
-            hoverTopWall
+            leftMiterWall,
+            rightMiterWall,
+            bottomWall,
+            topWall
         ];
 
+        /* secene에서 일단 보이지 않게 하기 */
         for (const mesh of meshes) {
             mesh.visible = false;
             scene.add(mesh);
+        }
+
+        return {
+            leftMiterWall,
+            rightMiterWall,
+            bottomWall,
+            topWall
         }
     }
 
@@ -393,9 +402,54 @@ export function createWindowTool({
         mesh.visible = true;
     }
 
-    /* 창문 위치 확정하는 함수 */
-    function commitWallSegmentation(){
+    /* 창문 위치 기반 벽 절편을 확정하는 함수 */
+    function commitWallSegmentation(gridX, gridZ, gridY, object){
 
+        /* 배치 확정할 벽 절편을 만든다 */
+        let {
+            leftMiterWall: _leftMiterWall,
+            rightMiterWall: _rightMiterWall,
+            bottomWall: _bottomWall,
+            topWall: _topWall  
+        } = createBasicWallSegments();
+
+        /* 확정된 grid 기준 벽을 재구성 */
+        const wallObjectId = object.userData.objectId;
+        const wallData = getObject(wallObjectId).data;
+        const confirmedSplitResult = splitWallByWindow(
+            wallData,
+            gridX,
+            gridZ,
+            gridY,
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT
+        );
+
+        updateMiterWallSegmentMesh(_leftMiterWall, confirmedSplitResult.leftWall);
+        updateMiterWallSegmentMesh(_rightMiterWall, confirmedSplitResult.rightWall);
+        updateWallSegmentMesh(_bottomWall, confirmedSplitResult.bottomWall);
+        updateWallSegmentMesh(_topWall, confirmedSplitResult.topWall);
+
+        /* 부모 ID 기반하여 벽 절편들 데이터를 넣는다 => scene에서 감지 */
+        const confirmedMeshes = [
+            _leftMiterWall,
+            _rightMiterWall,
+            _bottomWall,
+            _topWall             
+        ];
+
+        for ( const mesh of confirmedMeshes ){
+            mesh.userData = {
+                id: 'wall-segment',
+                parentId: wallObjectId
+            };
+        }
+
+        /* 원래 벽을 키지 못하도록 하기 => 원래 벽 지우기 */
+        if (previewedWallMesh === object) {
+            previewedWallMesh = undefined;
+        }
+        scene.remove(object);
     }
 
     return {

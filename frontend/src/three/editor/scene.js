@@ -63,7 +63,8 @@ export function createScene(){
         platform: () => platformTool?.hide(),
         floor: () => floorTool?.hide(),
         roof: () => roofTool?.hide(),
-        window: () => windowTool?.hide()
+        window: () => windowTool?.hide(),
+        editor: () => editorTool?.hide(),
     }
 
     /* raycasting 및 건설 오브젝트 추가하는 부분들 */
@@ -318,8 +319,10 @@ export function createScene(){
             placement.setRaycastTargets(() => {
                 const wallMeshes = scene.children.filter(
                     (object) =>
-                        object.isMesh &&
-                        object.userData.id === 'wall-face'
+                        object.isMesh &&(
+                            object.userData.id === 'wall-face' ||
+                            object.userData.id === 'wall-segment'
+                        )
                 );
 
                 return [
