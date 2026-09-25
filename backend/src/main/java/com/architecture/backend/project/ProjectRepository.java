@@ -5,9 +5,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProjectRepository extends JpaRepository<Project, Integer> {
+public interface ProjectRepository extends JpaRepository<ProjectEntity, Integer> {
 
-    List<Project> findAllByUserIdOrderByUpdatedAtDesc(Integer userId);
+    List<ProjectEntity> findAllByUserIdOrderByUpdatedAtDesc(Integer userId);
 
-    Optional<Project> findByIdAndUserId(Integer id, Integer userId);
+    Optional<ProjectEntity> findByIdAndUserId(Integer id, Integer userId);
 }

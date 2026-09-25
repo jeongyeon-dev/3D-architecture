@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProjectObjectRepository extends JpaRepository<ProjectObject, Integer> {
+public interface ProjectObjectRepository extends JpaRepository<ProjectObjectEntity, Integer> {
 
-    Optional<ProjectObject> findByProjectId(Integer projectId);
+    Optional<ProjectObjectEntity> findByProjectId(Integer projectId);
 }

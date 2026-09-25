@@ -22,6 +22,8 @@ import {
 import { 
     getObject,
     addObject, 
+    addWallSegment,
+    getWallSegment
 } from "../project/project-state.js";
 
 
@@ -57,7 +59,7 @@ export function createWindowTool({
     function updateHoverPoint(gridX, gridZ, gridY, object, normal){   
         updateHoverWindowGroup(gridX, gridZ, gridY, object, normal);
         
-        if (object?.userData.id !== 'wall-face'){
+        if (!isWallType(object)){
             clearWallSegmentationPreview();
             return;
         }
@@ -122,10 +124,12 @@ export function createWindowTool({
         hoverWindowGroup.visible = true;
 
         /* object가 벽일 경우 => 방향을 벽에 맞게 회전시키기 */
-        if (object?.userData.id !== 'wall-face') return;
-
-        const rotationY = Math.atan2(normal.x, normal.z);
-        hoverWindowGroup.rotation.y = rotationY; 
+        if (object?.userData.id === 'wall-face' ||
+            object?.userData.id === 'wall-segment'
+        ){
+            const rotationY = Math.atan2(normal.x, normal.z);
+            hoverWindowGroup.rotation.y = rotationY; 
+        }
     }
 
 
@@ -140,8 +144,10 @@ export function createWindowTool({
         previewedWallMesh = object;
         previewedWallMesh.visible = false;
 
-        const wallObjectId = object.userData.objectId;
-        const wallData = getObject(wallObjectId).data;
+        /* 벽 데이터 가져오기(원본 벽 or 벽 절편) */
+        const wallData = object.userData.id === 'wall-segment'
+                ? getWallSegment(object.userData.segmentId)
+                : getObject(object.userData.objectId).data;
 
         const splitResult = splitWallByWindow(
             wallData,
@@ -161,9 +167,13 @@ export function createWindowTool({
 
     /* 초기 벽 절편 생성 함수 */
     function createBasicWallSegments() {
+        const halfThickness = WALL_THICKNESS / 2;
+
         const initialBoxData = {
-            start: { x: 0, z: 0 },
-            end: { x: 1, z: 0 },
+            startLeft: { x: 0, z: halfThickness },
+            startRight: { x: 0, z: -halfThickness },
+            endLeft: { x: 1, z: halfThickness },
+            endRight: { x: 1, z: -halfThickness },
             baseY: 0,
             height: 1
         };
@@ -256,7 +266,8 @@ export function createWindowTool({
         };
 
         const wallBaseY = wallData.baseY;
-        const wallTopY = wallBaseY + WALL_HEIGHT;
+        const wallHeight = wallData.height ?? WALL_HEIGHT;
+        const wallTopY = wallBaseY + wallHeight;
 
         const directionX = wallEnd.x - wallStart.x;
         const directionZ = wallEnd.z - wallStart.z;
@@ -337,7 +348,7 @@ export function createWindowTool({
                 endLeft: windowStartLeft,
                 endRight: windowStartRight,
                 baseY: wallData.baseY,
-                height: WALL_HEIGHT
+                height: wallHeight
             },
             rightWall: {
                 type: 'miter-segment',
@@ -346,21 +357,27 @@ export function createWindowTool({
                 endLeft: wallData.endLeft,
                 endRight: wallData.endRight,
                 baseY: wallData.baseY,
-                height: WALL_HEIGHT
+                height: wallHeight
             },
-
-            /* 요 둘은 cube geometry로 바로 적용 가능 */
             bottomWall: {
                 type: 'wall-segment',
-                start: windowStart,
-                end: windowEnd,
+
+                startLeft: windowStartLeft,
+                startRight: windowStartRight,
+                endLeft: windowEndLeft,
+                endRight: windowEndRight,
+
                 baseY: wallData.baseY,
                 height: windowBottomY - wallData.baseY
             },
             topWall: {
                 type: 'wall-segment',
-                start: windowStart,
-                end: windowEnd,
+
+                startLeft: windowStartLeft,
+                startRight: windowStartRight,
+                endLeft: windowEndLeft,
+                endRight: windowEndRight,
+
                 baseY: windowTopY,
                 height: wallTopY - windowTopY
             }
@@ -379,7 +396,21 @@ export function createWindowTool({
     }
 
     function updateWallSegmentMesh(mesh, segmentData) {
-        const { start, end, baseY, height } = segmentData;
+        const {
+            startLeft, startRight,
+            endLeft, endRight,
+            baseY, height
+        } = segmentData;
+
+        const start = {
+            x: (startLeft.x + startRight.x) / 2,
+            z: (startLeft.z + startRight.z) / 2
+        };
+
+        const end = {
+            x: (endLeft.x + endRight.x) / 2,
+            z: (endLeft.z + endRight.z) / 2
+        };
 
         const dx = end.x - start.x;
         const dz = end.z - start.z;
@@ -414,8 +445,10 @@ export function createWindowTool({
         } = createBasicWallSegments();
 
         /* 확정된 grid 기준 벽을 재구성 */
-        const wallObjectId = object.userData.objectId;
-        const wallData = getObject(wallObjectId).data;
+        const wallData = object.userData.id === 'wall-segment'
+                ? getWallSegment(object.userData.segmentId)
+                : getObject(object.userData.objectId).data;
+        
         const confirmedSplitResult = splitWallByWindow(
             wallData,
             gridX,
@@ -430,18 +463,28 @@ export function createWindowTool({
         updateWallSegmentMesh(_bottomWall, confirmedSplitResult.bottomWall);
         updateWallSegmentMesh(_topWall, confirmedSplitResult.topWall);
 
+        /* 런타임 객체 저장하기 */
+        const leftSegmentId =
+            addWallSegment(confirmedSplitResult.leftWall);
+        const rightSegmentId =
+            addWallSegment(confirmedSplitResult.rightWall);
+        const bottomSegmentId =
+            addWallSegment(confirmedSplitResult.bottomWall);
+        const topSegmentId =
+            addWallSegment(confirmedSplitResult.topWall);
+
         /* 부모 ID 기반하여 벽 절편들 데이터를 넣는다 => scene에서 감지 */
-        const confirmedMeshes = [
-            _leftMiterWall,
-            _rightMiterWall,
-            _bottomWall,
-            _topWall             
+        const confirmedSegments = [
+            {mesh: _leftMiterWall, segmentId: leftSegmentId},
+            {mesh: _rightMiterWall, segmentId: rightSegmentId},
+            {mesh: _bottomWall, segmentId: bottomSegmentId},
+            {mesh: _topWall, segmentId: topSegmentId}
         ];
 
-        for ( const mesh of confirmedMeshes ){
+        for ( const { mesh, segmentId } of confirmedSegments ){
             mesh.userData = {
                 id: 'wall-segment',
-                parentId: wallObjectId
+                segmentId
             };
         }
 
@@ -450,6 +493,17 @@ export function createWindowTool({
             previewedWallMesh = undefined;
         }
         scene.remove(object);
+    }
+
+    /* 벽, 벽 절편인지 판별 */
+    function isWallType(object){
+        if (object?.userData.id === 'wall-face' ||
+            object?.userData.id === 'wall-segment'
+         ){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     return {

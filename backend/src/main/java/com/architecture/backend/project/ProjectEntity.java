@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "projects")
-public class Project {
+public class ProjectEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,10 +29,10 @@ public class Project {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    protected Project() {
+    protected ProjectEntity() {
     }
 
-    public Project(Integer userId, String title, LocalDateTime updatedAt) {
+    public ProjectEntity(Integer userId, String title, LocalDateTime updatedAt) {
         this.userId = userId;
         this.title = title;
         this.updatedAt = updatedAt;

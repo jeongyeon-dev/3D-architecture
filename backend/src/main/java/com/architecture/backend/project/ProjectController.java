@@ -28,12 +28,12 @@ public class ProjectController {
     }
 
     @GetMapping
-    List<Project> getProjects(@AuthenticationPrincipal Jwt jwt) {
+    List<ProjectEntity> getProjects(@AuthenticationPrincipal Jwt jwt) {
         return projectService.getProjects(userId(jwt));
     }
 
     @PostMapping("/create")
-    Project createProject(
+    ProjectEntity createProject(
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody ProjectCreateRequest request
     ) {
@@ -41,12 +41,12 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    ProjectObject getProject(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer id) {
+    ProjectObjectEntity getProject(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer id) {
         return projectService.getProject(userId(jwt), id);
     }
 
     @PutMapping("/save/{id}")
-    ProjectObject saveProject(
+    ProjectObjectEntity saveProject(
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable Integer id,
         @Valid @RequestBody ProjectSaveRequest request

@@ -26,7 +26,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(String username, String rawPassword) {
-        User user = userRepository.findByUsername(username).orElse(null);
+        UserEntity user = userRepository.findByUsername(username).orElse(null);
         if (user == null || !passwordMatches(rawPassword, user.getPassword())) {
             return new LoginResponse(false, null, null);
         }
@@ -47,7 +47,9 @@ public class AuthService {
             throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
         }
 
-        User user = userRepository.save(new User(username, nickname, passwordEncoder.encode(rawPassword)));
+        UserEntity user = userRepository.save(
+            new UserEntity(username, nickname, passwordEncoder.encode(rawPassword))
+        );
         return new SignupResponse(user.getId(), user.getUsername(), user.getNickname());
     }
 

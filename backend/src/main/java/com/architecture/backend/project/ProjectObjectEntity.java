@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "project_objects")
-public class ProjectObject {
+public class ProjectObjectEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +32,10 @@ public class ProjectObject {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    protected ProjectObject() {
+    protected ProjectObjectEntity() {
     }
 
-    public ProjectObject(Integer projectId, List<Map<String, Object>> objects, LocalDateTime updatedAt) {
+    public ProjectObjectEntity(Integer projectId, List<Map<String, Object>> objects, LocalDateTime updatedAt) {
         this.projectId = projectId;
         this.objects = objects;
         this.updatedAt = updatedAt;
