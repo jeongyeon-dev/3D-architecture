@@ -18,11 +18,11 @@ export function loadProject(objects, scene) {
                 loadPlatform(scene, object.data);
                 break;
             case "wall-face":
-                const { windows } = loadWall(scene, object);
+                const { mesh, windows } = loadWall(scene, object);
 
                 /* 창문이 있을 경우 창문 불러오기를 진행한다 */
                 if (windows.length > 0) {
-                    loadWindow(scene, windows);
+                    loadWindow(scene, mesh, windows);
                 }
                 break;
             case "roof":
