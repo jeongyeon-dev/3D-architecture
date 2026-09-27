@@ -13,6 +13,7 @@ import {
 } from '../assets/util/geometry-calculator.js';
 
 import { 
+    GRID_SIZE_M,
     WALL_HEIGHT,
     WINDOW_HEIGHT, 
     WINDOW_WIDTH,
@@ -23,7 +24,8 @@ import {
     getObject,
     addObject, 
     addWallSegment,
-    getWallSegment
+    getWallSegment,
+    addWindow
 } from "../project/project-state.js";
 
 
@@ -444,11 +446,15 @@ export function createWindowTool({
             topWall: _topWall  
         } = createBasicWallSegments();
 
-        /* 확정된 grid 기준 벽을 재구성 */
         const wallData = object.userData.id === 'wall-segment'
                 ? getWallSegment(object.userData.segmentId)
-                : getObject(object.userData.objectId).data;
+                : getObject(object.userData.objectId).data;     
+        const parentWallId = object.userData.id === 'wall-segment'
+                ? object.userData.parentWallId
+                : object.userData.objectId;
         
+
+        /* 확정된 grid 기준 벽을 재구성 */
         const confirmedSplitResult = splitWallByWindow(
             wallData,
             gridX,
@@ -484,9 +490,20 @@ export function createWindowTool({
         for ( const { mesh, segmentId } of confirmedSegments ){
             mesh.userData = {
                 id: 'wall-segment',
-                segmentId
+                segmentId,
+                parentWallId: parentWallId
             };
         }
+
+        /* 창문 객체 데이터를 저장하기 */
+        addWindow(parentWallId, {
+            gridX,
+            gridZ,
+            gridY,
+            rotation: hoverWindowGroup.rotation.y,
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT
+        });
 
         /* 원래 벽을 키지 못하도록 하기 => 원래 벽 지우기 */
         if (previewedWallMesh === object) {
@@ -510,6 +527,29 @@ export function createWindowTool({
         updateHoverPoint,
         confirmPoint,
         hide
+    }
+}
+
+
+/* 저장된 wall data에서 창문을 불러오는 함수 */
+export function loadWindow(scene, windows){
+    
+    /* 창문을 하나씩 불러온다 */
+    for (const windowData of windows){
+        const windowGroup = createStructureInstance('window-group');
+        const {
+            gridX, gridZ, gridY,
+            rotation, width, height
+        } = windowData;
+
+        windowGroup.position.set(
+            gridX * GRID_SIZE_M,
+            (gridY * 0.1) + (WINDOW_HEIGHT / 2),
+            gridZ * GRID_SIZE_M            
+        );
+
+        windowGroup.rotation.y = rotation; 
+        scene.add(windowGroup);
     }
 }
 

@@ -51,7 +51,7 @@ export function getPlatformObjectMeshes(){
 }
 
 
-/* 벽 절편 관리 함수 */
+/* 벽 절편 관리 함수들 */
 export function addWallSegment(object){
     const id = _nextId++;
 
@@ -65,4 +65,20 @@ export function addWallSegment(object){
 
 export function getWallSegment(id) {
     return wallSegments.get(id);
+}
+
+
+/* 벽에 창문을 넣는 함수들 */
+export function addWindow(wallId, windowData) {
+    const wall = objects.get(wallId);
+
+    if (!wall || wall.type !== 'wall-face') {
+        throw new Error(`벽 ${wallId}를 찾지 못했습니다.`);
+    }
+
+    if (!wall.windows) {
+        wall.windows = [];
+    }
+
+    wall.windows.push(windowData);
 }
