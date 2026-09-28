@@ -4,7 +4,7 @@ import { saveProject, getProject } from "../../api/project.js";
 import { createSimulator } from "../../three/editor/simulator.js";
 import { getAllObjects } from "../../three/project/project-state.js";
 
-import FloorSelector from "../../components/ToolBar.jsx";
+import FloorSelector from "../../components/toolbar/ToolBar.jsx";
 
 
 const rightTools = [

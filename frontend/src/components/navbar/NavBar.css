@@ -1,0 +1,165 @@
+.main-navbar {
+    position: relative;
+    z-index: 20;
+
+    width: 100%;
+    height: 72px;
+
+    display: flex;
+    align-items: stretch;
+
+    background: #ffffff;
+    border-bottom: 1px solid #ededf1;
+    box-sizing: border-box;
+}
+
+/* 왼쪽 로고 */
+.main-navbar__logo {
+    width: 72px;
+    height: 72px;
+    flex: 0 0 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: 0;
+
+    background: #e1161c;
+    color: #ffffff;
+
+    font-size: 36px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.main-navbar__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 로고를 제외한 오른쪽 행 */
+.main-navbar__row {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+}
+
+/* 중앙 메뉴가 남은 공간을 모두 차지 */
+.main-navbar__navigation {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-navbar__menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+
+    margin: 0 0 0 5em;
+    padding: 0;
+
+    list-style: none;
+}
+
+.main-navbar__link {
+    display: block;
+    padding: 12px 0;
+
+    color: #1c1c1c;
+    text-decoration: none;
+    white-space: nowrap;
+
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+
+    transition: color 150ms ease;
+}
+
+.main-navbar__link:hover {
+    color: #0db5ff;
+}
+
+/* 오른쪽 Buy 영역 */
+.main-navbar__actions {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+
+    margin-right: 16px;
+}
+
+.main-navbar__buy-button {
+    padding: 4px 24px;
+
+    border: 2px solid #0db5ff;
+    border-radius: 24px;
+
+    background: #0db5ff;
+    color: #ffffff;
+
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 20px;
+
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition:
+        background-color 200ms ease,
+        border-color 200ms ease,
+        transform 200ms ease;
+}
+
+.main-navbar__buy-button:hover {
+    background: #17a2df;
+    border-color: #17a2df;
+    transform: translateY(-1px);
+}
+
+.main-navbar__buy-button:focus-visible,
+.main-navbar__logo:focus-visible,
+.main-navbar__link:focus-visible {
+    outline: 2px solid #0db5ff;
+    outline-offset: 3px;
+}
+
+/* 작은 화면에서는 중앙 메뉴를 숨기는 로직 */
+@media (max-width: 1023px) {
+    .main-navbar {
+        height: 60px;
+    }
+
+    .main-navbar__logo {
+        width: 60px;
+        height: 60px;
+        flex-basis: 60px;
+
+        font-size: 18px;
+    }
+
+    .main-navbar__navigation {
+        display: none;
+    }
+
+    .main-navbar__row {
+        justify-content: flex-end;
+    }
+
+    .main-navbar__actions {
+        margin-right: 12px;
+    }
+}

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./ToolBar.css";
 
 function FloorSelector({ floor, onFloorChange }) {

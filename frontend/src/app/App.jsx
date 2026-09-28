@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import "./App.css";
 
+import NavBar from "../components/navbar/NavBar.jsx";
+
 import Editor from './editor/editor.jsx';
 import Login from './login/Login.jsx';
 import Signup from "./signup/Signup.jsx";
@@ -16,12 +18,14 @@ export default function App() {
     const [loggedIn, setLoggedIn] = useState(
         () => Boolean(getValidAccessToken())
     );
+
     const [page, setPage] = useState("home");
     const [projectId, setProjectId] = useState(null);
-
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [projectTitle, setProjectTitle] = useState("");
 
+    /* 주 페이지 내용 구성을 함 */
+    let pageContent;
 
     /* 프로젝트 생성 함수 */
     async function handleCreateProject(){
@@ -43,22 +47,20 @@ export default function App() {
     }
 
     if (!loggedIn) {
-        return (
+        pageContent = (
             <div className="home-layout">
                 <div>
                     <Login onLogin={() => setLoggedIn(true)} />
                     <Signup />
                 </div>
+
                 <Community />
             </div>
         );
-    }
-
-    if (page === "editor") {
-        return <Editor projectId={projectId}/>;
-    }
-
-    return (
+    }else if (page === "editor") {
+        pageContent = <Editor projectId={projectId} />;
+    }else{
+        pageContent = (
         <div className="home-layout">
             <div>
                 <button onClick={() => setShowCreateModal(true)}>
@@ -99,6 +101,20 @@ export default function App() {
                         </div>
                     </div>
                 )}
+        </div>
+        );
+    }
+
+    return (
+        <div className="app-shell">
+            <NavBar
+                onLogoClick={() => setPage("home")}
+                onBuyClick={() => setShowCreateModal(true)}
+            />
+
+            <main className="app-content">
+                {pageContent}
+            </main>
         </div>
     );
 }

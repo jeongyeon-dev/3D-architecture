@@ -107,7 +107,7 @@ const assets = {
     },
     'roof-prism': () => {
         const material = new THREE.MeshStandardMaterial({ 
-            color: '#ffcece',
+            color: '#ff8181',
             roughness: 0.85,
             metalness: 0.1
         });
