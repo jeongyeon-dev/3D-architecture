@@ -60,11 +60,13 @@
     justify-content: center;
 }
 
+
+/* 가운데 중앙의 4개 선택 섹션 */
 .main-navbar__menu {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 32px;
+    gap: 36px;
 
     margin: 0 0 0 5em;
     padding: 0;
@@ -91,24 +93,25 @@
     color: #0db5ff;
 }
 
-/* 오른쪽 Buy 영역 */
+/* 오른쪽 버튼 영역 */
 .main-navbar__actions {
     flex-shrink: 0;
 
     display: flex;
     align-items: center;
+    gap: 8px;
 
     margin-right: 16px;
 }
 
-.main-navbar__buy-button {
-    padding: 4px 24px;
+.main-navbar__signup-button {
+    padding: 4px 18px;
+
+    background-color: #0db5ff;
+    color: #ffffff;
 
     border: 2px solid #0db5ff;
     border-radius: 24px;
-
-    background: #0db5ff;
-    color: #ffffff;
 
     font-family: "Poppins", Arial, sans-serif;
     font-size: 13px;
@@ -124,18 +127,36 @@
         transform 200ms ease;
 }
 
-.main-navbar__buy-button:hover {
+.main-navbar__login-button {
+    padding: 4px 12px;
+
+    background-color: transparent;
+    color: #1c1c1c;
+
+    border: 2px solid transparent;
+    border-radius: 24px;
+
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 20px;
+
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition: transform 200ms ease;
+}
+
+.main-navbar__signup-button:hover {
     background: #17a2df;
     border-color: #17a2df;
     transform: translateY(-1px);
 }
 
-.main-navbar__buy-button:focus-visible,
-.main-navbar__logo:focus-visible,
-.main-navbar__link:focus-visible {
-    outline: 2px solid #0db5ff;
-    outline-offset: 3px;
+.main-navbar__login-button:hover {
+    transform: translateY(-1px);
 }
+
 
 /* 작은 화면에서는 중앙 메뉴를 숨기는 로직 */
 @media (max-width: 1023px) {

@@ -7,7 +7,12 @@ const menuItems = [
     { label: "개발자 소개", href: "#introduce" },
 ];
 
-export default function NavBar({ onLogoClick, onBuyClick }) {
+export default function NavBar({ 
+    loggedIn,
+    onLogoClick,
+    onLoginClick,
+    onSignupClick,
+}) {
     return (
         <header className="main-navbar">
             <button
@@ -38,16 +43,24 @@ export default function NavBar({ onLogoClick, onBuyClick }) {
                         ))}
                     </ul>
                 </nav>
-
-                <div className="main-navbar__actions">
-                    <button
-                        type="button"
-                        className="main-navbar__buy-button"
-                        onClick={onBuyClick}
-                    >
-                        회원가입
-                    </button>
-                </div>
+                {!loggedIn && (
+                    <div className="main-navbar__actions">
+                        <button
+                            type="button"
+                            className="main-navbar__login-button"
+                            onClick={onLoginClick}
+                        >
+                            로그인
+                        </button>
+                        <button
+                            type="button"
+                            className="main-navbar__signup-button"
+                            onClick={onSignupClick}
+                        >
+                            회원가입
+                        </button>
+                    </div>
+                )}
             </div>
         </header>
     );

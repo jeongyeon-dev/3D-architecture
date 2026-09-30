@@ -1,0 +1,138 @@
+.auth-modal__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    min-height: 100%;
+    overflow-y: auto;
+
+    background: rgba(0, 0, 0, 0.5);
+
+    animation: auth-backdrop-in 100ms ease forwards;
+}
+
+.auth-modal__panel {
+    position: relative;
+
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    margin-top: 20dvh;
+    padding: 46px 34px 28px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+
+    animation: auth-modal-in 200ms ease 100ms both;
+}
+
+.auth-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    width: 32px;
+    height: 32px;
+
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+    color: #1c1c1c;
+
+    font-size: 26px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.auth-modal__close:hover {
+    background: #f0f0f0;
+}
+
+.auth-modal__title {
+    margin: 0 0 24px;
+
+    color: #1c1c1c;
+    font-size: 24px;
+    text-align: center;
+}
+
+/* 기존 Login 컴포넌트의 form */
+
+.auth-modal__panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth-modal__panel input {
+    height: 44px;
+    padding: 0 14px;
+
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.auth-modal__panel input:focus {
+    border-color: #0d99ff;
+    outline: 2px solid rgba(13, 153, 255, 0.2);
+}
+
+.auth-modal__panel form button[type="submit"] {
+    height: 44px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #0d99ff;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.auth-modal__panel form button[type="submit"]:hover {
+    background: #0b87e0;
+}
+
+@keyframes auth-backdrop-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes auth-modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-modal__panel {
+        margin-top: 10dvh;
+        padding: 46px 24px 28px;
+    }
+}

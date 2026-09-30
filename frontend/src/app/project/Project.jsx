@@ -55,20 +55,30 @@ export default function Project({ onProjectSelect }) {
     }
 
     return (
-        <div>
+        <div className="project-grid">
             {projects.map((project) => (
-                <div 
+                <button
+                    type="button"
+                    className="project-card"
                     key={project.id}
                     onClick={() => handleProjectClick(project.id)}
                 >
-                    <img
-                        src={project.thumbnail_url}
-                        alt={project.title}
-                    />
+                    <div className="project-card__thumbnail">
+                        {project.thumbnail_url ? (
+                            <img
+                                src={project.thumbnail_url}
+                                alt=""
+                            />
+                        ) : (
+                            <span>미리보기 없음</span>
+                        )}
+                    </div>
 
-                    <h3>{project.title}</h3>
-                    <p>{project.updated_at}</p>
-                </div>
+                    <div className="project-card__information">
+                        <h3>{project.title}</h3>
+                        <p>{project.updated_at}</p>
+                    </div>
+                </button>
             ))}
         </div>
     );

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import "./App.css";
 
 import NavBar from "../components/navbar/NavBar.jsx";
+import AuthModal from '../components/modal/AuthModal.jsx';
 
 import Editor from './editor/editor.jsx';
 import Login from './login/Login.jsx';
 import Signup from "./signup/Signup.jsx";
 import Community from './community/Community.jsx';
 import Project from './project/Project.jsx';
+import Workspace from "./workspace/Workspace.jsx";
 
 import { createProject } from '../api/project.js';
 import { getValidAccessToken } from '../api/auth.js';
@@ -19,10 +21,12 @@ export default function App() {
         () => Boolean(getValidAccessToken())
     );
 
-    const [page, setPage] = useState("home");
+    const [page, setPage] = useState("workspace");
     const [projectId, setProjectId] = useState(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
     const [projectTitle, setProjectTitle] = useState("");
+    
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [authModal, setAuthModal] = useState(null);
 
     /* 주 페이지 내용 구성을 함 */
     let pageContent;
@@ -46,34 +50,25 @@ export default function App() {
         }
     }
 
-    if (!loggedIn) {
-        pageContent = (
-            <div className="home-layout">
-                <div>
-                    <Login onLogin={() => setLoggedIn(true)} />
-                    <Signup />
-                </div>
+    if (loggedIn) {
+        if (page === "editor") {
+            return (
+                <Editor projectId={projectId} />
+            );
+        }
 
-                <Community />
-            </div>
-        );
-    }else if (page === "editor") {
-        pageContent = <Editor projectId={projectId} />;
-    }else{
-        pageContent = (
-        <div className="home-layout">
-            <div>
-                <button onClick={() => setShowCreateModal(true)}>
-                    새 프로젝트 만들기
-                </button>
-                <Project
+        return (
+            <>
+                <Workspace
+                    onCreateProject={() => {
+                        setShowCreateModal(true);
+                    }}
                     onProjectSelect={(project) => {
                         setProjectId(project.id);
                         setPage("editor");
                     }}
                 />
-            </div>
-            <Community />
+
                 {showCreateModal && (
                     <div className="modal-backdrop">
                         <div className="project-modal">
@@ -83,7 +78,9 @@ export default function App() {
                                 type="text"
                                 placeholder="프로젝트 이름"
                                 value={projectTitle}
-                                onChange={(e) => setProjectTitle(e.target.value)}
+                                onChange={(event) => {
+                                    setProjectTitle(event.target.value);
+                                }}
                             />
 
                             <button onClick={handleCreateProject}>
@@ -101,20 +98,45 @@ export default function App() {
                         </div>
                     </div>
                 )}
-        </div>
+            </>
         );
     }
 
     return (
         <div className="app-shell">
             <NavBar
+                loggedIn={loggedIn}
                 onLogoClick={() => setPage("home")}
-                onBuyClick={() => setShowCreateModal(true)}
+                onLoginClick={() => setAuthModal("login")}
+                onSignupClick={() => setAuthModal("signup")}
             />
 
             <main className="app-content">
                 {pageContent}
             </main>
+
+            {authModal === "login" && (
+                <AuthModal
+                    title="로그인"
+                    onClose={() => setAuthModal(null)}
+                >
+                    <Login
+                        onLogin={() => {
+                            setLoggedIn(true);
+                            setAuthModal(null);
+                        }}
+                    />
+                </AuthModal>
+            )}
+
+            {authModal === "signup" && (
+                <AuthModal
+                    title="회원가입"
+                    onClose={() => setAuthModal(null)}
+                >
+                    <Signup />
+                </AuthModal>
+            )}
         </div>
     );
 }
