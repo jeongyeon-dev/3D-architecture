@@ -8,14 +8,6 @@ export default function Workspace({
     return (
         <div className="workspace">
             <aside className="workspace__sidebar">
-                <button
-                    type="button"
-                    className="workspace__logo"
-                    aria-label="워크스페이스 홈"
-                >
-                    A
-                </button>
-
                 <nav className="workspace__sidebar-menu">
                     <button
                         type="button"

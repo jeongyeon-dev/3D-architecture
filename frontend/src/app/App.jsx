@@ -7,9 +7,9 @@ import AuthModal from '../components/modal/AuthModal.jsx';
 import Editor from './editor/editor.jsx';
 import Login from './login/Login.jsx';
 import Signup from "./signup/Signup.jsx";
-import Community from './community/Community.jsx';
-import Project from './project/Project.jsx';
 import Workspace from "./workspace/Workspace.jsx";
+
+import HeroSection from '../sections/hero/HeroSection.jsx';
 
 import { createProject } from '../api/project.js';
 import { getValidAccessToken } from '../api/auth.js';
@@ -110,11 +110,10 @@ export default function App() {
                 onLoginClick={() => setAuthModal("login")}
                 onSignupClick={() => setAuthModal("signup")}
             />
-
-            <main className="app-content">
-                {pageContent}
-            </main>
-
+            <HeroSection
+                onStartClick={() => setAuthModal("signup")}
+            />
+            
             {authModal === "login" && (
                 <AuthModal
                     title="로그인"

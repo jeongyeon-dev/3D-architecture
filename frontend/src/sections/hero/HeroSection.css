@@ -1,0 +1,132 @@
+@font-face {
+    font-family: 'A2z';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/에이투지체-6SemiBold.woff2') 
+         format('woff2');
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+}
+
+
+.hero-section {
+    width: min(1200px, calc(100% - 48px));
+    min-height: 520px;
+
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    align-items: center;
+    gap: 48px;
+
+    margin: 0 auto;
+    padding: 72px 0;
+
+    box-sizing: border-box;
+}
+
+/* 왼쪽 제품 설명
+   1. 제목
+   2. 설명
+   3. 클릭 버튼 */
+.hero-section__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.hero-section__title {
+    margin: 0;
+
+    color: #1c1c1c;
+    
+    font-size: 39px;
+    font-family: "A2z", sans-serif;
+    line-height: 1.2;
+}
+
+.hero-section__description {
+    margin: 32px 0 0;
+
+    color: #666666;
+    
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.hero-section__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: 16px;
+    padding: 12px 22px;
+
+    border: 0;
+    border-radius: 999px;
+
+    background: #0d99ff;
+    color: #ffffff;
+
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 180ms ease,
+        transform 180ms ease;
+}
+
+.hero-section__button:hover {
+    background: #0b87e0;
+    transform: translateY(-2px);
+}
+
+
+/* 오른쪽 시각적 데모 자리 */
+.hero-section__demo {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 28px;
+
+    background: #d9d9d9;
+    color: #777777;
+
+    font-size: 14px;
+
+    overflow: hidden;
+}
+
+
+/* 모바일 */
+@media (max-width: 768px) {
+    .hero-section {
+        width: min(100% - 32px, 600px);
+        min-height: auto;
+
+        grid-template-columns: 1fr;
+        gap: 40px;
+
+        padding: 48px 0;
+    }
+
+    .hero-section__title {
+        font-size: 24px;
+    }
+
+    .hero-section__description {
+        font-size: 12px;
+    }
+
+    .hero-section__demo {
+        border-radius: 20px;
+    }
+}
