@@ -8,9 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "projects")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectEntity {
 
     @Id
@@ -29,33 +34,10 @@ public class ProjectEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    protected ProjectEntity() {
-    }
-
     public ProjectEntity(Integer userId, String title, LocalDateTime updatedAt) {
         this.userId = userId;
         this.title = title;
         this.updatedAt = updatedAt;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 
     public void touch(LocalDateTime updatedAt) {

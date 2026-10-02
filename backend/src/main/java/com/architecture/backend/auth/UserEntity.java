@@ -6,9 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
 
     @Id
@@ -24,29 +29,10 @@ public class UserEntity {
     @Column(nullable = false, length = 255)
     private String password;
 
-    protected UserEntity() {
-    }
-
     public UserEntity(String username, String nickname, String password) {
         this.username = username;
         this.nickname = nickname;
         this.password = password;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public void changePassword(String password) {

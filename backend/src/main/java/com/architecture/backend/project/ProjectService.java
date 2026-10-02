@@ -8,20 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.architecture.backend.config.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectObjectRepository projectObjectRepository;
-
-    public ProjectService(
-        ProjectRepository projectRepository,
-        ProjectObjectRepository projectObjectRepository
-    ) {
-        this.projectRepository = projectRepository;
-        this.projectObjectRepository = projectObjectRepository;
-    }
 
     @Transactional(readOnly = true)
     public List<ProjectEntity> getProjects(Integer userId) {

@@ -13,9 +13,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "project_objects")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectObjectEntity {
 
     @Id
@@ -32,29 +37,10 @@ public class ProjectObjectEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    protected ProjectObjectEntity() {
-    }
-
     public ProjectObjectEntity(Integer projectId, List<Map<String, Object>> objects, LocalDateTime updatedAt) {
         this.projectId = projectId;
         this.objects = objects;
         this.updatedAt = updatedAt;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public Integer getProjectId() {
-        return projectId;
-    }
-
-    public List<Map<String, Object>> getObjects() {
-        return objects;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 
     public void update(List<Map<String, Object>> objects, LocalDateTime updatedAt) {

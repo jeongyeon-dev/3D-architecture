@@ -6,23 +6,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.architecture.backend.auth.AuthDtos.LoginResponse;
 import com.architecture.backend.auth.AuthDtos.SignupResponse;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-
-    public AuthService(
-        UserRepository userRepository,
-        PasswordEncoder passwordEncoder,
-        JwtService jwtService
-    ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
 
     @Transactional
     public LoginResponse login(String username, String rawPassword) {
