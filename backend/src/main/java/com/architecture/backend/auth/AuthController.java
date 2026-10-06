@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.architecture.backend.auth.AuthDtos.LoginRequest;
 import com.architecture.backend.auth.AuthDtos.LoginResponse;
+import com.architecture.backend.auth.AuthDtos.RefreshRequest;
 import com.architecture.backend.auth.AuthDtos.SignupRequest;
 import com.architecture.backend.auth.AuthDtos.SignupResponse;
+
+import com.architecture.backend.auth.AuthDtos.AccessTokenResponse;
 
 import jakarta.validation.Valid;
 
@@ -30,5 +33,11 @@ public class AuthController {
     @PostMapping("/signup")
     SignupResponse signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request.username(), request.nickname(), request.password());
+    }
+
+    /* 리프래쉬 토큰 재발급 호출 */
+    @PostMapping("/refresh")
+    AccessTokenResponse reissueAccessToken(@Valid @RequestBody RefreshRequest request) {
+        return authService.reissueAccessToken(request.refreshToken());
     }
 }

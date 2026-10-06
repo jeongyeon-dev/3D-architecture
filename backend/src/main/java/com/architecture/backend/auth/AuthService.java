@@ -4,8 +4,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.architecture.backend.auth.AuthDtos.AccessTokenResponse;
 import com.architecture.backend.auth.AuthDtos.LoginResponse;
 import com.architecture.backend.auth.AuthDtos.SignupResponse;
+import com.architecture.backend.auth.jwtUtil.JwtService;
+
+import org.springframework.security.oauth2.jwt.Jwt;
+
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,14 +26,17 @@ public class AuthService {
     public LoginResponse login(String username, String rawPassword) {
         UserEntity user = userRepository.findByUsername(username).orElse(null);
         if (user == null || !passwordMatches(rawPassword, user.getPassword())) {
-            return new LoginResponse(false, null, null);
+            return new LoginResponse(false, null, null, null);
         }
 
         if (!isBcrypt(user.getPassword())) {
             user.changePassword(passwordEncoder.encode(rawPassword));
         }
 
-        return new LoginResponse(true, jwtService.createAccessToken(user.getId()), "bearer");
+        return new LoginResponse(true, 
+            jwtService.createAccessToken(user.getId(), user.getNickname()), 
+            jwtService.createRefreshToken(user.getId(), user.getNickname()),
+            "bearer");
     }
 
     @Transactional
@@ -45,6 +54,21 @@ public class AuthService {
         return new SignupResponse(user.getId(), user.getUsername(), user.getNickname());
     }
 
+    /* refresh 기준 access 재발급 함수 */
+    @Transactional(readOnly = true)
+    public AccessTokenResponse reissueAccessToken(String refreshToken) {
+        Jwt jwt = jwtService.decodeRefreshToken(refreshToken);
+
+        String accessToken = jwtService.createAccessToken(
+            Integer.valueOf(jwt.getSubject()),
+            jwt.getClaimAsString("nickname")
+        );
+
+        return new AccessTokenResponse(accessToken, "bearer");
+    }
+
+
+    /* 보조 함수들 */
     private boolean passwordMatches(String rawPassword, String storedPassword) {
         if (isBcrypt(storedPassword)) {
             return passwordEncoder.matches(rawPassword, storedPassword);

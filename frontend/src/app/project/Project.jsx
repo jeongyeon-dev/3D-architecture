@@ -3,28 +3,16 @@ import { getProjects, getProject } from "../../api/project.js";
 
 export default function Project({ onProjectSelect }) {
     const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect(() => {
         async function fetchProjects() {
-            const token = localStorage.getItem("access_token");
-
-            if (!token) {
-                setLoggedIn(false);
-                setLoading(false);
-                return;
-            }
-
-            setLoggedIn(true);
-
             try {
                 const data = await getProjects();
                 setProjects(data);
+                setLoggedIn(true);
             } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
+                setLoggedIn(false);
             }
         }
 
@@ -39,11 +27,6 @@ export default function Project({ onProjectSelect }) {
         } catch (error) {
             console.error(error);
         }
-    }
-
-
-    if (loading) {
-        return <div>불러오는 중...</div>;
     }
 
     if (!loggedIn) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import "./App.css";
 
 import NavBar from "../components/navbar/NavBar.jsx";
@@ -12,14 +12,13 @@ import Workspace from "./workspace/Workspace.jsx";
 import HeroSection from '../sections/hero/HeroSection.jsx';
 
 import { createProject } from '../api/project.js';
-import { getValidAccessToken } from '../api/auth.js';
+import { getUsableAccessToken } from "../api/auth.js";
 
 
 export default function App() {
-    /* 토큰 유무에 따른 로그인 상태 구별하기 */
-    const [loggedIn, setLoggedIn] = useState(
-        () => Boolean(getValidAccessToken())
-    );
+    /* 미들웨에서 검증 수행하기 */
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [authLoading, setAuthLoading] = useState(true);
 
     const [page, setPage] = useState("workspace");
     const [projectId, setProjectId] = useState(null);
@@ -27,6 +26,23 @@ export default function App() {
     
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [authModal, setAuthModal] = useState(null);
+
+    /* 미들웨어 수행해서 access 토큰 유효성 검사하기 */
+    useEffect(() => {
+        async function restoreLogin() {
+            try {
+                const accessToken = await getUsableAccessToken();
+                setLoggedIn(Boolean(accessToken));
+            } catch (error) {
+                console.error(error);
+                setLoggedIn(false);
+            } finally {
+                setAuthLoading(false);
+            }
+        }
+
+        restoreLogin();
+    }, []);
 
     /* 주 페이지 내용 구성을 함 */
     let pageContent;
@@ -48,6 +64,10 @@ export default function App() {
     }catch(error){
             console.error(error);
         }
+    }
+
+    if (authLoading) {
+        return <div>로그인 확인 중...</div>;
     }
 
     if (loggedIn) {

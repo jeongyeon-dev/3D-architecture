@@ -1,7 +1,4 @@
-import { 
-    getValidAccessToken, 
-    removeAccessToken 
-} from "./auth";
+import { authFetch } from "./authFetch";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -21,15 +18,7 @@ function getAuthHeaders() {
 
 
 export async function getProjects() {
-    const response = await fetch(`${API_BASE_URL}/projects`, {
-        headers: getAuthHeaders(),   
-    });
-
-    if (response.status === 401) {
-        removeAccessToken();
-        window.location.reload();
-        throw new Error("로그인이 만료되었습니다.");
-    }
+    const response = await authFetch("/projects");
 
     if (!response.ok) {
         throw new Error("프로젝트를 불러오지 못했습니다.");
@@ -40,15 +29,12 @@ export async function getProjects() {
 
 
 export async function createProject(title) {
-    const response = await fetch(`${API_BASE_URL}/projects/create`, {
+    const response = await authFetch("/projects/create", {
         method: "POST",
         headers: {
-            ...getAuthHeaders(),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            title: title,
-        }),
+        body: JSON.stringify({ title }),
     });
 
     if (!response.ok) {
@@ -60,17 +46,7 @@ export async function createProject(title) {
 
 
 export async function getProject(projectId) {
-    const token = localStorage.getItem("access_token");
-
-    const response = await fetch(
-        `${API_BASE_URL}/projects/${projectId}`,
-        {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
+    const response = await authFetch(`/projects/${projectId}`);
 
     if (!response.ok) {
         throw new Error("프로젝트를 불러오지 못했습니다.");
@@ -81,21 +57,13 @@ export async function getProject(projectId) {
 
 
 export async function saveProject(projectId, objects) {
-    const token = localStorage.getItem("access_token");
-
-    const response = await fetch(
-        `${API_BASE_URL}/projects/save/${projectId}`,
-        {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                objects,
-            }),
-        }
-    );
+    const response = await authFetch(`/projects/save/${projectId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ objects }),
+    });
 
     if (!response.ok) {
         throw new Error("프로젝트 저장에 실패했습니다.");

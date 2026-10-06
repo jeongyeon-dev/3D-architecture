@@ -13,7 +13,11 @@ public final class AuthDtos {
     ) {
     }
 
-    public record LoginResponse(boolean success, String accessToken, String tokenType) {
+    public record LoginResponse(
+        boolean success, 
+        String accessToken, 
+        String refreshToken, 
+        String tokenType) {
     }
 
     public record SignupRequest(
@@ -24,5 +28,17 @@ public final class AuthDtos {
     }
 
     public record SignupResponse(Integer id, String username, String nickname) {
+    }
+
+    public record RefreshRequest(
+        @NotBlank(message = "refresh token이 필요합니다.")
+        String refreshToken
+    ) {
+    }
+
+    public record AccessTokenResponse(
+        String accessToken,
+        String tokenType
+    ) {
     }
 }

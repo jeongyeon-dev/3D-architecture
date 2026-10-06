@@ -24,3 +24,4 @@ app:
   jwt:
     secret: ${SECRET_KEY:local-development-secret-key-change-me}
     access-token-minutes: ${ACCESS_TOKEN_EXPIRE_MINUTES:60}
+    refresh-token-minutes: ${REFRESH_TOKEN_EXPIRE_MINUTES:720}
