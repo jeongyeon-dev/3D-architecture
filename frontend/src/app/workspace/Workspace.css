@@ -11,14 +11,14 @@
     overflow: hidden;
 }
 
-/* 왼쪽 사이드바 */
+/** 왼쪽 사이드바 **/
 .workspace__sidebar {
     min-height: 0;
 
     display: flex;
     flex-direction: column;
 
-    padding: 20px 16px;
+    padding: 6px 6px;
 
     background: #ffffff;
     border-right: 1px solid #e5e5e5;
@@ -30,9 +30,15 @@
     gap: 4px;
 }
 
+/* 왼쪽 사이드바 각 버튼의 글자 폰트 등 정의  */
 .workspace__menu-button {
     width: 100%;
-    padding: 10px 12px;
+    height: 36px;
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
     border: 0;
     border-radius: 6px;
@@ -40,30 +46,135 @@
     background: transparent;
     color: #333333;
 
-    font-size: 14px;
-    font-weight: 600;
-    text-align: left;
+    font-size: 11px;
+    line-height: 1;
 
     cursor: pointer;
 }
 
-.workspace__menu-button:hover {
-    background: #f0f0f0;
+.workspace__menu-button svg {
+    flex-shrink: 0;
+    transform: translateY(-0.5px);
 }
 
+/* 마우스를 올린 항목 */
+.workspace__menu-button:not(.active):hover {
+    background-color: #F5F5F5;
+}
+
+/* 현재 선택된 항목 */
 .workspace__menu-button.active {
-    background: #e8e8e8;
-    color: #000000;
+    background-color: #E5F4FF;
+    color: #111111;
 }
 
-.workspace__user {
-    margin-top: auto;
-    padding: 12px;
 
-    border-top: 1px solid #eeeeee;
+/*** 왼쪽 사이드바 - 프로필 섹션 ***/
+.workspace__user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: auto;
+    padding: 16px 0 0;
+}
+
+/** 왼쪽 사이드바 - 프로필 섹션 - 좌측 닉네임 **/
+.workspace__account {
+    min-width: 0;
+    height: 36px;
+    padding: 0 12px 0 8px;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: 0;
+    border-radius: 6px;
+    box-sizing: border-box;
+
+    cursor: pointer;
+}
+
+.workspace__account:hover {
+    background-color: #f1f1f1;
+}
+
+/* 닉네임 프로필 동그란 원형 */
+.workspace__profile-circle {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: #ff4444;
+    color: #ffffff;
 
     font-size: 14px;
+    font-weight: 600;
 }
+
+.workspace__nickname {
+    max-width: 120px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #222222;
+    font-size: 13px;
+    font-weight: 400;
+    
+}
+
+.workspace__account-chevron {
+    flex-shrink: 0;
+    margin-left: -4px;
+    transform: translateY(2px);
+}
+
+
+/** 왼쪽 사이드바 - 프로필 섹션 - 우측 알림벨 **/
+.workspace__notification-button {
+    width: 36px;
+    height: 36px;
+    padding: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 8px;
+    box-sizing: border-box;
+
+    background: transparent;
+    color: #333333;
+
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.workspace__notification-button:hover {
+    background-color: #f1f1f1;
+}
+
+.workspace__notification-button svg {
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 
 /* 오른쪽 콘텐츠 */
 .workspace__main {
