@@ -76,7 +76,6 @@
     justify-content: space-between;
 
     margin-top: auto;
-    padding: 16px 0 0;
 }
 
 /** 왼쪽 사이드바 - 프로필 섹션 - 좌측 닉네임 **/
@@ -176,27 +175,32 @@
 }
 
 
-/* 오른쪽 콘텐츠 */
+
+/*** 오른쪽 프로젝트 카드 나오는 섹션 ***/
 .workspace__main {
     min-width: 0;
     min-height: 0;
 
-    padding: 40px 48px;
+    padding: 6px 32px 0;
     overflow-y: auto;
 }
 
 .workspace__header {
+    height: 36px;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
+/* 상단의 문구 */
 .workspace__eyebrow {
-    margin: 0 0 6px;
+    margin: 0px;
+    padding: 0 12px 0 8px;
 
-    color: #777777;
+    color: #222222;
     font-size: 13px;
 }
 
@@ -207,23 +211,71 @@
     line-height: 1.2;
 }
 
+/* 새 프로젝트 => 이 버튼 */
 .workspace__create-button {
-    padding: 10px 20px;
+    height: 30px;
+    padding: 0px 12px;
+    margin: 0;
 
-    border: 0;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 
-    background: #0d99ff;
+    border: 1px solid #dddddd;
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    background-color: #F5F5F5;
+
+}
+
+/* 버튼 옆에 넣은 아이콘 설정 */
+.workspace__create-icon {
+    position: relative;
+
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.workspace__create-icon svg {
+    padding: 2px;
+
+    border-radius: 10%;
+    background: #0D99FF;
     color: #ffffff;
+    
+    position: absolute;
+    inset: 0;
 
-    font-size: 14px;
-    font-weight: 700;
-
-    cursor: pointer;
+    transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+    
 }
 
 .workspace__create-button:hover {
-    background: #0b87e0;
+    background: #E5F4FF;
+    border-color: #cccccc;
+}
+
+/* 아이콘 hover 시 변하는 방식 표시 */
+.workspace__create-icon .icon-default {
+    opacity: 1;
+}
+
+.workspace__create-icon .icon-hover {
+    opacity: 0;
+}
+
+.workspace__create-button:hover .icon-default {
+    opacity: 0;
+}
+
+.workspace__create-button:hover .icon-hover {
+    opacity: 1;
 }
 
 .workspace__content {
@@ -249,15 +301,18 @@
     }
 }
 
-/* 프로젝트 관련 부분 */
+
+/*** 프로젝트 카드 관련 부분 ***/
 .project-grid {
     display: grid;
     grid-template-columns:
-        repeat(auto-fill, minmax(240px, 1fr));
+        repeat(auto-fill, minmax(min(100%, 280px), 1fr));
     gap: 24px;
 }
 
 .project-card {
+    position: relative;
+
     min-width: 0;
     padding: 0;
 
@@ -266,6 +321,7 @@
     border: 1px solid #dddddd;
     border-radius: 10px;
 
+    /* 각각: 아래 칸, 글자 색 */
     background: #ffffff;
     color: #1c1c1c;
     text-align: left;
@@ -282,6 +338,59 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
+.project-card__open {
+    width: 100%;
+    padding: 0;
+
+    display: block;
+
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.project-card__delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+
+    width: 28px;
+    height: 28px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #dddddd;
+    border-radius: 50%;
+
+    background: #ffffff;
+    color: #333333;
+
+    opacity: 0;
+    pointer-events: none;
+    cursor: pointer;
+
+    transition:
+        opacity 150ms ease,
+        background-color 150ms ease;
+}
+
+.project-card:hover .project-card__delete,
+.project-card:focus-within .project-card__delete {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.project-card__delete:hover {
+    background: #f1f1f1;
+}
+
 .project-card__thumbnail {
     width: 100%;
     aspect-ratio: 16 / 10;
@@ -291,7 +400,7 @@
     justify-content: center;
 
     overflow: hidden;
-    background: #e8e8e8;
+    background: #F5F5F5;
     color: #777777;
 
     font-size: 13px;

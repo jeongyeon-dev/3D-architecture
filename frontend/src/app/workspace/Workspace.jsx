@@ -1,15 +1,26 @@
 import Project from "../project/Project.jsx";
 import "./Workspace.css";
 
+import { useState } from "react";
+
 import { getNicknameFromToken } from "../../utils/jwt.js";
 
-import { ChevronDown, Bell, UsersRound, StickyNote, Trash2 } from "lucide-react";
+import { 
+    ChevronDown, 
+    Bell, 
+    UsersRound, 
+    StickyNote, 
+    Trash2,
+    PenTool,
+    Plus
+} from "lucide-react";
 
 export default function Workspace({
     onProjectSelect,
     onCreateProject,
 }) {
     const nickname = getNicknameFromToken();
+    const [selectedMenu, setSelectedMenu] = useState("내 프로젝트");
 
     return (
         <div className="workspace">
@@ -68,10 +79,8 @@ export default function Workspace({
                 <header className="workspace__header">
                     <div>
                         <p className="workspace__eyebrow">
-                            Workspace
+                            {selectedMenu}
                         </p>
-
-                        <h1>내 프로젝트</h1>
                     </div>
 
                     <button
@@ -79,6 +88,10 @@ export default function Workspace({
                         className="workspace__create-button"
                         onClick={onCreateProject}
                     >
+                        <span className="workspace__create-icon">
+                            <PenTool  className="icon-default" size={12} strokeWidth={2} />
+                            <Plus className="icon-hover" size={12} strokeWidth={2} />
+                        </span>                  
                         새 프로젝트
                     </button>
                 </header>
