@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProjects, getProject } from "../../api/project.js";
+import { getProjects, getProject, deleteProject } from "../../api/project.js";
 
 import { X } from "lucide-react";
 
@@ -33,10 +33,24 @@ export default function Project({ onProjectSelect }) {
     }
 
     async function handleProjectDelete(projectId){
-        try{
-            console.log("삭제실행")
-        }catch(error){
-            console.error(error)
+        const confirmed = window.confirm(
+            "프로젝트를 삭제하시겠습니까?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await deleteProject(projectId);
+
+            setProjects((currentProjects) =>
+                currentProjects.filter(
+                    (project) => project.id !== projectId
+                )
+            );
+        } catch (error) {
+            console.error(error);
         }
     }
 

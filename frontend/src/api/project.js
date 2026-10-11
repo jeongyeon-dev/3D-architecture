@@ -1,21 +1,6 @@
+/* 요 녀석은 미들웨어 함수로, 
+   토큰(refresh - access 관계 등)을 인식하고 재발급 및 인가하는 기능을 한다 */
 import { authFetch } from "./authFetch";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-
-/* 토큰을 구하는 함수 */
-function getAuthHeaders() {
-    const token = getValidAccessToken();
-
-    if (!token) {
-        throw new Error("로그인이 만료되었거나, 로그인이 되지 않았습니다.");
-    }
-
-    return {
-        Authorization: `Bearer ${token}`,
-    };
-}
-
 
 export async function getProjects() {
     const response = await authFetch("/projects");
@@ -44,7 +29,7 @@ export async function createProject(title) {
     return response.json();
 }
 
-
+/* 각각 저장 불러오기 및 저장 api 이다 */
 export async function getProject(projectId) {
     const response = await authFetch(`/projects/${projectId}`);
 
@@ -67,6 +52,20 @@ export async function saveProject(projectId, objects) {
 
     if (!response.ok) {
         throw new Error("프로젝트 저장에 실패했습니다.");
+    }
+
+    return response.json();
+}
+
+
+/* 프로젝트를 삭제하는 api: 정확히는 휴지통에 보낸다 */
+export async function deleteProject(projectId) {
+    const response  = await authFetch(`/projects/delete/${projectId}`, {
+        method: "PUT",
+    });
+
+    if(!response.ok){
+        throw new Error("프로젝트를 휴지통에 보내지 못했습니다.");
     }
 
     return response.json();

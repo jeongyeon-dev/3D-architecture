@@ -19,7 +19,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public List<ProjectEntity> getProjects(Integer userId) {
-        return projectRepository.findAllByUserIdOrderByUpdatedAtDesc(userId);
+        return projectRepository.findActiveProjects(userId);
     }
 
     @Transactional
@@ -49,6 +49,24 @@ public class ProjectService {
         return projectObject;
     }
 
+    @Transactional 
+    public Boolean deleteProject(Integer userId, Integer projectId){
+        ProjectEntity project = projectRepository
+                .findByIdAndUserId(projectId, userId)
+                .orElse(null);
+
+        if (project == null) {
+            return false;
+        }
+
+        project.moveToTrash();
+    
+        /* 이제 deletedAt 속성에 날짜가 추가된 것을 db에 반영한다 */
+        projectRepository.save(project);
+        return true;
+    }
+
+    /* 특정 ID 기반으로 프로젝트 찾기 */
     private ProjectEntity requireOwnedProject(Integer userId, Integer projectId) {
         return projectRepository.findByIdAndUserId(projectId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));

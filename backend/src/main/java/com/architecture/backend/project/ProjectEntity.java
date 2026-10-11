@@ -34,6 +34,11 @@ public class ProjectEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /* 휴지통에 버리기 유무를 판별
+       null이면 살아있는 거고, 값이 있으면 휴지통에 있는 것 */
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     public ProjectEntity(Integer userId, String title, LocalDateTime updatedAt) {
         this.userId = userId;
         this.title = title;
@@ -42,5 +47,13 @@ public class ProjectEntity {
 
     public void touch(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void moveToTrash() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.deletedAt = null;
     }
 }

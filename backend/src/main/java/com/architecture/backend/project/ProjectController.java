@@ -54,6 +54,15 @@ public class ProjectController {
         return projectService.saveProject(userId(jwt), id, request.objects());
     }
 
+    /* 해당 프로젝트 휴지통에 이동 */
+    @PutMapping("/delete/{id}")
+    Boolean deleteProject(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable Integer id
+    ){
+        return projectService.deleteProject(userId(jwt), id);
+    }
+
     private Integer userId(Jwt jwt) {
         return Integer.parseInt(jwt.getSubject());
     }
