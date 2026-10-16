@@ -1,4 +1,11 @@
 import { useEffect, useState } from 'react';
+import {
+    Navigate,
+    Route,
+    Routes,
+    useNavigate,
+    useParams
+} from 'react-router-dom';
 import "./App.css";
 
 import NavBar from "../components/navbar/NavBar.jsx";
@@ -19,14 +26,14 @@ export default function App() {
     /* 미들웨에서 검증 수행하기 */
     const [loggedIn, setLoggedIn] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
-
-    const [page, setPage] = useState("workspace");
-    const [projectId, setProjectId] = useState(null);
     const [projectTitle, setProjectTitle] = useState("");
     
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [authModal, setAuthModal] = useState(null);
 
+    /* 프론트 라우터 간 이동을 위한 객체 */
+    const navigate = useNavigate();
+    
     /* 미들웨어 수행해서 access 토큰 유효성 검사하기 */
     useEffect(() => {
         async function restoreLogin() {
@@ -56,10 +63,11 @@ export default function App() {
         try{
             const project = await createProject(projectTitle);
 
-            setProjectId(project.id);
             setShowCreateModal(false);
             setProjectTitle("");
-            setPage("editor");
+
+            /* 라우터 이동 */
+            navigate(`/editor/${project.id}`);
         
     }catch(error){
             console.error(error);
@@ -71,23 +79,31 @@ export default function App() {
     }
 
     if (loggedIn) {
-        if (page === "editor") {
-            return (
-                <Editor projectId={projectId} />
-            );
-        }
-
         return (
             <>
-                <Workspace
-                    onCreateProject={() => {
-                        setShowCreateModal(true);
-                    }}
-                    onProjectSelect={(project) => {
-                        setProjectId(project.id);
-                        setPage("editor");
-                    }}
-                />
+                <Routes>
+                    <Route
+                        path="/workspace"
+                        element={
+                            <Workspace
+                                onCreateProject={() => {
+                                    setShowCreateModal(true);
+                                }}
+                                onProjectSelect={(project) => {
+                                    navigate(`/editor/${project.id}`);
+                                }}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/editor/:projectId"
+                        element={<EditorRoute />}
+                    />
+                    <Route
+                        path="*"
+                        element={<Navigate to="/workspace" replace />}
+                    />
+                </Routes>
 
                 {showCreateModal && (
                     <div className="modal-backdrop">
@@ -126,7 +142,7 @@ export default function App() {
         <div className="app-shell">
             <NavBar
                 loggedIn={loggedIn}
-                onLogoClick={() => setPage("home")}
+                onLogoClick={() => navigate("/workspace")}
                 onLoginClick={() => setAuthModal("login")}
                 onSignupClick={() => setAuthModal("signup")}
             />
@@ -158,4 +174,11 @@ export default function App() {
             )}
         </div>
     );
+}
+
+/* 에디터 라우터 */
+function EditorRoute() {
+    const { projectId } = useParams();
+
+    return <Editor projectId={Number(projectId)} />;
 }

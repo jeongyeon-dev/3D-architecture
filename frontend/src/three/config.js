@@ -1,5 +1,9 @@
 /* 공통 사용 변수 */
 
+/* 화면 해상도 설정 */
+export const VIEW_WIDTH = 1920;
+export const VIEW_HEIGHT = 1080;
+
 /* GRID 척도 설정 */
 export const LAND_SIZE_M = 16;
 export const GRID_SIZE_M = 0.25;

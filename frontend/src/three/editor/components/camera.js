@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { VIEW_WIDTH, VIEW_HEIGHT } from '../../config';
 
 export function createCamera(gameWindow){
     const DEG2RAD = Math.PI / 180.0;
@@ -21,7 +22,11 @@ export function createCamera(gameWindow){
     const Y_AXIS = new THREE.Vector3(0, 1, 0);
    
     /* 카메라 초기 설정 */
-    const camera = new THREE.PerspectiveCamera(75, gameWindow.offsetWidth / gameWindow.offsetHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+        75, 
+        VIEW_WIDTH / VIEW_HEIGHT, 
+        0.1, 
+        1000);
     
     /* 카메라 관련 초기 변수들 */
     let cameraOrigin = new THREE.Vector3();

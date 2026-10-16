@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getProjects, getProject, deleteProject } from "../../api/project.js";
+import { formatEditedAgo } from "../../utils/fromatting.js";
 
-import { X } from "lucide-react";
+import { X, UsersRound } from "lucide-react";
 
 
 export default function Project({ onProjectSelect }) {
@@ -86,8 +87,20 @@ export default function Project({ onProjectSelect }) {
                         </div>
 
                         <div className="project-card__information">
-                            <h3>{project.title}</h3>
-                            <p>{project.updated_at}</p>
+                            <div className="project-card__details">
+                                <p className="project-card__title">
+                                    {project.title}
+                                </p>
+
+                                <p className="project-card__edited-at">
+                                    {formatEditedAgo(project.updated_at)}
+                                </p>
+                            </div>
+
+                            <div className="project-card__members">
+                                <UsersRound size={16} strokeWidth={1.5} />
+                                <span>N</span>
+                            </div>
                         </div>
                     </button>
 
@@ -100,7 +113,7 @@ export default function Project({ onProjectSelect }) {
                             handleProjectDelete(project.id);
                         }}
                     >
-                        <X size={16} strokeWidth={1.5} />
+                        <X size={11} strokeWidth={1.5} />
                     </button>
                 </article>
             ))}

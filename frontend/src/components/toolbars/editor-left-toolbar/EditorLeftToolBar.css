@@ -1,0 +1,17 @@
+.editor-left-toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+
+    box-sizing: border-box;
+    width: 220px;
+    height: 100%;
+    padding: 6px;
+
+    background: #ffffff;
+    border-right: 1px solid #e5e5e5;
+
+    box-shadow: 8px 0 18px rgba(0, 0, 0, 0.08);
+}
+

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { createCamera } from './components/camera.js';
 import { createAssetInstance } from '../assets/basic-assets.js';
-import { LAND_SIZE_M, GRID_SIZE_M, WALL_HEIGHT, PLATFORM_HEIGHT, GRID_OUTER_RANGE } from '../config.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { createGrid } from './components/grid.js';
 import { clipGrid } from './components/grid-clipper.js';
@@ -21,6 +20,17 @@ import { getGizmoRaycastTargets } from '../tools/utils/selection.js';
 import { loadProject } from '../project/project-loader.js';
 import { getObjectsByType } from '../project/project-state.js';
 
+/* 공통 변수 */
+import { 
+    LAND_SIZE_M, 
+    GRID_SIZE_M, 
+    WALL_HEIGHT, 
+    PLATFORM_HEIGHT, 
+    GRID_OUTER_RANGE,
+    VIEW_WIDTH,
+    VIEW_HEIGHT
+} from '../config.js';
+
 
 export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
@@ -31,7 +41,7 @@ export function createScene(){
 
     /* 화면 그려주는 객체(renderer) 자체 */
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(gameWindow.offsetWidth, gameWindow.offsetHeight);
+    renderer.setSize(VIEW_WIDTH, VIEW_HEIGHT);
     renderer.setPixelRatio( Math.min(window.devicePixelRatio, 2) );
     
     renderer.shadowMap.enabled = true;
@@ -44,7 +54,7 @@ export function createScene(){
     renderer.toneMappingExposure = 0.6;
 
     new EXRLoader().load(
-        './public/skybox/sunflowers_puresky_1k.exr',
+        '/skybox/sunflowers_puresky_1k.exr',
         (texture) => {
             texture.mapping = THREE.EquirectangularReflectionMapping;
 

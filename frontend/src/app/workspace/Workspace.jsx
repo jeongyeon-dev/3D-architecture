@@ -8,7 +8,7 @@ import { getNicknameFromToken } from "../../utils/jwt.js";
 import { 
     ChevronDown, 
     Bell, 
-    UsersRound, 
+    ExternalLink,
     StickyNote, 
     Trash2,
     PenTool,
@@ -61,7 +61,7 @@ export default function Workspace({
                         type="button"
                         className="workspace__menu-button"
                     >
-                        <UsersRound size={16} strokeWidth={1} />
+                        <ExternalLink size={16} strokeWidth={1} />
                         커뮤니티
                     </button>
 
