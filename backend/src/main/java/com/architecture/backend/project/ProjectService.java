@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.architecture.backend.config.ResourceNotFoundException;
+import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,10 +33,17 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public ProjectObjectEntity getProject(Integer userId, Integer projectId) {
-        requireOwnedProject(userId, projectId);
-        return projectObjectRepository.findByProjectId(projectId)
-            .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
+    public ProjectDetailResponse getProject(Integer userId, Integer projectId) {
+        ProjectEntity project = requireOwnedProject(userId, projectId);
+        ProjectObjectEntity projectData = projectObjectRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
+    
+        return new ProjectDetailResponse(
+            project.getId(), 
+            project.getTitle(), 
+            project.getUpdatedAt(), 
+            projectData.getObjects()
+        );
     }
 
     @Transactional

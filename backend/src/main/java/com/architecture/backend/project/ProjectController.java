@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.architecture.backend.project.ProjectDtos.ProjectCreateRequest;
+import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectSaveRequest;
 
 import jakarta.validation.Valid;
@@ -40,8 +41,12 @@ public class ProjectController {
         return projectService.createProject(userId(jwt), request.title());
     }
 
+    /* id 기반 프로젝트 불러오기: JSON 데이터, 접속자 닉네임, 프로젝트 명 */
     @GetMapping("/{id}")
-    ProjectObjectEntity getProject(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer id) {
+    ProjectDetailResponse getProject(
+        @AuthenticationPrincipal Jwt jwt, 
+        @PathVariable Integer id
+    ) {
         return projectService.getProject(userId(jwt), id);
     }
 

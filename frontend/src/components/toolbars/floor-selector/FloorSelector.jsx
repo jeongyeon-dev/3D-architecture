@@ -1,4 +1,4 @@
-import "./ToolBar.css";
+import "./FloorSelector.css";
 
 function FloorSelector({ floor, onFloorChange }) {
     const increaseFloor = () => {
@@ -16,7 +16,7 @@ function FloorSelector({ floor, onFloorChange }) {
             </button>
 
             <div className="floor-display">
-                {floor}F
+                {floor}층
             </div>
 
             <button id="floor-button" onClick={decreaseFloor}>

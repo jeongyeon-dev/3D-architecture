@@ -7,15 +7,20 @@ import { saveProject, getProject } from "../../api/project.js";
 import { createSimulator } from "../../three/editor/simulator.js";
 import { getAllObjects } from "../../three/project/project-state.js";
 
-import FloorSelector from "../../components/toolbars/toolbar/ToolBar.jsx";
+/* 에디터 화면 구성요소 */
 import EditorBottomToolbar from "../../components/toolbars/editor-bottom-toolbar/EditorBottomToolbar.jsx";
 import EditorLeftToolBar from "../../components/toolbars/editor-left-toolbar/EditorLeftToolBar.jsx";
+import EditorRightToolBar from "../../components/toolbars/editor-right-toolbar/EditorRightToolBar.jsx";
 
 
 
 export default function Editor({ projectId }) {
     const [floor, setFloor] = useState(1);
     const simulatorRef = useRef(null);
+
+    /* 백에서 불러오 프로젝트 및 관련 정보들 */
+    const [projectTitle, setProjectTitle] = useState("");
+    const [nickname, setNickname] = useState("");
 
 
     /* 프로젝트 id 기반하여 기존 오브젝트 불러오기 */
@@ -24,6 +29,8 @@ export default function Editor({ projectId }) {
             try {
                 const project = await getProject(projectId);
                 const projectObjects = project.objects ?? [];
+
+                setProjectTitle(project.title);
 
                 simulatorRef.current = createSimulator({
                     projectObjects
@@ -58,13 +65,12 @@ export default function Editor({ projectId }) {
             <div id="render-target"/>
                 <EditorBottomToolbar 
                     simulatorRef={simulatorRef}
-                />
-                <EditorLeftToolBar />
-
-                <FloorSelector
                     floor={floor}
                     onFloorChange={setFloor}
                 />
+                <EditorLeftToolBar />
+                <EditorRightToolBar />
+
                 <button
                     className="save-project-button"
                     onClick={handleSaveProject}
@@ -74,6 +80,8 @@ export default function Editor({ projectId }) {
         </div>
     );
 }
+
+
 
 
 

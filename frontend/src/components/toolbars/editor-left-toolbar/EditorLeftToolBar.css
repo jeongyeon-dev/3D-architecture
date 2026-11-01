@@ -7,7 +7,6 @@
     box-sizing: border-box;
     width: 220px;
     height: 100%;
-    padding: 6px;
 
     background: #ffffff;
     border-right: 1px solid #e5e5e5;
@@ -15,3 +14,15 @@
     box-shadow: 8px 0 18px rgba(0, 0, 0, 0.08);
 }
 
+/** 툴 바 인트로 섹션 **/
+.toolbar-intro-left {
+    padding: 20px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.toolbar-intro-left-label {
+    color: #666666;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+}

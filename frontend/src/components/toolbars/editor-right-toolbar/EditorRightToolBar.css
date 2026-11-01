@@ -1,0 +1,110 @@
+.editor-right-toolbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+
+    box-sizing: border-box;
+    width: 220px;
+    height: 100%;
+
+    background: #ffffff;
+    border-left: 1px solid #e5e5e5;
+    box-shadow: -8px 0 18px rgba(0, 0, 0, 0.08);
+}
+
+/** 툴 바 인트로 섹션 **/
+.toolbar-intro-right {
+    padding: 6px 6px 6px 4px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.toolbar__account {
+    min-width: 0;
+    height: 36px;
+    padding: 0 12px 0 8px;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: 0;
+    border-radius: 6px;
+    box-sizing: border-box;
+
+    cursor: pointer;
+}
+
+/* 프로필 + 화살표 마크 설정 */
+.workspace__profile-group {
+    display: flex;
+    align-items: center;
+}
+
+.workspace__profile-circle {
+    position: relative;
+    z-index: 2;
+
+    /* 기존 크기 및 색상 */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+
+    /* 두 원 사이의 흰색 간격 */
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+.workspace__chevron-circle {
+    position: relative;
+    z-index: 1;
+
+    width: 22px;
+    height: 22px;
+    margin-left: -1px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background-color: #F5F5F5;
+    color: #555555;
+}
+
+.workspace__chevron-arrow {
+    display: block;
+    transform: translateY(0.5px);
+}
+
+/* 얜 hover 시 */
+.workspace__chevron-circle:hover {
+    background-color: #E6E6E6;
+    color: #222222;
+}
+
+/* 우측 버튼 설정 */
+.toolbar__share-button {
+    height: 32px;
+    padding: 0 10px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1;
+
+    border: 0;
+    border-radius: 6px;
+    background-color: #0d99ff;
+    color: #ffffff;
+
+    
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.toolbar__share-button:hover {
+    background-color: #007BE5;
+}
+

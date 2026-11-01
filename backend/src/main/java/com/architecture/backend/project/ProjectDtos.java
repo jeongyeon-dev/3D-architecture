@@ -1,5 +1,6 @@
 package com.architecture.backend.project;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,14 @@ public final class ProjectDtos {
 
     public record ProjectSaveRequest(
         @NotNull(message = "프로젝트 오브젝트가 필요합니다.") List<Map<String, Object>> objects
+    ) {
+    }
+
+    public record ProjectDetailResponse(
+        Integer id,
+        String title,
+        LocalDateTime updatedAt,
+        List<Map<String, Object>> objects
     ) {
     }
 }
