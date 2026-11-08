@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.architecture.backend.project.ProjectDtos.ProjectCreateRequest;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectSaveRequest;
+import com.architecture.backend.project.projectObject.ProjectObjectEntity;
+import com.architecture.backend.project.project.ProjectEntity;
 
 import jakarta.validation.Valid;
 
@@ -72,3 +74,6 @@ public class ProjectController {
         return Integer.parseInt(jwt.getSubject());
     }
 }
+
+
+

@@ -1,4 +1,4 @@
-package com.architecture.backend.project;
+package com.architecture.backend.project.projectObject;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,3 +48,5 @@ public class ProjectObjectEntity {
         this.updatedAt = updatedAt;
     }
 }
+
+

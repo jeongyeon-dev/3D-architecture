@@ -1,4 +1,4 @@
-package com.architecture.backend.project;
+package com.architecture.backend.project.project;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,3 +23,4 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Integer>
             """)
     List<ProjectEntity> findActiveProjects(@Param("userId") Integer userId);
 }
+

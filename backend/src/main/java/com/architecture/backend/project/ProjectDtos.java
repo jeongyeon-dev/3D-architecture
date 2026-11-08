@@ -29,4 +29,12 @@ public final class ProjectDtos {
         List<Map<String, Object>> objects
     ) {
     }
+
+    public record ProjectMemberResponse(
+        String nickname,
+        String role
+    ) {
+    }
 }
+
+

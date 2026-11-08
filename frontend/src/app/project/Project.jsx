@@ -99,7 +99,7 @@ export default function Project({ onProjectSelect }) {
 
                             <div className="project-card__members">
                                 <UsersRound size={16} strokeWidth={1.5} />
-                                <span>N</span>
+                                <span>{project.members?.length ?? 0}</span>
                             </div>
                         </div>
                     </button>

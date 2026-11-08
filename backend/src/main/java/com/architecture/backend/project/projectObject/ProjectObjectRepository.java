@@ -1,4 +1,4 @@
-package com.architecture.backend.project;
+package com.architecture.backend.project.projectObject;
 
 import java.util.Optional;
 
@@ -8,3 +8,5 @@ public interface ProjectObjectRepository extends JpaRepository<ProjectObjectEnti
 
     Optional<ProjectObjectEntity> findByProjectId(Integer projectId);
 }
+
+

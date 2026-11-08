@@ -1,12 +1,17 @@
-package com.architecture.backend.project;
+package com.architecture.backend.project.project;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.architecture.backend.project.projectMember.ProjectMemberEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,6 +39,10 @@ public class ProjectEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    // 별도 테이블인 만큼 Colum 지정 안됨
+    @OneToMany(mappedBy = "project")
+    private List<ProjectMemberEntity> members = new ArrayList<>();
+
     /* 휴지통에 버리기 유무를 판별
        null이면 살아있는 거고, 값이 있으면 휴지통에 있는 것 */
     @Column(name = "deleted_at")
@@ -43,6 +52,10 @@ public class ProjectEntity {
         this.userId = userId;
         this.title = title;
         this.updatedAt = updatedAt;
+    }
+
+    public void setMembers(List<ProjectMemberEntity> members) {
+        this.members = members;
     }
 
     public void touch(LocalDateTime updatedAt) {
@@ -57,3 +70,4 @@ public class ProjectEntity {
         this.deletedAt = null;
     }
 }
+
