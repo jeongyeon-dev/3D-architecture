@@ -23,6 +23,7 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMemberEnti
         """) 
     List<ProjectMemberEntity> findByUser(@Param("user") UserEntity user);
     
-    
     List<ProjectMemberEntity> findByProject(ProjectEntity project);
+
+    List<ProjectMemberEntity> findByProject_id(Integer projectId);
 }

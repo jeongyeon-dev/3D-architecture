@@ -11,6 +11,7 @@ import {
     ExternalLink,
     StickyNote, 
     Trash2,
+    LogOut,
     PenTool,
     Plus
 } from "lucide-react";
@@ -18,6 +19,7 @@ import {
 export default function Workspace({
     onProjectSelect,
     onCreateProject,
+    onLogout,
 }) {
     const nickname = getNicknameFromToken();
     const [selectedMenu, setSelectedMenu] = useState("내 프로젝트");
@@ -73,8 +75,18 @@ export default function Workspace({
                         휴지통
                     </button>
                 </nav>
+
+                <button
+                    type="button"
+                    className="workspace__logout-button"
+                    onClick={onLogout}
+                >
+                <LogOut size={16} strokeWidth={1.5} />
+                    로그아웃
+                </button>
             </aside>
 
+            {/* 우측: 사실상 대부분 영역의 섹션 */}
             <main className="workspace__main">
                 <header className="workspace__header">
                     <div>

@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.architecture.backend.project.ProjectDtos.ProjectCreateRequest;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
+import com.architecture.backend.project.ProjectDtos.ProjectMemberResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectSaveRequest;
 import com.architecture.backend.project.projectObject.ProjectObjectEntity;
 import com.architecture.backend.project.project.ProjectEntity;
+import com.architecture.backend.project.projectMember.ProjectMemberEntity;
 
 import jakarta.validation.Valid;
 
@@ -52,6 +54,7 @@ public class ProjectController {
         return projectService.getProject(userId(jwt), id);
     }
 
+    /* 프로젝트 저장 로직 */
     @PutMapping("/save/{id}")
     ProjectObjectEntity saveProject(
         @AuthenticationPrincipal Jwt jwt,
@@ -69,6 +72,15 @@ public class ProjectController {
     ){
         return projectService.deleteProject(userId(jwt), id);
     }
+
+    /* 해당 프로젝트 회원 불러오기 */
+    @GetMapping("/members/{id}")
+    List<ProjectMemberResponse> getMembers(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable Integer id
+    ){
+        return projectService.getProjectMembers(userId(jwt), id);
+    } 
 
     private Integer userId(Jwt jwt) {
         return Integer.parseInt(jwt.getSubject());

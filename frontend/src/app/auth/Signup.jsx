@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { signup } from "../../api/auth.js";
+import googleIcon from "../../assets/icons/google_g.png";
+
+import { 
+    ArrowRight
+} from "lucide-react";
 
 export default function Signup() {
     const [username, setUsername] = useState("");
@@ -20,9 +25,22 @@ export default function Signup() {
 
     return (
         <div className="signup-page">
-            <h1>회원가입</h1>
-
             <form onSubmit={handleSubmit}>
+
+                <button
+                    type="button"
+                    className="google-signup-button"
+                >
+                    <img
+                        className="google-signup-button__icon"
+                        src={googleIcon}
+                        alt=""
+                    />
+                    구글로 계속하기
+                </button>
+
+                <span className="auth-or">or</span>
+
                 <input
                     type="text"
                     placeholder="아이디"
@@ -44,7 +62,12 @@ export default function Signup() {
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <button type="submit">
+                <button type="submit" className="signup-submit-button">
+                    <ArrowRight
+                        className="signup-submit-button__arrow"
+                        size={17}
+                        strokeWidth={1.5}
+                    />
                     회원가입
                 </button>
             </form>

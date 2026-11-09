@@ -33,11 +33,6 @@ export async function createProject(title) {
 export async function getProject(projectId) {
     const response = await authFetch(`/projects/${projectId}`);
 
-    // if (!response.ok) {
-    // console.log(await response.json());
-    //     throw new Error("프로젝트를 불러오지 못했습니다.");
-    // }   
-
     if (!response.ok) {
         throw new Error("프로젝트를 불러오지 못했습니다.");
     }

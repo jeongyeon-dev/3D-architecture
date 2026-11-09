@@ -31,6 +31,7 @@ public final class ProjectDtos {
     }
 
     public record ProjectMemberResponse(
+        Integer userId, 
         String nickname,
         String role
     ) {

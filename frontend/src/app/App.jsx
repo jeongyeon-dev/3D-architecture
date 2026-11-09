@@ -12,14 +12,15 @@ import NavBar from "../components/navbar/NavBar.jsx";
 import AuthModal from '../components/modal/AuthModal.jsx';
 
 import Editor from './editor/editor.jsx';
-import Login from './login/Login.jsx';
-import Signup from "./signup/Signup.jsx";
+import Login from './auth/Login.jsx';
+import Signup from "./auth/Signup.jsx";
 import Workspace from "./workspace/Workspace.jsx";
 
 import HeroSection from '../sections/hero/HeroSection.jsx';
 
 import { createProject } from '../api/project.js';
 import { getUsableAccessToken } from "../api/auth.js";
+import { LogoutFunc } from './auth/Logout.jsx';
 
 
 export default function App() {
@@ -82,10 +83,17 @@ export default function App() {
         return (
             <>
                 <Routes>
+                    {/* 워크 스페이스 부분: 로그아웃 + 프로젝트 생성 + 프로젝트 선택 기능 */}
                     <Route
                         path="/workspace"
                         element={
+                            
                             <Workspace
+                                onLogout={() => {
+                                    LogoutFunc();
+                                    setLoggedIn(false);
+                                    navigate("/");
+                                }}
                                 onCreateProject={() => {
                                     setShowCreateModal(true);
                                 }}
@@ -152,7 +160,7 @@ export default function App() {
             
             {authModal === "login" && (
                 <AuthModal
-                    title="로그인"
+                    title="환영합니다"
                     onClose={() => setAuthModal(null)}
                 >
                     <Login
@@ -166,7 +174,12 @@ export default function App() {
 
             {authModal === "signup" && (
                 <AuthModal
-                    title="회원가입"
+                    title={
+                        <>
+                        회원가입하여<br />
+                        Full-Access 권한을 누리세요
+                        </>
+                    }
                     onClose={() => setAuthModal(null)}
                 >
                     <Signup />
@@ -182,3 +195,5 @@ function EditorRoute() {
 
     return <Editor projectId={Number(projectId)} />;
 }
+
+

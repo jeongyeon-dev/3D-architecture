@@ -11,6 +11,7 @@ import com.architecture.backend.auth.UserEntity;
 import com.architecture.backend.auth.UserRepository;
 import com.architecture.backend.config.ResourceNotFoundException;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
+import com.architecture.backend.project.ProjectDtos.ProjectMemberResponse;
 import com.architecture.backend.project.projectObject.ProjectObjectEntity;
 import com.architecture.backend.project.projectObject.ProjectObjectRepository;
 import com.architecture.backend.project.project.ProjectEntity;
@@ -117,6 +118,21 @@ public class ProjectService {
         projectRepository.save(project);
         return true;
     }
+
+    @Transactional
+    public List<ProjectMemberResponse> getProjectMembers(Integer userId, Integer projectId){
+        
+        // memberEntity => memberResponse로 변환
+        return projectMemberRepository.findByProject_id(projectId)
+                .stream()
+                .map(member -> new ProjectMemberResponse(
+                    member.getUser().getId(),
+                    member.getUser().getNickname(),
+                    member.getRole()
+                ))
+                .toList();
+    }
+
 
     /* 특정 ID 기반으로 프로젝트 찾기 */
     private ProjectEntity requireOwnedProject(Integer userId, Integer projectId) {

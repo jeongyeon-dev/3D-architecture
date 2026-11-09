@@ -69,7 +69,9 @@ export default function Editor({ projectId }) {
                     onFloorChange={setFloor}
                 />
                 <EditorLeftToolBar />
-                <EditorRightToolBar />
+                <EditorRightToolBar 
+                    projectId={projectId}
+                />
 
                 <button
                     className="save-project-button"

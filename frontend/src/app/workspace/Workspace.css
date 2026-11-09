@@ -27,7 +27,7 @@
 .workspace__sidebar-menu {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 }
 
 /* 왼쪽 사이드바 각 버튼의 글자 폰트 등 정의  */
@@ -70,11 +70,19 @@
 
 
 /*** 왼쪽 사이드바 - 프로필 섹션 ***/
-.workspace__user {
+.workspace__sidebar .workspace__user {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    
+    /* 임시 조치 */
+    margin-left: -6px;
+    margin-right: -6px;
+    padding: 0 6px 6px;
 
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 6px;
+    
     margin-top: auto;
 }
 
@@ -172,6 +180,33 @@
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
+}
+
+
+/** 왼쪽 사이드바 - 로그아웃 버튼 **/
+.workspace__logout-button {
+    height: 36px;
+    margin: auto 10px 20px;
+    padding: 0px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    gap: 8px;
+
+    border: 0;
+    border-radius: 6px;
+    background: #0d99ff;
+
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+
+    line-height: 1;
+}
+
+.workspace__logout-button:hover {
+    background-color: #007BE5;
 }
 
 
@@ -458,3 +493,4 @@
     color: #777777;
     font-size: 11px;
 }
+
