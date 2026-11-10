@@ -41,4 +41,12 @@ public final class AuthDtos {
         String tokenType
     ) {
     }
+
+    /* 얘는 유저 객체 반환하는 거 */
+    public record UserResponse(
+        Integer userId,
+        String nickname
+    ){
+
+    }
 }

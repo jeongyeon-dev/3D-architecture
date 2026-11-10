@@ -1,0 +1,26 @@
+.project__empty-space {
+    min-height: calc(90dvh - 66px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project__empty-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    color: #a0a0a0;
+}
+
+.project__empty-card h3{
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+
+.project__empty-card p {
+    font-size: 12px;
+    margin: 0;
+}

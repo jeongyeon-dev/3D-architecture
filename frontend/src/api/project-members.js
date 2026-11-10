@@ -13,3 +13,13 @@ export async function getMembers(projectId) {
     return response.json();
 }
 
+/* 프로젝트 잠재 유저를 검색하는 함수 */
+export async function searchMembers(keyword) {
+    const response = await authFetch(`/projects/members/search/${keyword}`);
+
+    if (!response.ok) {
+        throw new Error("유저 검색 과정에 오류가 발생했습니다.");
+    }
+
+    return response.json();
+}

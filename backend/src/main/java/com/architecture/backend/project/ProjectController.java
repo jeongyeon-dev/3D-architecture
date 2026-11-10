@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.architecture.backend.auth.AuthDtos.UserResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectCreateRequest;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectMemberResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectSaveRequest;
 import com.architecture.backend.project.projectObject.ProjectObjectEntity;
 import com.architecture.backend.project.project.ProjectEntity;
-import com.architecture.backend.project.projectMember.ProjectMemberEntity;
+import com.architecture.backend.project.projectMember.ProjectMemberRepository;
 
 import jakarta.validation.Valid;
 
@@ -81,6 +82,15 @@ public class ProjectController {
     ){
         return projectService.getProjectMembers(userId(jwt), id);
     } 
+
+    @GetMapping("/members/search/{keyword}")
+    List<UserResponse> searchMembers(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable String keyword
+    ){
+        return projectService.searchMembers(userId(jwt), keyword);
+    }
+
 
     private Integer userId(Jwt jwt) {
         return Integer.parseInt(jwt.getSubject());

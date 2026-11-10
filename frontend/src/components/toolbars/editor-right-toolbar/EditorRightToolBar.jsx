@@ -1,21 +1,28 @@
 import './EditorRightToolBar.css';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { getNicknameFromToken } from  "../../../utils/jwt.js";
-import { getMembers } from '../../../api/project-members.js';
+import { getMembers, searchMembers } from '../../../api/project-members.js';
 
 import { 
-    ChevronDown
+    ChevronDown,
+    Search
 } from "lucide-react";
 
 
 export default function EditorRightToolBar({ projectId }) {
     const nickname = getNicknameFromToken();
-
-    const [ members, setMembers ] = useState([]);
     const [ activePanel, setActivePanel ] = useState(null);
 
+    /* 현 프로젝트 맴버 보기용 */
+    const [ members, setMembers ] = useState([]);
+
+    /* 유저 검색용 */
+    const [keyword, setKeyword] = useState("");
+    const [searchedMembers, setSearchedMembers ] = useState([]);
+
+    
     /* 현재 활성화된 두 번째 row의 패널 */
     function togglePanel(panelName) {
         setActivePanel((current) =>
@@ -61,6 +68,21 @@ export default function EditorRightToolBar({ projectId }) {
 
         return colors[sum % colors.length];
     }
+
+
+    /* 유저를 검색하는 함수: 입력 텍스트 변할 때만 trigger */
+    useEffect(() => {
+        const trimmedKeyword = keyword.trim();
+        if (trimmedKeyword.length < 2) {
+            setSearchedMembers([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            const result = await searchMembers(trimmedKeyword);
+            setSearchedMembers(result);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [keyword]);
     
     return (
         <aside className="editor-right-toolbar">
@@ -70,7 +92,10 @@ export default function EditorRightToolBar({ projectId }) {
                     <div className="workspace__user">
                         <div className="toolbar__account">
                             <div className="workspace__profile-group">
-                                <div className="workspace__profile-circle">
+                                <div 
+                                    className="workspace__profile-circle"
+                                    style={{ backgroundColor: getProfileColor(nickname) }}
+                                >
                                     {nickname?.charAt(0) || "U"}
                                 </div>
                                 <span className="workspace__chevron-circle">
@@ -99,7 +124,9 @@ export default function EditorRightToolBar({ projectId }) {
                             <button
                                 type="button"
                                 className="toolbar__share-button"
-                                aria-label="알림 확인"
+                                onClick={() =>{
+                                    togglePanel("search");
+                                }}
                             >
                                 공유하기
                             </button>
@@ -113,7 +140,7 @@ export default function EditorRightToolBar({ projectId }) {
                             {members.map((member) =>(
                                 <div
                                     className="toolbar__members"
-                                    key={member.nickname}
+                                    key={member.user_id}
                                 >
                                     <div className="toolbar__member-nickname">
                                         <div 
@@ -133,6 +160,49 @@ export default function EditorRightToolBar({ projectId }) {
 
                             ))}
                         </div>
+                    )}
+
+                    {activePanel === "search" && (
+                        <div className="search-panel">
+                            <div className="search-field">
+                                <Search
+                                    className="search-field__icon"
+                                    size={16}
+                                    strokeWidth={1.5}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="검색하기"
+                                    value={keyword}
+                                    onChange={(event) => setKeyword(event.target.value)}
+                                />
+                            </div>
+                            {/* 검색된 결과(유저 목록)이 list로 display */}
+                                <div className="toolbar__members-panel-two">
+                                    {searchedMembers.slice(0, 10).map((member) => (
+                                    <div
+                                        className="toolbar__members"
+                                        key={member.user_id}
+                                    >
+                                        <div className="toolbar__member-nickname">
+                                            <div 
+                                                className="toolbar__member__profile-circle"
+                                                style={{ backgroundColor: getProfileColor(member.nickname) }}
+                                            >
+                                                {nickname?.charAt(0) || "U"}
+                                            </div>
+                                            <span className="toolbar__member-nickname-text">
+                                                {member.nickname}
+                                            </span>            
+                                        </div>
+                                        <span className="toolbar__member-invite">
+                                            초대하기
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
                     )}
                 </div>
             </section>

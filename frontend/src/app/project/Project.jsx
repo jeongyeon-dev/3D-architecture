@@ -1,9 +1,14 @@
+import "./Project.css";
+
 import { useEffect, useState } from "react";
 import { getProjects, getProject, deleteProject } from "../../api/project.js";
 import { formatEditedAgo } from "../../utils/fromatting.js";
 
-import { X, UsersRound } from "lucide-react";
-
+import { 
+    X, 
+    UsersRound,
+    CirclePlus
+} from "lucide-react";
 
 export default function Project({ onProjectSelect }) {
     const [projects, setProjects] = useState([]);
@@ -60,7 +65,19 @@ export default function Project({ onProjectSelect }) {
     }
 
     if (projects.length === 0) {
-        return <div>저장된 프로젝트가 없습니다.</div>;
+        return (
+        <div className="project__empty-space">
+            <div className="project__empty-card">
+                <CirclePlus size={36} strokeWidth={1.5} />
+                <h3>
+                    프로젝트가 비어 있습니다
+                </h3>
+                <p>
+                    추가한 새 프로젝트가 여기에 표시됩니다
+                </p>
+            </div>
+        </div>
+        )
     }
 
     return (

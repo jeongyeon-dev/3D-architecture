@@ -214,3 +214,65 @@
     font-size: 11px;
     cursor: pointer;
 }
+
+
+/** 검색 버튼 클릭 => 검색어 입력 및 결과 display **/
+.search-panel {
+    padding: 8px;
+}
+
+.search-field {
+    position: relative;
+}
+
+.search-field input {
+    width: 100%;
+    height: 36px;
+    padding: 0 18px 0 32px;
+
+    box-sizing: border-box;
+
+    /* 추후 변경을 위해 transparent 설정할 것 */
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: #f5f5f5;
+
+    color: #222;
+    line-height: 10;
+}
+
+/* 검색창 내부 글씨 */
+.search-field input::placeholder {
+    color: #a0a0a0;
+    font-size: 11px;
+
+    
+}
+
+/* 입력을 하고 있을 때 */
+.search-field input:focus {
+    outline: none;
+    border-color: #0d99ff;
+}
+
+.search-field__icon {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+
+    color: #191919;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+/** 입력 결과 display 설정 **/
+.toolbar__members-panel-two {
+    padding: 6px 12px 0px 4px;
+}
+
+/* 초대하기 */
+.toolbar__member-invite {
+    color: #868686;
+    font-size: 11px;
+    cursor: pointer;
+}

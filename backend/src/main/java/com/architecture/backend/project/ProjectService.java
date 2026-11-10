@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.architecture.backend.auth.UserEntity;
 import com.architecture.backend.auth.UserRepository;
+import com.architecture.backend.auth.AuthDtos.UserResponse;
 import com.architecture.backend.config.ResourceNotFoundException;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectMemberResponse;
@@ -120,8 +122,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<ProjectMemberResponse> getProjectMembers(Integer userId, Integer projectId){
-        
+    public List<ProjectMemberResponse> getProjectMembers(Integer userId, Integer projectId){   
         // memberEntity => memberResponse로 변환
         return projectMemberRepository.findByProject_id(projectId)
                 .stream()
@@ -132,6 +133,24 @@ public class ProjectService {
                 ))
                 .toList();
     }
+
+    /** 유저 초대, 권한 위임, 퇴출 로직들 **/
+    /* keyword로 유저 검색: 잠재적으로 유저 편입 */
+    @Transactional 
+    public List<UserResponse> searchMembers(Integer userId, String keyword){
+        if(keyword == null || keyword.length() < 2) return List.of();
+    
+        List<UserEntity> users 
+                = userRepository.searchByNickname(keyword, PageRequest.of(0, 10));
+        
+        return users.stream()
+                .map(user -> new UserResponse(
+                    user.getId(), 
+                    user.getNickname()
+                ))
+                .toList(); 
+    }
+
 
 
     /* 특정 ID 기반으로 프로젝트 찾기 */
