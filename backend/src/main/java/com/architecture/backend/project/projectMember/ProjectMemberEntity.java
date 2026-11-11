@@ -39,7 +39,6 @@ public class ProjectMemberEntity {
     private UserEntity user;
 
     // 해당 맴버의 역할
-    @Column(name = "role", nullable = false, unique = true)
     private String role;
 
     // 생성자

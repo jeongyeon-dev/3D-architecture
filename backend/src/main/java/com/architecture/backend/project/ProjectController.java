@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.architecture.backend.auth.AuthDtos.UserResponse;
+import com.architecture.backend.auth.UserDtos.UserInviteRequest;
+import com.architecture.backend.auth.UserDtos.UserResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectCreateRequest;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectMemberResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectSaveRequest;
 import com.architecture.backend.project.projectObject.ProjectObjectEntity;
 import com.architecture.backend.project.project.ProjectEntity;
-import com.architecture.backend.project.projectMember.ProjectMemberRepository;
 
 import jakarta.validation.Valid;
 
@@ -91,11 +91,20 @@ public class ProjectController {
         return projectService.searchMembers(userId(jwt), keyword);
     }
 
+    /* 해당 유저 프로젝트에 초대하기: 권한 설정 포함 */
+    @PostMapping("/members/invite")
+    Boolean inviteUser(
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody UserInviteRequest dto
+    ){
+        return projectService.inviteUser(userId(jwt), dto.userId(), dto.projectId(), dto.role());
+    }
 
     private Integer userId(Jwt jwt) {
         return Integer.parseInt(jwt.getSubject());
     }
 }
+
 
 
 

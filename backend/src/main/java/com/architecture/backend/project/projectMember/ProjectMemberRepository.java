@@ -1,6 +1,7 @@
 package com.architecture.backend.project.projectMember;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +27,10 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMemberEnti
     List<ProjectMemberEntity> findByProject(ProjectEntity project);
 
     List<ProjectMemberEntity> findByProject_id(Integer projectId);
+
+    /* 특정 유저 찾기 */
+    Optional<ProjectMemberEntity> findByProject_IdAndUser_Id(
+        Integer projectId,
+        Integer userId
+    );
 }

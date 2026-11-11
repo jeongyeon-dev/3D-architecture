@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.architecture.backend.auth.UserEntity;
 import com.architecture.backend.auth.UserRepository;
-import com.architecture.backend.auth.AuthDtos.UserResponse;
+import com.architecture.backend.auth.UserDtos.UserResponse;
 import com.architecture.backend.config.ResourceNotFoundException;
 import com.architecture.backend.project.ProjectDtos.ProjectDetailResponse;
 import com.architecture.backend.project.ProjectDtos.ProjectMemberResponse;
@@ -151,6 +152,29 @@ public class ProjectService {
                 .toList(); 
     }
 
+    /* 유저 초대하기 */
+    @Transactional 
+    public boolean inviteUser(
+        Integer requestedUserId, 
+        Integer invitedUserId,
+        Integer projectId, 
+        String role
+    ){
+        /* 권한 확인 */
+        if(!"OWNER".equals(getRole(requestedUserId, projectId))){
+            throw new AccessDeniedException("소유자만 실행할 수 있습니다.");
+        }
+
+        ProjectEntity project = projectRepository.getReferenceById(projectId);
+        UserEntity user = userRepository.getReferenceById(invitedUserId);
+
+        /* 초대됨 데이터 생성하기 */
+        projectMemberRepository.save(
+            new ProjectMemberEntity(project, user, role)
+        );
+
+        return true;
+    }
 
 
     /* 특정 ID 기반으로 프로젝트 찾기 */
@@ -158,7 +182,17 @@ public class ProjectService {
         return projectRepository.findByIdAndUserId(projectId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
     }
+
+    /* 특정 projectId + userId 기반으로 해당 유저 권한 찾기 */
+    private String getRole(Integer userId, Integer projectId){
+        ProjectMemberEntity middle 
+                = projectMemberRepository.findByProject_IdAndUser_Id(projectId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+        return middle.getRole();
+    }
 }
+
 
 
 

@@ -133,8 +133,12 @@ export default function EditorRightToolBar({ projectId }) {
                         </div>
                     </div>
                 </div >
-                {/* 두 번째 row */}
-                <div className="toolbar__panel">
+                {/* 두 번째 row: 아코디언 애니메이션 도입 */}
+                <div
+                    className={`toolbar__panel ${
+                        activePanel ? "is-open" : ""
+                    }`}
+                >
                     {activePanel === "members" && (
                         <div className="toolbar__members-panel">
                             {members.map((member) =>(
@@ -195,9 +199,12 @@ export default function EditorRightToolBar({ projectId }) {
                                                 {member.nickname}
                                             </span>            
                                         </div>
-                                        <span className="toolbar__member-invite">
+                                        <button
+                                            type="button"
+                                            className="toolbar__member-invite"
+                                        >
                                             초대하기
-                                        </span>
+                                        </button>
                                     </div>
                                 ))}
                             </div>
