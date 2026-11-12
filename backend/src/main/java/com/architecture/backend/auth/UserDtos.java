@@ -7,7 +7,8 @@ public final class UserDtos {
 
     public record UserResponse(
         Integer userId,
-        String nickname
+        String nickname,
+        String role
     ) {
     }
 

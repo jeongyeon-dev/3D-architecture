@@ -14,11 +14,32 @@ export async function getMembers(projectId) {
 }
 
 /* 프로젝트 잠재 유저를 검색하는 함수 */
-export async function searchMembers(keyword) {
-    const response = await authFetch(`/projects/members/search/${keyword}`);
+export async function searchMembers(projectId, keyword) {
+    const response = await authFetch(`/projects/members/search/${projectId}-${keyword}`);
 
     if (!response.ok) {
-        throw new Error("유저 검색 과정에 오류가 발생했습니다.");
+        throw new Error("유저 검색 과정에서 오류가 발생했습니다.");
+    }
+
+    return response.json();
+}
+
+/* 프로젝트에 멤버를 초대하는 함수 */
+export async function inviteMembers(userId, projectId) {
+    const response = await authFetch(`/projects/members/invite`, {
+        method: "POST",
+        headers: {
+            "Content-Type":  "application/json",
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            project_id: projectId,
+            role: "VIEWER"
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("유저 초대 과정에서 오류가 발생했습니다.");
     }
 
     return response.json();

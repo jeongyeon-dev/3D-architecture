@@ -78,7 +78,7 @@ export default function EditorRightToolBar({ projectId }) {
             return;
         }
         const timer = setTimeout(async () => {
-            const result = await searchMembers(trimmedKeyword);
+            const result = await searchMembers(projectId, trimmedKeyword);
             setSearchedMembers(result);
         }, 300);
         return () => clearTimeout(timer);

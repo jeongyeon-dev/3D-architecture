@@ -126,19 +126,24 @@ public class ProjectService {
     public List<ProjectMemberResponse> getProjectMembers(Integer userId, Integer projectId){   
         // memberEntity => memberResponse로 변환
         return projectMemberRepository.findByProject_id(projectId)
-                .stream()
-                .map(member -> new ProjectMemberResponse(
-                    member.getUser().getId(),
-                    member.getUser().getNickname(),
-                    member.getRole()
-                ))
-                .toList();
+                        .stream()
+                        .map(member -> new ProjectMemberResponse(
+                            member.getUser().getId(),
+                            member.getUser().getNickname(),
+                            member.getRole()
+                        ))
+                        .toList();             
     }
+
 
     /** 유저 초대, 권한 위임, 퇴출 로직들 **/
     /* keyword로 유저 검색: 잠재적으로 유저 편입 */
     @Transactional 
-    public List<UserResponse> searchMembers(Integer userId, String keyword){
+    public List<UserResponse> searchMembers(
+        Integer userId, 
+        String keyword, 
+        Integer projectId
+    ){
         if(keyword == null || keyword.length() < 2) return List.of();
     
         List<UserEntity> users 
@@ -147,7 +152,8 @@ public class ProjectService {
         return users.stream()
                 .map(user -> new UserResponse(
                     user.getId(), 
-                    user.getNickname()
+                    user.getNickname(),
+                    getRole(userId, projectId)
                 ))
                 .toList(); 
     }
@@ -184,12 +190,10 @@ public class ProjectService {
     }
 
     /* 특정 projectId + userId 기반으로 해당 유저 권한 찾기 */
-    private String getRole(Integer userId, Integer projectId){
-        ProjectMemberEntity middle 
-                = projectMemberRepository.findByProject_IdAndUser_Id(projectId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 유저를 찾을 수 없습니다."));
-
-        return middle.getRole();
+    private String getRole(Integer userId, Integer projectId){   
+        return projectMemberRepository.findByProject_IdAndUser_Id(projectId, userId)
+                .map(ProjectMemberEntity::getRole)
+                .orElse("NONE");
     }
 }
 

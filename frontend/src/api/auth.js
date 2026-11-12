@@ -76,8 +76,9 @@ export async function getUsableAccessToken() {
 export async function refreshAccessToken() {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
-    if (!refreshToken) {
+    if (!refreshToken || isTokenExpired(refreshToken)) {
         removeAccessToken();
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
         return null;
     }
 
@@ -119,8 +120,10 @@ export function removeAccessToken() {
 
 /* access 토큰이 만료되었는지 확인 */
 export function isAccessTokenExpired() {
-    const token = getAccessToken();
+    return isTokenExpired(getAccessToken());
+}
 
+function isTokenExpired(token) {
     if (!token) {
         return true;
     }
@@ -135,11 +138,7 @@ export function isAccessTokenExpired() {
 
         const payload = JSON.parse(atob(base64));
 
-        if (!payload.exp) {
-            return true;
-        }
-
-        return Date.now() >= payload.exp * 1000;
+        return !payload.exp || Date.now() >= payload.exp * 1000;
     } catch {
         return true;
     }

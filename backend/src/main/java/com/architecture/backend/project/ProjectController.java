@@ -83,12 +83,13 @@ public class ProjectController {
         return projectService.getProjectMembers(userId(jwt), id);
     } 
 
-    @GetMapping("/members/search/{keyword}")
+    @GetMapping("/members/search/{projectId}-{keyword}")
     List<UserResponse> searchMembers(
         @AuthenticationPrincipal Jwt jwt,
-        @PathVariable String keyword
+        @PathVariable String keyword,
+        @PathVariable Integer projectId
     ){
-        return projectService.searchMembers(userId(jwt), keyword);
+        return projectService.searchMembers(userId(jwt), keyword, projectId);
     }
 
     /* 해당 유저 프로젝트에 초대하기: 권한 설정 포함 */
