@@ -1,5 +1,6 @@
 import './EditorBottomToolbar.css';
 import { useState } from 'react';
+import { getAuthority } from '../../../api/project';
 
 import {
     Box,
@@ -25,6 +26,9 @@ const rightTools = [
 
 export default function EditorBottomToolbar({ simulatorRef, floor, onFloorChange }) {
     const [activeToolId, setActiveToolId] = useState('bulldoze');
+
+    /* 편집 권한에 따라 가능 여부 로직을 작성해야 함 */
+
 
     function selectTool(toolId) {
         setActiveToolId(toolId);

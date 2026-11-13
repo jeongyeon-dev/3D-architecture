@@ -3,7 +3,11 @@ import './EditorRightToolBar.css';
 import { useState, useEffect } from "react";
 
 import { getNicknameFromToken } from  "../../../utils/jwt.js";
-import { getMembers, searchMembers } from '../../../api/project-members.js';
+import { 
+    getMembers, 
+    searchMembers, 
+    inviteMember 
+} from '../../../api/project-members.js';
 
 import { 
     ChevronDown,
@@ -40,6 +44,43 @@ export default function EditorRightToolBar({ projectId }) {
         }
     }
 
+    /* 유저 초대하기 */
+    async function handleMemberInvite(userId) {
+        try {
+            const invited = await inviteMember(userId, projectId);
+
+            if (!invited) {
+                alert("권한이 없습니다.")
+                return;
+            }
+
+            const result = await searchMembers(
+                projectId,
+                keyword.trim()
+            );
+
+            setSearchedMembers(result);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    /* 유저를 검색하는 함수: 입력 텍스트 변할 때만 trigger */
+    useEffect(() => {
+        const trimmedKeyword = keyword.trim();
+        if (trimmedKeyword.length < 2) {
+            setSearchedMembers([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            const result = await searchMembers(projectId, trimmedKeyword);
+            setSearchedMembers(result);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [keyword]);
+
+    /** 내부 기능 함수 **/
     /* 영어 권한 => 한글로 */
     function getRoleLabel(role) {
         const roleLabels = {
@@ -68,21 +109,6 @@ export default function EditorRightToolBar({ projectId }) {
 
         return colors[sum % colors.length];
     }
-
-
-    /* 유저를 검색하는 함수: 입력 텍스트 변할 때만 trigger */
-    useEffect(() => {
-        const trimmedKeyword = keyword.trim();
-        if (trimmedKeyword.length < 2) {
-            setSearchedMembers([]);
-            return;
-        }
-        const timer = setTimeout(async () => {
-            const result = await searchMembers(projectId, trimmedKeyword);
-            setSearchedMembers(result);
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [keyword]);
     
     return (
         <aside className="editor-right-toolbar">
@@ -202,8 +228,10 @@ export default function EditorRightToolBar({ projectId }) {
                                         <button
                                             type="button"
                                             className="toolbar__member-invite"
+                                            disabled={member.role !== "NONE"}
+                                            onClick={() => handleMemberInvite(member.user_id)}
                                         >
-                                            초대하기
+                                            {member.role !== "NONE" ? "초대됨" : "초대하기"}
                                         </button>
                                     </div>
                                 ))}

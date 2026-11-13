@@ -301,7 +301,15 @@
     cursor: pointer;
 }
 
-.toolbar__member-invite:hover {
+/* 이미 초대되었을 경우 */
+.toolbar__member-invite:disabled {
+    color: #888;
+    cursor: default;
+    background: transparent;
+}
+
+/* disabled 상태라면? => hover 기능 없음 */
+.toolbar__member-invite:not(:disabled):hover {
     background: #f2f2f2;
     color: #222;
 }

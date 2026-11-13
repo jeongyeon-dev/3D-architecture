@@ -25,8 +25,8 @@ export async function searchMembers(projectId, keyword) {
 }
 
 /* 프로젝트에 멤버를 초대하는 함수 */
-export async function inviteMembers(userId, projectId) {
-    const response = await authFetch(`/projects/members/invite`, {
+export async function inviteMember(userId, projectId) {
+    const response = await authFetch(`/projects/members/role`, {
         method: "POST",
         headers: {
             "Content-Type":  "application/json",
@@ -40,6 +40,27 @@ export async function inviteMembers(userId, projectId) {
 
     if (!response.ok) {
         throw new Error("유저 초대 과정에서 오류가 발생했습니다.");
+    }
+
+    return response.json();
+}
+
+/* 프로젝트의 해당 멤버의 권한을 변경하는 함수 */
+export async function changeRole(userId, projectId, role) {
+    const response = await authFetch(`/projects/members/role`, {
+        method: "POST",
+        headers: {
+            "Content-Type":  "application/json",
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            project_id: projectId,
+            role: role
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("유저 권한 변경 과정에서 오류가 발생했습니다.");
     }
 
     return response.json();

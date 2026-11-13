@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,7 +80,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDetailResponse getProject(Integer userId, Integer projectId) {
-        ProjectEntity project = requireOwnedProject(userId, projectId);
+        ProjectEntity project = getProjectByMember(projectId, userId);
         ProjectObjectEntity projectData = projectObjectRepository.findByProjectId(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
     
@@ -95,7 +94,8 @@ public class ProjectService {
 
     @Transactional
     public ProjectObjectEntity saveProject(Integer userId, Integer projectId, List<Map<String, Object>> objects) {
-        ProjectEntity project = requireOwnedProject(userId, projectId);
+        // 멤버를 기준으로 프로젝트를 찾는다 => 프로젝트 내 저장 객체 불러오기
+        ProjectEntity project = getProjectByMember(projectId, userId);
         ProjectObjectEntity projectObject = projectObjectRepository.findByProjectId(projectId)
             .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
 
@@ -150,50 +150,72 @@ public class ProjectService {
                 = userRepository.searchByNickname(keyword, PageRequest.of(0, 10));
         
         return users.stream()
-                .map(user -> new UserResponse(
-                    user.getId(), 
-                    user.getNickname(),
-                    getRole(userId, projectId)
-                ))
+                .map(user -> {
+                    ProjectMemberEntity member = getMember(user.getId(), projectId);
+                    String role = member == null ? "NONE" : member.getRole();
+                    
+                    return new UserResponse(
+                        user.getId(), 
+                        user.getNickname(),
+                        role
+                    );
+                })
                 .toList(); 
     }
 
     /* 유저 초대하기 */
     @Transactional 
-    public boolean inviteUser(
+    public boolean userRegistration(
         Integer requestedUserId, 
         Integer invitedUserId,
         Integer projectId, 
         String role
     ){
-        /* 권한 확인 */
-        if(!"OWNER".equals(getRole(requestedUserId, projectId))){
-            throw new AccessDeniedException("소유자만 실행할 수 있습니다.");
+        /* 권한 확인: 소유자만 역할 변경 가능 */
+        if(!"OWNER".equals(getMember(requestedUserId, projectId).getRole())){
+            return false;
         }
 
         ProjectEntity project = projectRepository.getReferenceById(projectId);
         UserEntity user = userRepository.getReferenceById(invitedUserId);
 
-        /* 초대됨 데이터 생성하기 */
-        projectMemberRepository.save(
-            new ProjectMemberEntity(project, user, role)
-        );
+        ProjectMemberEntity member = getMember(invitedUserId, projectId);
+        String currentRole = member == null ? "NONE" : member.getRole();
+
+        // 기존 유저라면? => 변경된 역할 적용하기
+        if(!currentRole.equals("NONE")){
+            member.changeRole(role);
+            projectMemberRepository.save(member);
+        }
+
+        // 만약 최초 유저라면? => 초대인 만큼 기본 역할 부여하기 
+        if(currentRole.equals("NONE")){
+            projectMemberRepository.save(
+                new ProjectMemberEntity(project, user, role)
+            );
+        }
 
         return true;
     }
 
-
-    /* 특정 ID 기반으로 프로젝트 찾기 */
-    private ProjectEntity requireOwnedProject(Integer userId, Integer projectId) {
-        return projectRepository.findByIdAndUserId(projectId, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
+    /* 프로젝트 권한 반환하기 */
+    public String getAuthority(Integer userId, Integer projectId){
+        ProjectMemberEntity member = getMember(userId, projectId);
+        return member == null ? "NONE" : member.getRole();
     }
 
     /* 특정 projectId + userId 기반으로 해당 유저 권한 찾기 */
-    private String getRole(Integer userId, Integer projectId){   
-        return projectMemberRepository.findByProject_IdAndUser_Id(projectId, userId)
-                .map(ProjectMemberEntity::getRole)
-                .orElse("NONE");
+    private ProjectMemberEntity getMember(Integer userId, Integer projectId){   
+        return projectMemberRepository.findByProject_IdAndUser_Id(projectId, userId).orElse(null);
+    }
+
+    /* 멤버를 기준으로 해당 프로젝트 찾기 */
+    private ProjectEntity getProjectByMember(Integer projectId, Integer userId){
+        ProjectMemberEntity member = projectMemberRepository
+            .findByProject_IdAndUser_Id(projectId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
+        
+            return member.getProject();
     }
 }
 

@@ -5,7 +5,6 @@ import com.architecture.backend.project.project.ProjectEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +35,7 @@ public class ProjectMemberEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private UserEntity user;
 
     // 해당 맴버의 역할
@@ -49,6 +49,11 @@ public class ProjectMemberEntity {
     ) {
         this.project = project;
         this.user = user;
+        this.role = role;
+    }
+
+    // 역할 변경
+    public void changeRole(String role){
         this.role = role;
     }
 }

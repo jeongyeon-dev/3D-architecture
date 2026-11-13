@@ -61,7 +61,7 @@ export default function Project({ onProjectSelect }) {
     }
 
     if (!loggedIn) {
-        return <div>로그인해야 프로젝트를 볼 수 있습니다.</div>;
+        return <div>서버 내부 오류</div>;
     }
 
     if (projects.length === 0) {

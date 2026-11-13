@@ -70,3 +70,14 @@ export async function deleteProject(projectId) {
 
     return response.json();
 }
+
+/* 해당 프로젝트에서 편집 권한 알아오기 */
+export async function getAuthority(projectId) {
+    const response = await authFetch(`/projects/auth/${projectId}`);
+
+    if (!response.ok) {
+        throw new Error("권한을 확인하지 못했습니다.");
+    }
+
+    return response.json();
+}

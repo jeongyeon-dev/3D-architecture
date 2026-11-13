@@ -92,14 +92,23 @@ public class ProjectController {
         return projectService.searchMembers(userId(jwt), keyword, projectId);
     }
 
-    /* 해당 유저 프로젝트에 초대하기: 권한 설정 포함 */
-    @PostMapping("/members/invite")
+    /* 해당 유저 프로젝트에 초대 및 권한 설정하기 */
+    @PostMapping("/members/role")
     Boolean inviteUser(
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody UserInviteRequest dto
     ){
-        return projectService.inviteUser(userId(jwt), dto.userId(), dto.projectId(), dto.role());
+        return projectService.userRegistration(userId(jwt), dto.userId(), dto.projectId(), dto.role());
     }
+
+    /* 해당 프로젝트의 해당 유저 권한 알아오기 */
+    @GetMapping("/auth/{projectId}")
+    String getAuthority(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable Integer projectId
+    ){
+        return projectService.getAuthority(userId(jwt), projectId);
+    } 
 
     private Integer userId(Jwt jwt) {
         return Integer.parseInt(jwt.getSubject());
