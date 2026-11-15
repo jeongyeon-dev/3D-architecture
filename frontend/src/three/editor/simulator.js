@@ -1,18 +1,36 @@
 import { createScene } from "./scene.js";
 import { createLand } from "./components/land.js";
 
-export function createSimulator({ projectObjects = [] } = {}){
+export function createSimulator({
+    projectObjects = [],
+    onCursorGridChange,
+} = {}) {
+    /* 가변 속성 */
     let activeToolId = '';
+    let previousGridPosition = null;
 
+    /* 생성 => 초기화 */
     const scene = createScene();
-    const land = createLand(1);
-
     scene.initialize(projectObjects);
+
+    const land = createLand(1);
 
     /* 좌표 추적하기 */
     scene.setOnGridHovered(({ gridX, gridZ, gridY, object, normal }) => {
-        scene.hideToolCursors(activeToolId);
+        /* 좌표를 소켓에 보내는 로직 부분: 다를 경우에만 전송.. 콜백 */
+        const position = { gridX, gridZ, gridY };
+        const isSamePosition =
+            previousGridPosition?.gridX === gridX &&
+            previousGridPosition?.gridZ === gridZ &&
+            previousGridPosition?.gridY === gridY;
 
+        if(!isSamePosition) {
+            previousGridPosition = position;
+            onCursorGridChange?.(position);
+        }
+
+        
+        scene.hideToolCursors(activeToolId);
         switch(activeToolId){
             case 'wall':
                 scene.updateWallHover(gridX, gridZ, gridY); 
