@@ -18,7 +18,12 @@ import { createEditorTool } from '../tools/editor-tool.js';
 import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
 import { getGizmoRaycastTargets } from '../tools/utils/selection.js';
 import { loadProject } from '../project/project-loader.js';
-import { getObjectsByType } from '../project/project-state.js';
+
+/* 프로젝트 데이터 관리 */
+import { 
+    getObjectsByType,
+    removeAllObjects
+} from '../project/project-state.js';
 
 /* 공통 변수 */
 import { 
@@ -105,6 +110,7 @@ export function createScene(){
     /* 초기화 함수 */
     function initialize(projectObjects = []){
         scene.clear();
+        removeAllObjects();
 
         /* 카메라 위치 설정 */
         center = LAND_SIZE_M / 2;
@@ -544,6 +550,30 @@ export function createScene(){
         upperFloorGrid = undefined;
     }
 
+    
+    /* 소켓으로 받아온 상대 마우스 커서 */
+    function updateRemoteCursor(message) {
+        const {
+            userId,
+            gridX,
+            gridZ,
+            gridY
+        } = message;
+
+        console.log(userId, gridX, gridZ, gridY);
+    }
+
+    
+    /* 마우스 커서 받기 전 접속 알림 */
+    function addRemoteCursor(message){
+        const { userId } = message;
+    }
+
+    /* 이후 상대 접속 종료 => 커서 지워야 함 */
+    function removeRemoteCursor(message){
+        const { userId } = message;
+    }
+
 
     return {
         threeScene: scene,
@@ -572,6 +602,9 @@ export function createScene(){
         updateEditorHover,
         confirmEditorPoint,
         setRaycastTarget,
-        setFloor
+        setFloor,
+        updateRemoteCursor,
+        addRemoteCursor,
+        removeRemoteCursor
     }
 }

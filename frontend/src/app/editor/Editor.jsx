@@ -32,11 +32,28 @@ export default function Editor({ projectId }) {
 
     /* 소켓 열기: 에디터 진입 시 바로 */
     useEffect(() => {
-        socketRef.current = connectProjectSocket(projectId, 
-            (message) => {
-                console.log("소켓 수신: ", message);
-            }
-        )
+        /* 여기가 소켓 연결부 */
+        async function connectSocket() {
+            socketRef.current = await connectProjectSocket(
+                projectId,
+                (message) => {
+                    /* 소켓에서 받은 상대 마우스 커서를 three 쪽으로 보낸다 */
+                    switch (message.type) {
+                        case "CURSOR_MOVE":
+                            simulatorRef.current?.updateRemoteCursor(message);
+                            break;
+                        case "USER_JOIN":
+                            simulatorRef.current?.addRemoteUser(message);
+                            break;
+                        case "USER_LEAVE":
+                            simulatorRef.current?.removeRemoteUser(message);
+                            break;
+                    }
+                }
+            );
+        }
+
+        connectSocket();
 
         /* 나가면 닫힘 */
         return () => {
@@ -58,8 +75,14 @@ export default function Editor({ projectId }) {
                     projectObjects,
                     
                     /* 여기서 마우스 감지 => 소켓 전송 기능 구체화 */
-                    onCursorGridChange: (position) => {
-                        console.log(position);
+                    onCursorGridChange: ({ gridX, gridZ, gridY }) => {
+                        sendSocketMessage({
+                            type: "CURSOR_MOVE",
+                            projectId,
+                            gridX,
+                            gridZ,
+                            gridY,
+                        });
                     },
                 });
 

@@ -1,5 +1,7 @@
 package com.architecture.backend.config;
 
+import com.architecture.backend.realtime.WebSocketHandler;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -23,3 +25,4 @@ public class WebSocketConfig implements WebSocketConfigurer {
             .setAllowedOrigins("http://localhost:5173");
     }
 }
+

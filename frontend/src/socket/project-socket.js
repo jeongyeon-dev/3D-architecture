@@ -1,20 +1,29 @@
 const API_WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
 
+import { getUsableAccessToken } from "../api/auth";
+
 let socket = null;
 
 /* 소켓 연결 성립시키기 */
-export function connectProjectSocket(projectId, onMessage) {
-    /* 예방용 코드: 먼저 닫기 */
+export async function connectProjectSocket(projectId, onMessage) {
+    const accessToken = await getUsableAccessToken();
+
+    if (!accessToken) {
+        throw new Error("로그인이 필요합니다.");
+    }
+
+    const params = new URLSearchParams({
+        projectId: String(projectId),
+        token: accessToken,
+    });
+
     socket?.close();
-    socket = new WebSocket(`${API_WS_BASE_URL}/ws/cursor`);
 
-    socket.onopen = () => {
-        socket.send(JSON.stringify({
-            type: "JOIN",
-            projectId,
-        }));
-    };
+    socket = new WebSocket(
+        `${API_WS_BASE_URL}/ws/cursor?${params}`
+    );
 
+    /* 서버에서 받은 메시지 */
     socket.onmessage = (event) => {
         onMessage(JSON.parse(event.data));
     };

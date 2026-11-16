@@ -95,6 +95,7 @@ export function createSimulator({
     document.addEventListener('wheel', scene.onWheel, { passive: false });
     document.addEventListener('contextmenu', (event) => event.preventDefault(), false);
 
+    /* 시뮬레이터(반환 객체)에 각종 기능 삽입 */
     const simulator = {
         threeScene: scene.threeScene,
         update(){
@@ -107,6 +108,17 @@ export function createSimulator({
         },
         setFloor(floor) {
             scene.setFloor(floor);
+        },
+
+        /* 상대 커서 받아서 처리하는 곳 */
+        updateRemoteCursor(message) {
+            scene.updateRemoteCursor(message);
+        },
+        addRemoteCursor(message) {
+            scene.addRemoteCursor(message);
+        },        
+        removeRemoteCursor(message) {
+            scene.removeRemoteCursor(message);
         }
     }
 
