@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
 /* 스크롤 바 없애기 */
 .editor-window{
     overflow: hidden;
@@ -22,6 +24,13 @@
     transform: translate(-50%, -50%);
 }
 
+/* 타 사용자의 커서의 닉네임 */
+.remote-cursor-nickname {
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+}
 
 
 

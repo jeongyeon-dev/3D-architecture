@@ -41,7 +41,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         WebSocketSession session,
         TextMessage message
     ) throws IOException {
-        System.out.println("수신: " + message.getPayload());
+        // System.out.println("수신: " + message.getPayload());
         
         /* 발신(broadcast)하기 */
         webSocketSessionRegistry.broadcast(session, message.getPayload());
@@ -54,7 +54,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) throws IOException {
         System.out.println("WebSocket 종료: " + session.getId());
         ProjectSession leftUser = webSocketSessionRegistry.find(session);
-        UserAlertMessage leaveMessage = new UserAlertMessage("USER_LEVE", leftUser.userId());
+        UserAlertMessage leaveMessage = new UserAlertMessage("USER_LEAVE", leftUser.userId());
 
         if(leftUser != null){
             String payload = objectMapper.writeValueAsString(leaveMessage);

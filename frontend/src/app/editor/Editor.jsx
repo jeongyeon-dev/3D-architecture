@@ -43,10 +43,10 @@ export default function Editor({ projectId }) {
                             simulatorRef.current?.updateRemoteCursor(message);
                             break;
                         case "USER_JOIN":
-                            simulatorRef.current?.addRemoteUser(message);
+                            simulatorRef.current?.addRemoteCursor(message);
                             break;
                         case "USER_LEAVE":
-                            simulatorRef.current?.removeRemoteUser(message);
+                            simulatorRef.current?.removeRemoteCursor(message);
                             break;
                     }
                 }

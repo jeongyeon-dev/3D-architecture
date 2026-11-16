@@ -19,6 +19,9 @@ import { calculateMiterWalls } from '../tools/utils/miter-calculator.js';
 import { getGizmoRaycastTargets } from '../tools/utils/selection.js';
 import { loadProject } from '../project/project-loader.js';
 
+/* 2차원 공간 렌더러 */
+import { createLabelRenderer } from './components/label-renderer.js';
+
 /* 프로젝트 데이터 관리 */
 import { 
     getObjectsByType,
@@ -36,6 +39,13 @@ import {
     VIEW_HEIGHT
 } from '../config.js';
 
+/* 커서 함수 */
+import { 
+    moveCursor,
+    createCursor,
+    removeCursor 
+} from './components/remote-cursor.js';
+
 
 export function createScene(){
     /* 화면 생성 + 카메라 불러오기 */
@@ -52,6 +62,13 @@ export function createScene(){
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     gameWindow.appendChild(renderer.domElement);
+
+    /* 2차원 표시기 */
+    const labelRenderer = createLabelRenderer(
+        gameWindow,
+        VIEW_WIDTH,
+        VIEW_HEIGHT
+    );
 
 
     /* sky box 생성 및 설정 */
@@ -383,15 +400,16 @@ export function createScene(){
         }
 
         for (const platformGrid of platformGrids) {
-            const distance =
-                camera.camera.position.distanceTo(
-                    platformGrid.position
-                );
+            
+            const distance = camera.camera.position.distanceTo(
+                        platformGrid.position
+                    );
 
             platformGrid.updateOpacity(distance);
         }
 
         renderer.render(scene, camera.camera);
+        labelRenderer.render(scene, camera.camera);
     }
 
     function start(){
@@ -554,24 +572,29 @@ export function createScene(){
     /* 소켓으로 받아온 상대 마우스 커서 */
     function updateRemoteCursor(message) {
         const {
-            userId,
-            gridX,
-            gridZ,
-            gridY
+            user_id: userId,
+            nickname: nickname,
+            grid_x: gridX,
+            grid_z: gridZ,
+            grid_y: gridY
         } = message;
 
-        console.log(userId, gridX, gridZ, gridY);
+        const position = {gridX, gridZ, gridY};
+        console.log(message)
+
+        moveCursor(scene, userId, nickname, position);
     }
 
-    
     /* 마우스 커서 받기 전 접속 알림 */
     function addRemoteCursor(message){
-        const { userId } = message;
+        const { user_id: userId, nickname: nickname } = message;
+        createCursor(scene, userId, nickname);
     }
 
     /* 이후 상대 접속 종료 => 커서 지워야 함 */
     function removeRemoteCursor(message){
-        const { userId } = message;
+        const { user_id: userId } = message;
+        removeCursor(scene, userId);
     }
 
 
