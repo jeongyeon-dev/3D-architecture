@@ -46,8 +46,14 @@ import {
     removeCursor 
 } from './components/remote-cursor.js';
 
+/* 동기화 관리 */
+import { receiveObjectSync } from '../../collaboration/object-sync.js';
 
-export function createScene(){
+export function createScene({
+    onObjectDragStart,
+    onObjectTransform,
+    onObjectDragEnd
+} = {}){
     /* 화면 생성 + 카메라 불러오기 */
     const gameWindow = document.getElementById('render-target');
     const scene = new THREE.Scene();
@@ -98,6 +104,9 @@ export function createScene(){
         window: () => windowTool?.hide(),
         editor: () => editorTool?.hide(),
     }
+
+    /* 동기화 도구 생성 */
+    const objectSync = receiveObjectSync(scene);
 
     /* raycasting 및 건설 오브젝트 추가하는 부분들 */
     const raycaster = new THREE.Raycaster();
@@ -197,7 +206,10 @@ export function createScene(){
         /* 편집 도구 객체 생성하기 */
         editorTool = createEditorTool({
             scene,
-            gridSize: GRID_SIZE_M
+            gridSize: GRID_SIZE_M,
+            onObjectDragStart,
+            onObjectTransform,
+            onObjectDragEnd
         });
 
 
@@ -580,7 +592,6 @@ export function createScene(){
         } = message;
 
         const position = {gridX, gridZ, gridY};
-        console.log(message)
 
         moveCursor(scene, userId, nickname, position);
     }
@@ -628,6 +639,9 @@ export function createScene(){
         setFloor,
         updateRemoteCursor,
         addRemoteCursor,
-        removeRemoteCursor
+        removeRemoteCursor,
+        receiveObjectDragStart: objectSync.receiveObjectDragStart,
+        receiveObjectTransform: objectSync.receiveObjectTransform,
+        receiveObjectDragEnd: objectSync.receiveObjectDragEnd,
     }
 }

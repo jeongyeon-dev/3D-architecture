@@ -7,12 +7,19 @@ import { saveProject, getProject } from "../../api/project.js";
 import { createSimulator } from "../../three/editor/simulator.js";
 import { getAllObjects } from "../../three/project/project-state.js";
 
-/* 소켓 api */
+/* 소켓 api 발신 부분 */
 import { 
     connectProjectSocket,
     disconnectProjectSocket,
     sendSocketMessage
-} from "../../socket/project-socket.js";
+} from "../../collaboration/project-socket.js";
+
+/* 오브젝트 동기화 발신 부분 */
+import { 
+    sendObjectDragStart,
+    sendObjectTransform,
+    sendObjectDragEnd
+} from "../../collaboration/object-sync.js";
 
 /* 에디터 화면 구성요소 */
 import EditorBottomToolbar from "../../components/toolbars/editor-bottom-toolbar/EditorBottomToolbar.jsx";
@@ -37,8 +44,10 @@ export default function Editor({ projectId }) {
             socketRef.current = await connectProjectSocket(
                 projectId,
                 (message) => {
+                    /** 여기는 서버 => 클라 수신하는 접합부 **/
+
                     /* 소켓에서 받은 상대 마우스 커서를 three 쪽으로 보낸다 */
-                    switch (message.type) {
+                    switch (message.type) {  
                         case "CURSOR_MOVE":
                             simulatorRef.current?.updateRemoteCursor(message);
                             break;
@@ -47,6 +56,17 @@ export default function Editor({ projectId }) {
                             break;
                         case "USER_LEAVE":
                             simulatorRef.current?.removeRemoteCursor(message);
+                            break;
+
+                        /* 오브젝트 동기화 수신 */
+                        case "OBJECT_DRAG_START":
+                            simulatorRef.current?.receiveObjectDragStart(message);
+                            break;
+                        case "OBJECT_TRANSFORM":
+                            simulatorRef.current?.receiveObjectTransform(message);
+                            break;
+                        case "OBJECT_DRAG_END":
+                            simulatorRef.current?.receiveObjectDragEnd(message);
                             break;
                     }
                 }
@@ -73,6 +93,7 @@ export default function Editor({ projectId }) {
 
                 simulatorRef.current = createSimulator({
                     projectObjects,
+                    /** 여기는 클라 => 서버로 발신하는 접합부 **/
                     
                     /* 여기서 마우스 감지 => 소켓 전송 기능 구체화 */
                     onCursorGridChange: ({ gridX, gridZ, gridY }) => {
@@ -83,6 +104,17 @@ export default function Editor({ projectId }) {
                             gridZ,
                             gridY,
                         });
+                    },
+
+                    /* 오브젝트 동기화 발신 함수 */
+                    onObjectDragStart: ({ objectId }) => {
+                        sendObjectDragStart(projectId, objectId);
+                    },
+                    onObjectTransform: ({ objectId, data }) => {
+                        sendObjectTransform(projectId, objectId, data);
+                    },
+                    onObjectDragEnd: ({ objectId, data }) => {
+                        sendObjectDragEnd(projectId, objectId, data);
                     },
                 });
 

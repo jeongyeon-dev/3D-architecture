@@ -4,13 +4,20 @@ import { createLand } from "./components/land.js";
 export function createSimulator({
     projectObjects = [],
     onCursorGridChange,
+    onObjectDragStart,
+    onObjectTransform,
+    onObjectDragEnd
 } = {}) {
     /* 가변 속성 */
     let activeToolId = '';
     let previousGridPosition = null;
 
     /* 생성 => 초기화 */
-    const scene = createScene();
+    const scene = createScene({
+        onObjectDragStart,
+        onObjectTransform,
+        onObjectDragEnd
+    });
     scene.initialize(projectObjects);
 
     const land = createLand(1);
@@ -119,6 +126,17 @@ export function createSimulator({
         },        
         removeRemoteCursor(message) {
             scene.removeRemoteCursor(message);
+        },
+
+        /* 오브젝트 동기화: 수신 */
+        receiveObjectDragStart(message) {
+            scene.receiveObjectDragStart(message);
+        },
+        receiveObjectTransform(message) {
+            scene.receiveObjectTransform(message);
+        },
+        receiveObjectDragEnd(message) {
+            scene.receiveObjectDragEnd(message);
         }
     }
 

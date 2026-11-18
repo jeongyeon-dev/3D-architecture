@@ -21,7 +21,10 @@ import {
 
 export function createEditorTool({
     scene,
-    gridSize
+    gridSize,
+    onObjectDragStart,
+    onObjectTransform,
+    onObjectDragEnd
 }){
     /* 빈 변수들 */
     const confirmedRoofs = [];
@@ -94,7 +97,7 @@ export function createEditorTool({
         currentHoverPoint = { gridX, gridZ, gridY };
         const arrow = getArrow(object);
         
-        /* 화살표 클릭 시 => 드래그 시작 */
+        /* 화살표 클릭 시 => 드래그 시작 -- 소캣 전송 시작 */
         if(arrow){
             draggingArrow = arrow;
             dragStartPoint = currentHoverPoint;
@@ -103,6 +106,9 @@ export function createEditorTool({
             const objectId = currentSelecteMesh.userData.objectId;
             const _object = getObject(objectId);
             draggingPrismData = structuredClone(_object.data);
+
+            /* 소켓 전송 시작 */
+            onObjectDragStart?.({ objectId });
             return;
         }
         
@@ -127,12 +133,18 @@ export function createEditorTool({
     function endDraggingPoint(event){
         if (event.button !== 0) return;
 
-        /* 오브젝트 데이터가 변경 됨 */
+        /* 오브젝트 데이터가 변경 됨 -- 소켓 전송 끝 */
         if (draggingArrow && currentSelecteMesh) {
             const objectId = currentSelecteMesh.userData.objectId;
             const object = getObject(objectId);
 
             object.data = draggingPrismData;
+
+            /* 소켓 전송 끝 */
+            onObjectDragEnd?.({
+                objectId,
+                data: draggingPrismData
+            });
         }
 
         draggingPrismData = undefined;
@@ -194,7 +206,7 @@ export function createEditorTool({
         currentHoveredMesh = object;
     }
 
-    /* currentSeletedMesh를 스케일링 하기 */
+    /* currentSeletedMesh를 스케일링 하기 -- 소켓 전송 중 */
     function updatePrismForm(mesh) {
         const prismData = draggingPrismData;
         const direction = draggingArrow.userData.direction;
@@ -202,6 +214,12 @@ export function createEditorTool({
         /* 변형 data 생성하기 => 이에 기반하여 prism 형태 변형하기 */
         resizePrism(prismData, direction, currentHoverPoint);
         doPrismTransform(mesh, prismData);
+
+        /* 소켓 전송 중 */
+        onObjectTransform?.({
+            objectId: mesh.userData.objectId,
+            data: prismData
+        });
 
         /* 변형된 prism에 맞춰 화살표 위치 갱신 */
         updateGizmoPosition(prismData);

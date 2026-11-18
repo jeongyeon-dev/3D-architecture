@@ -18,6 +18,8 @@ import com.architecture.backend.auth.UserEntity;
 import com.architecture.backend.auth.UserRepository;
 import com.architecture.backend.realtime.WebSocketDtos.CursorMoveMessage;
 import com.architecture.backend.realtime.WebSocketDtos.ProjectSession;
+import com.architecture.backend.realtime.objectSync.ObjectSync;
+import com.architecture.backend.realtime.objectSync.ObjectDtos.ObjectSyncMessage;
 
 import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
@@ -29,9 +31,12 @@ public class WebSocketSessionRegistry {
 
     private final JwtDecoder jwtDecoder;
     private final ObjectMapper objectMapper;
-
     private final UserRepository userRepository;
+    
+    /* 오브젝트 동기화 */
+    private final ObjectSync objectSync;
 
+    
     /* 웹 소켓 세션 */
     private final Map<String, ProjectSession> websocketSessions = new ConcurrentHashMap<>();
     
@@ -68,6 +73,8 @@ public class WebSocketSessionRegistry {
             .add(session.getId());
     }
 
+
+
     /* 등록 해제하는 함수 */
     public void unregister(WebSocketSession session){
         /* 웹 소켓 세션에서 먼저 지운다 */
@@ -85,12 +92,70 @@ public class WebSocketSessionRegistry {
         if(sessionIds.isEmpty()) projectSessions.remove(projectId);
     }
 
+
+
     /* 메시지 발신하는 함수 */
     public void broadcast(WebSocketSession session, String payload) throws IOException {
         /* 발신자 세션 찾기 */
         ProjectSession sender = websocketSessions.get(session.getId());
         if(sender == null) return;
+        System.out.println(payload);
+        String outgoingPayload = null;
+        ObjectSyncMessage syncMessage = null;
+        String type = objectMapper
+            .readTree(payload)
+            .path("type")
+            .asString();
 
+        /* 분기에 따라 메시지가 작성됨 */
+        switch (type) {
+            case "CURSOR_MOVE" -> {
+                outgoingPayload = makeCursorMessage(sender, payload);
+            }        
+            case "OBJECT_DRAG_START" -> {
+                syncMessage = makeObjectMessage(sender, payload);
+                objectSync.startManipulation(syncMessage);
+            }
+            case "OBJECT_TRANSFORM" -> {
+                syncMessage = makeObjectMessage(sender, payload);
+                objectSync.doManipulation(syncMessage);
+            }
+            case "OBJECT_DRAG_END" -> {
+                syncMessage = makeObjectMessage(sender, payload);
+                objectSync.confirmManipulation(syncMessage);
+            }
+        }
+
+        /* 전할 메시지 구성 검토 단계 */
+        if (syncMessage != null) {
+            outgoingPayload = objectMapper.writeValueAsString(syncMessage);
+        }
+        if (outgoingPayload == null) return;
+
+
+        /* 해당 프로젝트에 있는 세션들 찾기 */
+        Set<String> sesssionIds = projectSessions.get(sender.projectId());
+        
+
+        /* 발신하기: 해당 프로젝트 모든 세션에게, 본인만 빼고 */
+        for(String sessionId : sesssionIds){
+            if(sessionId.equals(session.getId())) continue;
+
+            ProjectSession target = websocketSessions.get(sessionId);
+            if(target != null && target.session().isOpen()){
+                target.session().sendMessage(new TextMessage(outgoingPayload));
+            }
+        }
+    }
+
+    /* 특정 유저 찾기 */
+    public ProjectSession find(WebSocketSession session) {
+        return websocketSessions.get(session.getId());
+    }
+
+
+    /* 내부 분기 함수들 */
+    private String makeCursorMessage(ProjectSession sender, String payload){
         /* 맡은 메시지를 dto에 넣는 과정 */
         CursorMoveMessage received = objectMapper.readValue(
             payload,
@@ -105,26 +170,27 @@ public class WebSocketSessionRegistry {
             received.gridZ(),
             received.gridY()
         );
-        String outgoingPayload = objectMapper.writeValueAsString(outgoing);
 
-        /* 해당 프로젝트에 있는 세션들 찾기 */
-        Set<String> sesssionIds = projectSessions.get(sender.projectId());
-        
-        /* 발신하기: 해당 프로젝트 모든 세션에게, 본인만 빼고 */
-        for(String sessionId : sesssionIds){
-            if(sessionId.equals(session.getId())) continue;
-
-            ProjectSession target = websocketSessions.get(sessionId);
-
-            if(target != null && target.session().isOpen()){
-                target.session().sendMessage(new TextMessage(outgoingPayload));
-            }
-        }
+        return objectMapper.writeValueAsString(outgoing);
     }
 
-    /* 특정 유저 찾기 */
-    public ProjectSession find(WebSocketSession session) {
-        return websocketSessions.get(session.getId());
+    private ObjectSyncMessage makeObjectMessage(
+        ProjectSession sender, 
+        String payload
+    ) throws IOException {
+        
+        ObjectSyncMessage received = objectMapper.readValue(
+            payload,
+            ObjectSyncMessage.class
+        );
+
+        return new ObjectSyncMessage(
+            received.type(),
+            sender.userId(),
+            received.projectId(),
+            received.objectId(),
+            received.data()
+        );
     }
 }
 

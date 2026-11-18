@@ -42,7 +42,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         TextMessage message
     ) throws IOException {
         // System.out.println("수신: " + message.getPayload());
-        
         /* 발신(broadcast)하기 */
         webSocketSessionRegistry.broadcast(session, message.getPayload());
     }
