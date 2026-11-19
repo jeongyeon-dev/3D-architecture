@@ -57,7 +57,7 @@ public class ProjectController {
 
     /* 프로젝트 저장 로직 */
     @PutMapping("/save/{id}")
-    ProjectObjectEntity saveProject(
+    List<ProjectObjectEntity> saveProject(
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable Integer id,
         @Valid @RequestBody ProjectSaveRequest request

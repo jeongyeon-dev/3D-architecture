@@ -13,6 +13,7 @@ import {
     setGizmoArrowScale,
     updateGizmoPosition
 } from './utils/selection.js';
+
 import { 
     getObject,
     addObject, 

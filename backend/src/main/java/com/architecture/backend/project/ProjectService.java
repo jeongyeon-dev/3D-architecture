@@ -65,7 +65,6 @@ public class ProjectService {
         
         // 먼저 프로젝트를 만든다
         ProjectEntity project = projectRepository.save(new ProjectEntity(userId, title, now));
-        projectObjectRepository.save(new ProjectObjectEntity(project.getId(), List.of(), now));
         
         // 유저 정보를 불러온다
         UserEntity user = userRepository.findById(userId)
@@ -81,30 +80,46 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public ProjectDetailResponse getProject(Integer userId, Integer projectId) {
         ProjectEntity project = getProjectByMember(projectId, userId);
-        ProjectObjectEntity projectData = projectObjectRepository.findByProjectId(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
+        
+        /* 프로젝트 오브젝트를 불러오는 로직 */
+        List<Map<String, Object>> projectData = projectObjectRepository
+            .findAllObjectsInProject(projectId)
+            .stream()
+            .map(ProjectObjectEntity::getObjectData)
+            .toList();
     
         return new ProjectDetailResponse(
             project.getId(), 
             project.getTitle(), 
             project.getUpdatedAt(), 
-            projectData.getObjects()
+            projectData
         );
     }
 
     @Transactional
-    public ProjectObjectEntity saveProject(Integer userId, Integer projectId, List<Map<String, Object>> objects) {
-        // 멤버를 기준으로 프로젝트를 찾는다 => 프로젝트 내 저장 객체 불러오기
+    public List<ProjectObjectEntity> saveProject(
+        Integer userId,
+        Integer projectId,
+        List<Map<String, Object>> objects
+    ) {
         ProjectEntity project = getProjectByMember(projectId, userId);
-        ProjectObjectEntity projectObject = projectObjectRepository.findByProjectId(projectId)
-            .orElseThrow(() -> new ResourceNotFoundException("프로젝트를 찾을 수 없습니다."));
-
         LocalDateTime now = LocalDateTime.now();
-        projectObject.update(objects, now);
-        project.touch(now);
-        return projectObject;
-    }
 
+        projectObjectRepository.deleteByProjectId(projectId);
+
+        List<ProjectObjectEntity> projectObjects = objects.stream()
+            .map(object -> new ProjectObjectEntity(
+                projectId,
+                getObjectId(object),
+                object,
+                now
+            ))
+            .toList();
+
+        List<ProjectObjectEntity> savedObjects = projectObjectRepository.saveAll(projectObjects);
+        project.touch(now);
+        return savedObjects;
+    }
     @Transactional 
     public Boolean deleteProject(Integer userId, Integer projectId){
         ProjectEntity project = projectRepository
@@ -217,8 +232,14 @@ public class ProjectService {
         
             return member.getProject();
     }
+
+    private Integer getObjectId(Map<String, Object> object) {
+        Object id = object.get("id");
+
+        if (id instanceof Number number) {
+            return number.intValue();
+        }
+
+        throw new IllegalArgumentException("오브젝트 id가 필요합니다.");
+    }
 }
-
-
-
-

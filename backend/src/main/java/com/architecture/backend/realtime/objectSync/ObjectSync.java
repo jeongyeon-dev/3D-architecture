@@ -37,11 +37,14 @@ public class ObjectSync {
 
     /* 오브젝트 변형 확정(끝) */
     public void confirmManipulation(ObjectSyncMessage syncMessage){
+        /* 인메모리 계층에서 해당 객체를 지운다 */
         objectSessionStore.deleteObject(
             syncMessage.userId(),
             syncMessage.projectId(),
             syncMessage.objectId(),
             syncMessage.data()
         );
+
+        /* DB 계층에서 이를 반영한다 */
     }
 }

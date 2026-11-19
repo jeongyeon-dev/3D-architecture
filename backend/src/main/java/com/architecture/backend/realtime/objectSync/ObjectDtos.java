@@ -15,7 +15,7 @@ public class ObjectDtos {
     public record ObjectSyncMessage(
         String type,
 
-        @JsonAlias("projectId")
+        @JsonAlias("userId")
         Integer userId,
 
         @JsonAlias("projectId")

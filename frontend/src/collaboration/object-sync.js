@@ -1,6 +1,16 @@
 import { sendSocketMessage } from "./project-socket";
 
 
+/* 오브젝트 조작 본체 로직들 */
+import { doPrismTransform } from "../three/tools/roof-tool";
+
+/* 프론트 오브젝트 데이터: 동기화용 */
+import { getObject } from "../three/project/project-state.js";
+
+/* gizmo 동기화용 */
+import { updateGizmoPosition } from "../three/tools/utils/selection.js";
+
+
 /** 발신부 **/
 /* 오브젝트 클릭 시작 */
 export function sendObjectDragStart(projectId, objectId) {
@@ -34,21 +44,28 @@ export function sendObjectDragEnd(projectId, objectId, data) {
 
 /** 수신부 **/
 export function receiveObjectSync(scene) {
+    let mesh;
+
     function receiveObjectDragStart(message) {
-        // scene 안에서 objectId로 Mesh를 찾고,
-        // 원격 편집 시작 상태를 적용
-        console.log("편집 시작: " + message)
+        mesh = findObjectMesh(scene, message.object_id);
     }
 
     function receiveObjectTransform(message) {
-        // scene 안에서 objectId로 Mesh를 찾고,
-        // message.data로 doTransform 실행
-        console.log("편집 중: " + message)
+        if(mesh != null){
+            doPrismTransform(mesh, message.data);
+            updateGizmoPosition(message.data);
+        }
     }
 
     function receiveObjectDragEnd(message) {
-        // 최종 data 반영, 원격 편집 상태 해제
-        console.log("편집 종료: " + message)
+        if(mesh != null){
+            doPrismTransform(mesh, message.data);
+            updateGizmoPosition(message.data);
+        
+            /* 프론트 상 데이터 반영 필요 */
+            const object = getObject(message.object_id);
+            object.data = message.data;
+        }
     }
 
     return {
@@ -56,4 +73,21 @@ export function receiveObjectSync(scene) {
         receiveObjectTransform,
         receiveObjectDragEnd
     };
+}
+
+
+/* 보조 함수 */
+function findObjectMesh(scene, objectId) {
+    let targetMesh;
+
+    scene.traverse((object) => {
+        if (
+            object.isMesh &&
+            object.userData.objectId === objectId
+        ) {
+            targetMesh = object;
+        }
+    });
+
+    return targetMesh;
 }
