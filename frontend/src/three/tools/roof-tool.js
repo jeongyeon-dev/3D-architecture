@@ -147,14 +147,14 @@ export function createRoofTool({
 }
 
 
-export function loadRoof(scene, data){
+export function loadRoof(scene, data, objectId){
     const mesh = createStructureInstance('roof-prism');
     doPrismTransform(mesh, data);
     
     mesh.userData.objectId = addObject({
         type: "roof",
         data: data
-    });
+    }, objectId);
 
     addPlatformMesh(mesh);
     scene.add(mesh);

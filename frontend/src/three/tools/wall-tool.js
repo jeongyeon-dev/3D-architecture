@@ -292,14 +292,14 @@ export function createWallTool({
 
 export function loadWall(scene, wallObject){
     /* 벽에 소속된 창문도 함께 가져온다 */
-    const { data, windows = [] } = wallObject;
+    const { id: objectId, data, windows = [] } = wallObject;
     const mesh = createStructureInstance('wall-face', data);
     
     const id = addObject({
         type: 'wall-face',
         data,
         windows
-    });
+    }, objectId);
 
     mesh.userData.objectId = id;
 
@@ -313,9 +313,9 @@ export function loadWall(scene, wallObject){
 }
 
 /* 벽 구조물 data를 불러오는 로직 */
-export function loadWallData(data){
+export function loadWallData(data, objectId){
     addObject({
         type: 'wall-data',
         data: data
-    });
+    }, objectId);
 }

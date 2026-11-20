@@ -8,12 +8,16 @@ const wallSegments = new Map();
 let nextId = 1;
 let _nextId = 1;
 
-export function addObject(object){
-    const id = nextId++;
+export function addObject(object, existingId){
+    const id = existingId ?? nextId++;
+
+    if (existingId != null) {
+        nextId = Math.max(nextId, existingId + 1);
+    }
 
     objects.set(id, {
-        id,
         ...object,
+        id
     });
 
     return id;

@@ -1,7 +1,6 @@
 package com.architecture.backend.project.projectObject;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -16,6 +15,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import tools.jackson.databind.JsonNode;
 
 @Entity
 @Table(
@@ -41,7 +41,7 @@ public class ProjectObjectEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "object_data", columnDefinition = "json", nullable = false)
-    private Map<String, Object> objectData;
+    private JsonNode objectData;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
@@ -49,7 +49,7 @@ public class ProjectObjectEntity {
     public ProjectObjectEntity(
         Integer projectId,
         Integer objectId,
-        Map<String, Object> objectData,
+        JsonNode objectData,
         LocalDateTime updatedAt
     ) {
         this.projectId = projectId;
@@ -58,7 +58,7 @@ public class ProjectObjectEntity {
         this.updatedAt = updatedAt;
     }
 
-    public void update(Map<String, Object> objectData, LocalDateTime updatedAt) {
+    public void update(JsonNode objectData, LocalDateTime updatedAt) {
         this.objectData = objectData;
         this.updatedAt = updatedAt;
     }

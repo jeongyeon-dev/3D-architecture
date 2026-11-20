@@ -1,6 +1,7 @@
 package com.architecture.backend.realtime.objectSync;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
@@ -35,6 +36,7 @@ public class ObjectSessionStore {
             );
     }
 
+
     /* 데이터 지우기 */
     public void deleteObject(
         Integer userId, 
@@ -42,12 +44,19 @@ public class ObjectSessionStore {
         Integer objectId,
         JsonNode data
     ){
-        Map<Integer, ObjectEditState> editingObject = editingObjectsByProject.get(userId);
+        Map<Integer, ObjectEditState> editingObjects = editingObjectsByProject.get(projectId);
 
-        if(editingObject != null){
-            editingObject.remove(userId);
+        if(editingObjects == null){
+            return;
+        }
+
+        editingObjects.computeIfPresent(userId, (key, state) ->
+            Objects.equals(state.objectId(), objectId) ? null : state
+        );
+
+        /* 비엇을 경우 최상위 항목 제거 */
+        if (editingObjects.isEmpty()) {
+            editingObjectsByProject.remove(projectId, editingObjects);
         }
     }
-
-    /* 데이터 찾아서 반환하기 */
 }

@@ -2,10 +2,10 @@ package com.architecture.backend.project;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import tools.jackson.databind.JsonNode;
 
 public final class ProjectDtos {
 
@@ -18,7 +18,7 @@ public final class ProjectDtos {
     }
 
     public record ProjectSaveRequest(
-        @NotNull(message = "프로젝트 오브젝트가 필요합니다.") List<Map<String, Object>> objects
+        @NotNull(message = "프로젝트 오브젝트가 필요합니다.") List<JsonNode> objects
     ) {
     }
 
@@ -26,7 +26,7 @@ public final class ProjectDtos {
         Integer id,
         String title,
         LocalDateTime updatedAt,
-        List<Map<String, Object>> objects
+        List<JsonNode> objects
     ) {
     }
 

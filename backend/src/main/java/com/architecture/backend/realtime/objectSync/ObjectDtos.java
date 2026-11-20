@@ -23,6 +23,10 @@ public class ObjectDtos {
 
         @JsonAlias("objectId")
         Integer objectId,
+
+        @JsonAlias("sessionId")
+        String sessionId,
+        
         JsonNode data
     ) {
     }

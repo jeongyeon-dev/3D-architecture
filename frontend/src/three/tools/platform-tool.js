@@ -146,14 +146,14 @@ export function createPlatformTool({
 }
 
 
-export function loadPlatform(scene, data){
+export function loadPlatform(scene, data, objectId){
     const mesh = createStructureInstance('platform-cube');
     doCubeTransform(mesh, data);
     
     mesh.userData.objectId = addObject({
         type: "platform",
         data: data
-    });
+    }, objectId);
 
     addPlatformMesh(mesh);
     scene.add(mesh);

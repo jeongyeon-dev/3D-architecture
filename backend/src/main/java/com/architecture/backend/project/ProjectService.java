@@ -2,7 +2,6 @@ package com.architecture.backend.project;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,7 @@ import com.architecture.backend.project.projectMember.ProjectMemberEntity;
 import com.architecture.backend.project.projectMember.ProjectMemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.JsonNode;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +82,7 @@ public class ProjectService {
         ProjectEntity project = getProjectByMember(projectId, userId);
         
         /* 프로젝트 오브젝트를 불러오는 로직 */
-        List<Map<String, Object>> projectData = projectObjectRepository
+        List<JsonNode> projectData = projectObjectRepository
             .findAllObjectsInProject(projectId)
             .stream()
             .map(ProjectObjectEntity::getObjectData)
@@ -100,7 +100,7 @@ public class ProjectService {
     public List<ProjectObjectEntity> saveProject(
         Integer userId,
         Integer projectId,
-        List<Map<String, Object>> objects
+        List<JsonNode> objects
     ) {
         ProjectEntity project = getProjectByMember(projectId, userId);
         LocalDateTime now = LocalDateTime.now();
@@ -233,11 +233,11 @@ public class ProjectService {
             return member.getProject();
     }
 
-    private Integer getObjectId(Map<String, Object> object) {
-        Object id = object.get("id");
+    private Integer getObjectId(JsonNode object) {
+        JsonNode id = object.get("id");
 
-        if (id instanceof Number number) {
-            return number.intValue();
+        if (id != null && id.isNumber()) {
+            return id.intValue();
         }
 
         throw new IllegalArgumentException("오브젝트 id가 필요합니다.");

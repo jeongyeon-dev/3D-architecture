@@ -217,13 +217,13 @@ export function createFloorTool({
 
 
 /* 데이터를 받아 floor 오브젝트 로드하는 함수 */
-export function loadFloor(scene, data){
+export function loadFloor(scene, data,objectId){
     const mesh = createStructureInstance('floor-polygon', data);
 
     mesh.userData.objectId = addObject({
         type: "floor",
         data
-    });
+    }, objectId);
 
     scene.add(mesh);
 }

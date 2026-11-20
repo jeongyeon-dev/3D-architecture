@@ -99,7 +99,7 @@ public class WebSocketSessionRegistry {
         /* 발신자 세션 찾기 */
         ProjectSession sender = websocketSessions.get(session.getId());
         if(sender == null) return;
-        System.out.println(payload);
+
         String outgoingPayload = null;
         ObjectSyncMessage syncMessage = null;
         String type = objectMapper
@@ -113,16 +113,19 @@ public class WebSocketSessionRegistry {
                 outgoingPayload = makeCursorMessage(sender, payload);
             }        
             case "OBJECT_DRAG_START" -> {
-                syncMessage = makeObjectMessage(sender, payload);
-                objectSync.startManipulation(syncMessage);
+                syncMessage = objectSync.startManipulation(
+                    makeObjectMessage(sender, payload)
+                );
             }
             case "OBJECT_TRANSFORM" -> {
-                syncMessage = makeObjectMessage(sender, payload);
-                objectSync.doManipulation(syncMessage);
+                syncMessage = objectSync.doManipulation(
+                    makeObjectMessage(sender, payload)
+                );
             }
             case "OBJECT_DRAG_END" -> {
-                syncMessage = makeObjectMessage(sender, payload);
-                objectSync.confirmManipulation(syncMessage);
+                syncMessage = objectSync.confirmManipulation(
+                    makeObjectMessage(sender, payload)
+                );
             }
         }
 
@@ -189,6 +192,7 @@ public class WebSocketSessionRegistry {
             sender.userId(),
             received.projectId(),
             received.objectId(),
+            sender.session().getId(),
             received.data()
         );
     }

@@ -12,26 +12,24 @@ export function loadProject(objects, scene) {
     for (const object of objects) {
         switch (object.type) {
             case "floor":
-                loadFloor(scene, object.data);
+                loadFloor(scene, object.data, object.id);
                 break;
             case "platform":
-                loadPlatform(scene, object.data);
+                loadPlatform(scene, object.data, object.id);
                 break;
             case "wall-face":
                 const { mesh, windows } = loadWall(scene, object);
 
-                /* 창문이 있을 경우 창문 불러오기를 진행한다 */
+                /* 창문이 있을 경우 => 창문 로드: 벽 절편화 */
                 if (windows.length > 0) {
                     loadWindow(scene, mesh, windows);
                 }
                 break;
             case "roof":
-                loadRoof(scene, object.data);
+                loadRoof(scene, object.data, object.id);
                 break;
             case "wall-data":
-                loadWallData(object.data);
-                break;
-            default:
+                loadWallData(object.data, object.id);
                 break;
         }
     }
