@@ -30,7 +30,7 @@ public class ObjectLockManager {
             /* 획득 가능 여부 측정하기 */
             boolean available =
                 currentState == null ||
-                !currentState.leaseExpiresAt().isAfter(now) ||
+                isExpired(currentState, now) ||
                 isSameOwner(currentState, arguments);
 
             /* 불가시 중단 */
@@ -45,7 +45,7 @@ public class ObjectLockManager {
             
         });
 
-        return true;
+        return acquired.get();
     }
 
 
@@ -116,5 +116,13 @@ public class ObjectLockManager {
     ) {
         return Objects.equals(state.editorUserId(), arguments.userId()) &&
             Objects.equals(state.sessionId(), arguments.sessionId());
+    }
+
+    /* 락이 만료되었는지 확인하는 함수 */
+    private boolean isExpired(
+        ObjectLockState state,
+        Instant now
+    ) {
+        return !state.leaseExpiresAt().isAfter(now);
     }
 }
