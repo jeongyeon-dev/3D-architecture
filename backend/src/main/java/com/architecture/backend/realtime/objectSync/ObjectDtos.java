@@ -30,4 +30,11 @@ public class ObjectDtos {
         JsonNode data
     ) {
     }
+
+    public record ObjectEditDeniedMessage(
+        String type,
+        Integer objectId,
+        JsonNode data
+    ) {
+    }
 }

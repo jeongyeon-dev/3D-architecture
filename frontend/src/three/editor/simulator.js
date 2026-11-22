@@ -6,7 +6,7 @@ export function createSimulator({
     onCursorGridChange,
     onObjectDragStart,
     onObjectTransform,
-    onObjectDragEnd
+    onObjectDragEnd,
 } = {}) {
     /* 가변 속성 */
     let activeToolId = '';
@@ -137,6 +137,11 @@ export function createSimulator({
         },
         receiveObjectDragEnd(message) {
             scene.receiveObjectDragEnd(message);
+        },
+
+        /* 락 관련 */
+        receiveObjectLockDenied(message){
+            scene.receiveObjectLockDenied(message);
         }
     }
 

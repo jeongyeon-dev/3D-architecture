@@ -68,6 +68,11 @@ export default function Editor({ projectId }) {
                         case "OBJECT_DRAG_END":
                             simulatorRef.current?.receiveObjectDragEnd(message);
                             break;
+
+                        /* 오브젝트 LOCK으로 접근 실패 시 */
+                        case "OBJECT_LOCK_DENIED":
+                            simulatorRef.current?.receiveObjectLockDenied(message);
+                            break;
                     }
                 }
             );

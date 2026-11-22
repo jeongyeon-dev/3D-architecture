@@ -31,7 +31,6 @@ public class ObjectSync {
         if(!objectLockManager.tryAcquire(arguments)) return null;
 
         objectSessionStore.putObject(
-            syncMessage.userId(),
             syncMessage.projectId(),
             syncMessage.objectId(),
             null
@@ -49,7 +48,6 @@ public class ObjectSync {
         if(!objectLockManager.renewIfOwner(arguments)) return null;
 
         objectSessionStore.putObject(
-            syncMessage.userId(),
             syncMessage.projectId(),
             syncMessage.objectId(),
             syncMessage.data()
@@ -84,10 +82,8 @@ public class ObjectSync {
 
         /* 인메모리 계층에서 해당 객체를 지운다 */
         objectSessionStore.deleteObject(
-            syncMessage.userId(),
             syncMessage.projectId(),
-            syncMessage.objectId(),
-            syncMessage.data()
+            syncMessage.objectId()
         );
 
         /* 락 제거하기 */

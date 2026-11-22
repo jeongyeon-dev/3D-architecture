@@ -329,6 +329,10 @@ export function createScene({
         return editorTool?.confirmPoint(gridX, gridZ, gridY, object);
     }
 
+    function receiveObjectLockDenied(message) {
+        editorTool?.receiveObjectLockDenied(message);
+    }
+
 
     /* 어떤 대상을 raycast할지 결정  */
     function setRaycastTarget(toolId) {
@@ -643,5 +647,6 @@ export function createScene({
         receiveObjectDragStart: objectSync.receiveObjectDragStart,
         receiveObjectTransform: objectSync.receiveObjectTransform,
         receiveObjectDragEnd: objectSync.receiveObjectDragEnd,
+        receiveObjectLockDenied
     }
 }

@@ -18,10 +18,14 @@ import com.architecture.backend.auth.UserEntity;
 import com.architecture.backend.auth.UserRepository;
 import com.architecture.backend.realtime.WebSocketDtos.CursorMoveMessage;
 import com.architecture.backend.realtime.WebSocketDtos.ProjectSession;
+import com.architecture.backend.realtime.objectSync.ObjectSessionStore;
 import com.architecture.backend.realtime.objectSync.ObjectSync;
+import com.architecture.backend.realtime.objectSync.ObjectDtos.ObjectEditDeniedMessage;
+import com.architecture.backend.realtime.objectSync.ObjectDtos.ObjectEditState;
 import com.architecture.backend.realtime.objectSync.ObjectDtos.ObjectSyncMessage;
 
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /* 접속 소켓과 유저·프로젝트 정보 보관 */
@@ -35,6 +39,7 @@ public class WebSocketSessionRegistry {
     
     /* 오브젝트 동기화 */
     private final ObjectSync objectSync;
+    private final ObjectSessionStore objectSessionStore;
 
     
     /* 웹 소켓 세션 */
@@ -133,7 +138,35 @@ public class WebSocketSessionRegistry {
         if (syncMessage != null) {
             outgoingPayload = objectMapper.writeValueAsString(syncMessage);
         }
-        if (outgoingPayload == null) return;
+
+        /* 수행이 제대로 안되었다는 것: 예 => lock으로 막힘 */
+        if (outgoingPayload == null){
+            if ("OBJECT_DRAG_START".equals(type)) {
+                /* 해당 오브젝트ID 기반 "거절됨" 메시지 및 transform 데이터를 편집 시도자에게 발송 */
+                Integer objectId = objectMapper
+                    .readTree(payload)
+                    .path("objectId")
+                    .intValue();
+
+                ObjectEditState editState = objectSessionStore.getObject(sender.projectId(), objectId);
+                JsonNode transform = editState == null ? null : editState.data();
+
+                ObjectEditDeniedMessage deniedMessage =
+                    new ObjectEditDeniedMessage(
+                        "OBJECT_LOCK_DENIED",
+                        objectId,
+                        transform
+                    );
+
+                session.sendMessage(
+                    new TextMessage(
+                        objectMapper.writeValueAsString(deniedMessage)
+                    )
+                );
+            }   
+            
+            return;
+        }
 
 
         /* 해당 프로젝트에 있는 세션들 찾기 */

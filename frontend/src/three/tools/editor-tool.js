@@ -33,7 +33,7 @@ export function createEditorTool({
     
     let currentStartPoint;
     let currentHoverPoint;
-    let currentSelecteMesh;
+    let currentSelectedMesh;
     let currentHoveredMesh;
 
     let draggingArrow = undefined;
@@ -61,7 +61,7 @@ export function createEditorTool({
 
         /* 드래그 하고 있을 경우 => 선택된 mesh 스케일링 하기 */
         if (draggingArrow) {
-            updatePrismForm(currentSelecteMesh);
+            updatePrismForm(currentSelectedMesh);
             return;
         }
         
@@ -104,7 +104,7 @@ export function createEditorTool({
             dragStartPoint = currentHoverPoint;
 
             /* 변형 데이터 지속적 반영 */
-            const objectId = currentSelecteMesh.userData.objectId;
+            const objectId = currentSelectedMesh.userData.objectId;
             const _object = getObject(objectId);
             draggingPrismData = structuredClone(_object.data);
 
@@ -113,20 +113,20 @@ export function createEditorTool({
             return;
         }
         
-        removeOutline(currentSelecteMesh);
-        removeSelectionHighlight(currentSelecteMesh);
+        removeOutline(currentSelectedMesh);
+        removeSelectionHighlight(currentSelectedMesh);
         removeGizmo();
 
-        currentSelecteMesh = object;
+        currentSelectedMesh = object;
 
-        createOutline(currentSelecteMesh);
-        createSelectionHighlight(currentSelecteMesh);
-        createGizmo(currentSelecteMesh);
+        createOutline(currentSelectedMesh);
+        createSelectionHighlight(currentSelectedMesh);
+        createGizmo(currentSelectedMesh);
 
         /* drag plane y 위치 설정 */
         dragPlane = createInvisibleInstance(
             'invisible-plane',
-            currentSelecteMesh.position.y
+            currentSelectedMesh.position.y
         );
     }
 
@@ -135,8 +135,8 @@ export function createEditorTool({
         if (event.button !== 0) return;
 
         /* 오브젝트 데이터가 변경 됨 -- 소켓 전송 끝 */
-        if (draggingArrow && currentSelecteMesh) {
-            const objectId = currentSelecteMesh.userData.objectId;
+        if (draggingArrow && currentSelectedMesh) {
+            const objectId = currentSelectedMesh.userData.objectId;
             const object = getObject(objectId);
 
             object.data = draggingPrismData;
@@ -262,6 +262,18 @@ export function createEditorTool({
         }
     }
 
+    /* Lock으로 편집 실패 시 적용하는 함수 */
+    function receiveObjectLockDenied(message) {
+        const objectId = message.object_id;
+        const originalTransformData = message.data;
+
+        /* 편집 대상 오브젝트가 거절된 오브젝트라면? => 원상 복구하기 */
+        if(objectId == currentSelecteMesh?.userData.objectId){
+            doPrismTransform(currentSelectedMesh, originalTransformData);
+            updateGizmoPosition(originalTransformData);
+        }      
+    }
+
     return {
         updateHoverPoint,
         confirmPoint,
@@ -269,6 +281,7 @@ export function createEditorTool({
         endDraggingPoint,
         isDragging,
         getDragPlane,
+        receiveObjectLockDenied,
         hide
     }
 }
