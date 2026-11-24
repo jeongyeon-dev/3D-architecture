@@ -79,5 +79,5 @@ export async function getAuthority(projectId) {
         throw new Error("권한을 확인하지 못했습니다.");
     }
 
-    return response.json();
+    return response.text();
 }

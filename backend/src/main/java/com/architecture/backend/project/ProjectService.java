@@ -178,7 +178,7 @@ public class ProjectService {
                 .toList(); 
     }
 
-    /* 유저 초대하기 */
+    /* 유저 등록하기: 기본은 관전자, 편집자로 변경 가능 */
     @Transactional 
     public boolean userRegistration(
         Integer requestedUserId, 
@@ -218,6 +218,8 @@ public class ProjectService {
         ProjectMemberEntity member = getMember(userId, projectId);
         return member == null ? "NONE" : member.getRole();
     }
+
+
 
     /* 특정 projectId + userId 기반으로 해당 유저 권한 찾기 */
     private ProjectMemberEntity getMember(Integer userId, Integer projectId){   

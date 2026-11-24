@@ -159,6 +159,7 @@ export default function Editor({ projectId }) {
                     simulatorRef={simulatorRef}
                     floor={floor}
                     onFloorChange={setFloor}
+                    projectId={projectId}
                 />
                 <EditorLeftToolBar />
                 <EditorRightToolBar 

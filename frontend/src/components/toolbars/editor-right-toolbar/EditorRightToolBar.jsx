@@ -6,7 +6,8 @@ import { getNicknameFromToken } from  "../../../utils/jwt.js";
 import { 
     getMembers, 
     searchMembers, 
-    inviteMember 
+    inviteMember, 
+    changeRole
 } from '../../../api/project-members.js';
 
 import { 
@@ -25,6 +26,9 @@ export default function EditorRightToolBar({ projectId }) {
     /* 유저 검색용 */
     const [keyword, setKeyword] = useState("");
     const [searchedMembers, setSearchedMembers ] = useState([]);
+
+    /* 어떤 유저의 역할을 변경할지 */
+    const [openRoleMenuUserId, setOpenRoleMenuUserId] = useState(null);
 
     
     /* 현재 활성화된 두 번째 row의 패널 */
@@ -54,6 +58,7 @@ export default function EditorRightToolBar({ projectId }) {
                 return;
             }
 
+            /* 다시 불러오기 해서 업데이트 */
             const result = await searchMembers(
                 projectId,
                 keyword.trim()
@@ -62,6 +67,25 @@ export default function EditorRightToolBar({ projectId }) {
             setSearchedMembers(result);
         } catch (error) {
             console.error(error);
+        }
+    }
+
+    /* 유저 권한 변경하기 */
+    async function handleRoleChange(userId, role){
+        try{
+            const changed = await changeRole(userId, projectId, role);
+
+            if(!changed){
+                alert("권한이 없습니다.")
+                return;
+            }
+
+            /* 업데이트용 다시 불러오기 */
+            const projectMembers = await getMembers(projectId);    
+            setMembers(projectMembers)
+
+        }catch(error){
+            console.log(error);
         }
     }
 
@@ -177,15 +201,51 @@ export default function EditorRightToolBar({ projectId }) {
                                             className="toolbar__member__profile-circle"
                                             style={{ backgroundColor: getProfileColor(member.nickname) }}
                                         >
-                                            {nickname?.charAt(0) || "U"}
+                                            {member.nickname?.charAt(0) || "U"}
                                         </div>
                                         <span className="toolbar__member-nickname-text">
                                             {member.nickname}
                                         </span>            
                                     </div>
-                                    <span className="toolbar__member-role">
-                                        {getRoleLabel(member.role)}
-                                    </span>
+                                    <div className="toolbar__role-dropdown">
+                                        <button 
+                                            type="button"
+                                            disabled={member.role === "OWNER"}
+                                            className="toolbar__member-role"
+                                            onClick={() =>
+                                                setOpenRoleMenuUserId((currentId) =>
+                                                    currentId === member.user_id
+                                                        ? null
+                                                        : member.user_id
+                                                )
+                                            }
+                                        >
+                                            {getRoleLabel(member.role)}
+                                        </button>
+                                        {openRoleMenuUserId === member.user_id && (
+                                            <div className="toolbar__role-menu">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleRoleChange(member.user_id, "EDITOR");
+                                                        setOpenRoleMenuUserId(null);
+                                                    }}
+                                                >
+                                                    편집자
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleRoleChange(member.user_id, "VIEWER");
+                                                        setOpenRoleMenuUserId(null);
+                                                    }}
+                                                >
+                                                    열람자
+                                                </button>
+                                            </div>
+                                        )}                                    
+                                    </div>
                                 </div>
 
                             ))}
@@ -219,7 +279,7 @@ export default function EditorRightToolBar({ projectId }) {
                                                 className="toolbar__member__profile-circle"
                                                 style={{ backgroundColor: getProfileColor(member.nickname) }}
                                             >
-                                                {nickname?.charAt(0) || "U"}
+                                                {member.nickname?.charAt(0) || "U"}
                                             </div>
                                             <span className="toolbar__member-nickname-text">
                                                 {member.nickname}

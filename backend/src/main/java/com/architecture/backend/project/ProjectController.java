@@ -93,7 +93,7 @@ public class ProjectController {
     }
 
     /* 해당 유저 프로젝트에 초대 및 권한 설정하기 */
-    @PostMapping("/members/role")
+    @PutMapping("/members/role")
     Boolean inviteUser(
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody UserInviteRequest dto

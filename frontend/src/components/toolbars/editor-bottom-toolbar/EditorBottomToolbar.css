@@ -20,6 +20,21 @@
     backdrop-filter: blur(12px);
 }
 
+/* 이 부분은 편집 가능 여부에 따라 visual 상태 변화를 줌 */
+.editor-bottom-toolbar .ui-button.is-readonly,
+.editor-bottom-toolbar .ui-button.is-readonly.selected {
+    background: transparent;
+    color: #b8b8b8;
+    opacity: 0.85;
+    cursor: default;
+}
+
+.editor-bottom-toolbar .ui-button.is-readonly:hover {
+    background: transparent;
+    color: #b8b8b8;
+}
+
+
 .editor-bottom-toolbar button {
     display: flex;
     flex-direction: column;
