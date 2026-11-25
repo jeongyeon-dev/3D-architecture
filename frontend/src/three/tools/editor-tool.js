@@ -34,12 +34,13 @@ export function createEditorTool({
     let currentStartPoint;
     let currentHoverPoint;
     let currentSelectedMesh;
+    let currentSelectedMeshType;
     let currentHoveredMesh;
 
     let draggingArrow = undefined;
     let dragStartPoint = undefined; 
     let hoveredArrow = undefined;
-    let draggingPrismData = undefined;
+    let draggingMeshData = undefined;
 
     let dragPlane;
 
@@ -59,10 +60,17 @@ export function createEditorTool({
     function updateHoverPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
 
-        /* 드래그 하고 있을 경우 => 선택된 mesh 스케일링 하기 */
+        /* 드래그 하고 있을 경우 => 선택된 mesh를 type에 맞게 변형하기 */
         if (draggingArrow) {
-            updatePrismForm(currentSelectedMesh);
-            return;
+            switch(currentSelectedMeshType){
+                case 'roof':
+                    updatePrismForm(currentSelectedMesh);
+                    break;
+                case 'window':
+                    break;
+                default:
+                    break;
+            }
         }
         
         /* 커서 가리키는 오브젝트 하이라이트 하기 */
@@ -93,7 +101,7 @@ export function createEditorTool({
         hoveredArrow = arrow;
     }
 
-    /* 마우스 클릭 시 */
+    /* 마우스 클릭 */
     function confirmPoint(gridX, gridZ, gridY, object){
         currentHoverPoint = { gridX, gridZ, gridY };
         const arrow = getArrow(object);
@@ -106,7 +114,7 @@ export function createEditorTool({
             /* 변형 데이터 지속적 반영 */
             const objectId = currentSelectedMesh.userData.objectId;
             const _object = getObject(objectId);
-            draggingPrismData = structuredClone(_object.data);
+            draggingMeshData = structuredClone(_object.data);
 
             /* 소켓 전송 시작 */
             onObjectDragStart?.({ objectId });
@@ -117,7 +125,9 @@ export function createEditorTool({
         removeSelectionHighlight(currentSelectedMesh);
         removeGizmo();
 
+        /* 선택된 오브젝트가 지정된 순간 => type 구하기 */
         currentSelectedMesh = object;
+        currentSelectedMeshType = getTypeOfMesh(object);
 
         createOutline(currentSelectedMesh);
         createSelectionHighlight(currentSelectedMesh);
@@ -139,16 +149,16 @@ export function createEditorTool({
             const objectId = currentSelectedMesh.userData.objectId;
             const object = getObject(objectId);
 
-            object.data = draggingPrismData;
+            object.data = draggingMeshData;
 
             /* 소켓 전송 끝 */
             onObjectDragEnd?.({
                 objectId,
-                data: draggingPrismData
+                data: draggingMeshData
             });
         }
 
-        draggingPrismData = undefined;
+        draggingMeshData = undefined;
         currentStartPoint = null;
         draggingArrow = undefined;
         dragStartPoint = undefined;
@@ -209,7 +219,7 @@ export function createEditorTool({
 
     /* currentSeletedMesh를 스케일링 하기 -- 소켓 전송 중 */
     function updatePrismForm(mesh) {
-        const prismData = draggingPrismData;
+        const prismData = draggingMeshData;
         const direction = draggingArrow.userData.direction;
 
         /* 변형 data 생성하기 => 이에 기반하여 prism 형태 변형하기 */
@@ -272,6 +282,17 @@ export function createEditorTool({
             doPrismTransform(currentSelectedMesh, originalTransformData);
             updateGizmoPosition(originalTransformData);
         }      
+    }
+
+
+    /* 해당 선택 오브젝트의 type 알기 */
+    function getTypeOfMesh(selectedMesh){
+        const objectId = selectedMesh.userData.objectId;
+        const projectObject = objectId
+            ? getObject(objectId)
+            : undefined;
+        
+        return projectObject?.type;
     }
 
     return {
