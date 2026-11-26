@@ -33,4 +33,35 @@
 }
 
 
+/** Gizmo 2차원 도구 렌더링 **/
+.gizmo-bubble {
+    width: 88px;
+    height: 52px;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}
 
+/* 기즈모 도구 아래 꼬리 */
+.gizmo-bubble::after {
+    content: "";
+    position: absolute;
+
+    left: 50%;
+    bottom: -7px;
+    transform: translateX(-50%);
+
+    width: 12px;
+    height: 12px;
+
+    background: #fff;
+    border-right: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
+
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.gizmo-bubble::after {
+    z-index: -1;
+}

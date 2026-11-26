@@ -1,15 +1,23 @@
 import * as THREE from 'three';
 import { GIZMO_OFFSET } from '../../config';
 
+/* 2차원 오브젝트 그리기 */
+import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
 /* gizmo 객체 */
 let gizmo = undefined;
+let gizmoBubble = undefined;
+
 
 export function createOutline(mesh) {
     const geometry = new THREE.EdgesGeometry(mesh.geometry);
 
+    /* 앞 오브젝트에 의해 가려지지 않도록 함 */
     const material = new THREE.LineBasicMaterial({
         color: '#fdfdfd',
-        toneMapped: false
+        toneMapped: false,
+        depthTest: false,
+        depthWrite: false
     });
 
     const outline = new THREE.LineSegments(
@@ -46,42 +54,21 @@ export function createGizmo(mesh){
     const center = box.getCenter(new THREE.Vector3());
 
     /* 동서남북 화살표 위치 구하기 */
-    const east = new THREE.Vector3(
-        box.max.x + GIZMO_OFFSET,
-        center.y,
-        center.z
-    );
-
-    const west = new THREE.Vector3(
-    box.min.x - GIZMO_OFFSET,
-    center.y,
-    center.z
-    );
-
-    const north = new THREE.Vector3(
-        center.x,
-        center.y,
-        box.min.z - GIZMO_OFFSET
-    );
-
-    const south = new THREE.Vector3(
-        center.x,
-        center.y,
-        box.max.z + GIZMO_OFFSET
-    );
+    const east = new THREE.Vector3(box.max.x + GIZMO_OFFSET, center.y, center.z);
+    const west = new THREE.Vector3(box.min.x - GIZMO_OFFSET, center.y, center.z);
+    const north = new THREE.Vector3(center.x, center.y, box.min.z - GIZMO_OFFSET);
+    const south = new THREE.Vector3(center.x, center.y, box.max.z + GIZMO_OFFSET);
 
     const eastArrow = createArrow(1, 0, 0, east);
     const westArrow = createArrow(-1, 0, 0, west);
     const northArrow = createArrow(0, 0, -1, north);
     const southArrow = createArrow(0, 0, 1, south);
-    
+
+    /* 2차원 기즈모 UI 생성 */
+    createGizmoBubble(mesh, center);
+
     gizmo = new THREE.Group();
-    gizmo.add(
-        eastArrow,
-        westArrow,
-        northArrow,
-        southArrow
-    );
+    gizmo.add(eastArrow, westArrow, northArrow, southArrow);
     mesh.parent.add(gizmo);
 
     return [
@@ -98,9 +85,11 @@ export function createGizmo(mesh){
 
 /* gizmo 지우기 */
 export function removeGizmo(){
-    if (!gizmo) return;
+    gizmoBubble?.element.remove();
+    gizmoBubble?.removeFromParent();
+    gizmoBubble = undefined;
 
-    gizmo.removeFromParent();
+    gizmo?.removeFromParent();
     gizmo = undefined;
 }
 
@@ -120,13 +109,20 @@ function createArrow(x, y, z, origin){
     const shaftLength = length - headLength;
     const shaftRadius = 0.035;
 
-    const material = new THREE.MeshStandardMaterial({
-        color: 0xfdfdfd,
-        emissive: '#009ae7',
-        emissiveIntensity: 4,
-        toneMapped: false
+    /* 가려지지 않도록 */
+    const material = new THREE.MeshBasicMaterial({
+        color: '#ffffff',
+        toneMapped: false,
+
+        transparent: true,
+        opacity: 1,
+
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.NoBlending
     });
 
+    
     /* 화살표 꼬리 */
     const shaftGeometry = new THREE.CylinderGeometry(
         shaftRadius,
@@ -137,7 +133,9 @@ function createArrow(x, y, z, origin){
     const shaft = new THREE.Mesh(shaftGeometry, material);
     
     shaft.position.y = shaftLength / 2;
+    shaft.renderOrder = 999;
     arrow.add(shaft);
+
 
     /* 화살표 머리 */
     const headGeometry = new THREE.ConeGeometry(
@@ -148,7 +146,9 @@ function createArrow(x, y, z, origin){
     const head = new THREE.Mesh(headGeometry, material);
 
     head.position.y = shaftLength + headLength / 2;
+    head.renderOrder = 999;
     arrow.add(head);
+
 
     /* 방향 및 위치 설정 */
     arrow.quaternion.setFromUnitVectors(
@@ -200,6 +200,7 @@ export function createSelectionHighlight(mesh) {
         opacity: 0.2,
         depthWrite: false,
         toneMapped: false
+        
     });
 
     const highlight = new THREE.Mesh(
@@ -261,4 +262,29 @@ export function updateGizmoPosition(prismData) {
         y,
         prismData.midZ + prismData.length / 2 + GIZMO_OFFSET
     );
+}
+
+
+
+/** 여기서 부턴 private 한 함수 **/
+
+/* 2차원 gizmo UI 생성 함수 */
+function createGizmoBubble(mesh){
+    const box = new THREE.Box3().setFromObject(mesh);
+    const center = box.getCenter(new THREE.Vector3());
+
+    const bubbleElement = document.createElement('div');
+    bubbleElement.className = 'gizmo-bubble';
+    gizmoBubble = new CSS2DObject(bubbleElement);
+
+    /* mesh가 월드 좌표 기준일 경우 mesh 중심에 위치할 수 없어 이런 계산이 필요하다.. */
+    const bubbleWorldPosition = new THREE.Vector3(
+        center.x,
+        box.max.y + 0.6,
+        center.z
+    );
+
+    const bubbleLocalPosition = mesh.worldToLocal(bubbleWorldPosition.clone());
+    gizmoBubble.position.copy(bubbleLocalPosition);
+    mesh.add(gizmoBubble);
 }
